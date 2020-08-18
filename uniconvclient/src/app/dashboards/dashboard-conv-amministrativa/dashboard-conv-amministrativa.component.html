@@ -1,0 +1,28 @@
+<!-- ============================================================== -->
+<!-- Info card -->
+<!-- ============================================================== -->
+<!--<app-info-card></app-info-card>-->
+<!-- ============================================================== -->
+<!-- Info card -->
+<!-- ============================================================== -->
+
+<!-- ============================================================== -->
+<!-- Notifiche -->
+<!-- ============================================================== -->
+
+   
+<app-collapse-wrapper [options]="{title:'Convenzioni in esecuzione', type:'info'}">
+    <app-convenzioniresult [baseColumns]="baseColumns" [querymodel]="queryconvinesecuzione"></app-convenzioniresult>
+</app-collapse-wrapper>
+
+<app-collapse-wrapper [options]="{title:'Convenzioni in scadenza entro 6 mesi', type:'warning'}">
+    <app-convenzioniresult [baseColumns]="columnsInScadenza" [querymodel]="queryconvsinscadenza"></app-convenzioniresult>
+</app-collapse-wrapper>
+
+
+<app-collapse-wrapper [options]="{title:'Convenzioni terminate', type:'light'}">
+    <app-convenzioniresult [baseColumns]="baseColumns" [querymodel]="queryconvscadute"></app-convenzioniresult>
+</app-collapse-wrapper>
+
+
+  

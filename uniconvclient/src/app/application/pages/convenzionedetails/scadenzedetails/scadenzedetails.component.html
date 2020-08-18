@@ -1,0 +1,58 @@
+
+<app-fase-wrapper [options]="{title: 'Pagamento', type: this.executedtype()}">
+<div *ngIf="executed()>=0">       
+  <div class="table-responsive-md">
+    <table class="table table-sm table-hover">
+        <tbody>            
+            <tr class="d-flex">                                           
+              <td class="col-md-3">Tipo pagamento</td>
+              <td class="col-md-9">{{conv?.tipopagamento?.descrizione}}</td>
+            </tr>                                           
+        </tbody>
+    </table>
+</div>
+<div class="table-responsive-md">
+  <table class="table table-sm table-hover"> 
+          <thead>
+              <tr>
+                  <th scope="col">Tranche prevista</th>
+                  <th scope="col">Importo</th>
+                  <th scope="col">Stato</th>
+                  <th scope="col">Richiesta emissione</th>
+                  <th scope="col">Fattura/Nota debito</th>
+                  <th scope="col">Ordinativo incasso</th>
+                  <th scope="col">Prelievo</th>
+                  <th scope="col"></th>
+              </tr>
+          </thead>         
+          <tbody>   
+          <tr *ngFor="let scadenza of conv.scadenze">                                           
+            <td>{{scadenza?.data_tranche}}</td>
+            <td>{{scadenza?.dovuto_tranche | mycurrency }}</td>  
+            <td>
+                <span [ngSwitch]="scadenza?.state">                        
+                    <span *ngSwitchCase="'attivo'" class="label label-rounded label-primary">{{scadenza?.state}}</span>                        
+                    <span *ngSwitchCase="'inpagamento'" class="label label-rounded label-warning">{{scadenza?.state}}</span> 
+                    <span *ngSwitchCase="'inemissione'" class="label label-rounded label-warning">{{scadenza?.state}}</span>   
+                    <span *ngSwitchCase="'pagato'" class="label label-rounded label-success">{{scadenza?.state}}</span>     
+                  </span>
+            </td>                                                
+            <td>{{scadenza?.data_emisrichiesta}}</td>
+            <td><app-rangedetails [numero]="scadenza?.num_fattura" [data]="scadenza?.data_fattura"></app-rangedetails></td>    
+            <td><app-rangedetails [numero]="scadenza?.num_ordincasso" [data]="scadenza?.data_ordincasso"></app-rangedetails></td>                                                                                                
+            <td> 
+              <span [ngSwitch]="scadenza?.prelievo"> 
+                  <span *ngSwitchCase="'PRE_SI'">Si</span>                        
+                  <span *ngSwitchCase="'PRE_NO'">No</span>                  
+                </span>
+            </td>
+            <td>
+              <button type="button" title="Apri vista scadenza" class="btn btn-primary btn-sm border-0 rounded-0 oi oi-external-link" (click)="onClick(scadenza?.id)">                  
+              </button>  
+            </td>
+          </tr>                                           
+      </tbody>
+  </table>
+</div>
+</div>
+</app-fase-wrapper>

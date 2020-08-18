@@ -1,0 +1,24 @@
+<ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '4px' }"></ngx-loading>
+<div class="btn-toolbar mb-4" role="toolbar">
+  <div class="btn-group btn-group">             
+    <button class="btn btn-outline-primary rounded-lg"  [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
+      <span class="oi oi-arrow-top"></span>  
+      <span class="ml-2">Aggiorna</span>              
+    </button> 
+    <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onValidate()" >              
+      <span class="oi oi-flash"></span>  
+      <span class="ml-2">Valida</span>              
+    </button>   
+  </div>
+  <div class="btn-group btn-group">   
+  <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onAziendaRicerca()" >              
+      <span class="oi oi-magnifying-glass iconic" title="reload" aria-hidden="true" ></span> 
+      <span class="ml-2">Ricerca azienda</span>              
+    </button>   
+  </div>
+</div>
+
+<form *ngIf='model' [formGroup]="form" >
+  <formly-form  [model]="model" [fields]="fields" [form]="form" [options]="options">      
+  </formly-form> 
+</form>

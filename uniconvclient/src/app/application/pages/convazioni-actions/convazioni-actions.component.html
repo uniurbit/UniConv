@@ -1,0 +1,12 @@
+ <div *ngIf="items && items.length>0" class="mb-2">
+  <h5 class="card-title">Azioni disponibili</h5>
+  <div class="btn-group">            
+    <span *ngFor="let item of items">    
+      <button type="button" *ngxPermissionsOnly="item.permissions" title="{{item.title}}" class="btn btn-primary btn-sm rounded-lg ml-1 pl-1" [disabled]="item.disabled" (click)="item.onClick($event)">
+        <span *ngIf="item.icon" class="{{item.icon}}"></span>  
+        <span *ngIf="item.text" class="ml-2">{{ item.text }}</span>          
+      </button>      
+    </span>
+  </div>
+</div>
+

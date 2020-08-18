@@ -1,0 +1,55 @@
+
+<div class="card">
+    <ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '0px' }"></ngx-loading>
+    <div class="card-body"  [ngClass]="{
+        'bg-light-warning': typeresearch == 'myofficetasks',
+        'bg-light-danger': typeresearch == 'mytasks'
+      }">
+        <h4 class="card-title">{{title}}</h4>
+    </div>
+    <div class="comment-widgets" [perfectScrollbar]="config">
+        <!-- Comment Row -->        
+        <div *ngIf="model">
+        <div class="d-flex flex-row comment-row m-t-0"  *ngFor="let task of model" >
+            <div class="comment-text w-100">                 
+                <span class="float-right">                    
+                    <span *ngIf="task.model_type == 'App\\\Convenzione'">Convenzione n. {{task.model_id}}</span>
+                    <span *ngIf="task.model_type == 'App\\\Scadenza'">Scadenza n. {{task.model_id}} (convenzione n. {{task.model.convenzione_id}})</span>                     
+                </span>
+                <h6 *ngIf="!task.namelist" class="font-medium">...</h6>   
+                <h6 *ngIf="task.namelist" class="font-medium">{{task.namelist | titlecase}}</h6>                
+                <span class="m-b-15 d-block">{{task.subject}}</span>                    
+                <div class="comment-footer">
+                    <span class="text-muted float-right">{{ task.readable_created_at.date | date:'d MMMM, yyyy' }}</span>                  
+                    <span [ngSwitch]="task.state">                        
+                        <span *ngSwitchCase="'aperto'" class="label label-rounded label-primary">{{task.state}}</span>                        
+                        <span *ngSwitchCase="'inlavorazione'" class="label label-rounded label-warning">{{task.state}}</span> 
+                        <span *ngSwitchCase="'completato'" class="label label-rounded label-success">{{task.state}}</span>                                            
+                        <span *ngSwitchCase="'annullato'" class="label label-rounded label-danger">{{task.state}}</span>                                                
+                        <span *ngSwitchDefault class="label label-rounded label-info">{{task.state}}</span>                        
+                    </span>
+                    <!-- 'aperto', 'inlavorazione', 'completato', 'annullato' -->
+                    <span class="action-icons float-right">
+                        <span class="button-group mr-4">
+                            <button type="button" *ngxPermissionsOnly="['ADMIN_AMM','ADMIN','SUPER-ADMIN']" class="btn btn-sm btn-outline-secondary" (click)="onClick(task)" data-toggle="tooltip" title="Apre attività">
+                                Dettagli
+                                <i class="ti-pencil-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="task.state == 'aperto'" (click)="onCheck(task)" data-toggle="tooltip"  title="Esegui attività">
+                                Esegui
+                                <i class="ti-check"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="onOpen(task)" data-toggle="tooltip"  title="Apre entità">
+                                Apri
+                                <i class="ti-arrow-top-right"></i>
+                            </button>
+                        </span>                        
+                    </span>
+                </div>               
+            </div>
+        </div>
+        </div>       
+    
+    </div>
+    <ngb-pagination *ngIf="page" class="mr-3 d-flex justify-content-end" [collectionSize]="page.totalElements" [pageSize]="page.size" [(page)]="page.pageNumber" [maxSize]="7" [rotate]="true" (pageChange)="loadPage($event)"></ngb-pagination>
+</div>

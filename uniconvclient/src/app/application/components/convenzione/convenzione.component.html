@@ -1,0 +1,149 @@
+<ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '0px' }"></ngx-loading>
+
+<div class="btn-toolbar mb-4" role="toolbar">
+  <div class="btn-group">    
+    <button  class="btn btn-outline-primary rounded-lg" [disabled]="isDeleted()" (click)="onNew()" >              
+        <span class="oi oi-document"></span>
+        <span class="ml-2">Nuovo</span>
+    </button>    
+    <button class="btn btn-outline-primary rounded-lg ml-1"  [disabled]="!form.valid || !form.dirty || isDeleted()" (click)="onSubmit()" >              
+        <span class="oi oi-arrow-top"></span>  
+        <span class="ml-2">Aggiorna</span>        
+    </button>
+    <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onReload()"  [disabled]="isNew || !form.dirty || isDeleted()">
+        <span class="oi oi-reload iconic" title="reload" aria-hidden="true" ></span>
+        <span class="ml-2">Ricarica</span>
+    </button>   
+    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()"  (click)="onValidate()" >              
+      <span class="oi oi-flash"></span>  
+      <span class="ml-2">Valida</span>              
+    </button> 
+    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()" (click)="onDelete()" >              
+      <span class="oi oi-ban iconic"></span>  
+      <span class="ml-2">Cancella</span>        
+    </button>
+    <!-- <button class="btn btn-outline-primary rounded-lg ml-1" >
+        <span class="oi oi-magnifying-glass"></span>
+        <span class="ml-2">Ricerca</span>
+    </button> -->    
+  </div>
+
+  <div class="btn-group ml-4">
+      <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onDescr()">
+          <span class="oi oi-excerpt"></span>
+          <span class="ml-2">Vista</span>
+      </button>
+      <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onBack()">
+          <span class="oi oi-arrow-left"></span>
+          <span class="ml-2">Ritorna</span>
+      </button>
+  </div>
+</div>
+
+<div class="mb-2" *ngIf="isDeleted()">
+  <div class="p-3 bg-danger text-white">
+      <b>La presente convenzione è stata cancellata {{ model.deleted_at | date }} </b>
+   </div>
+</div>
+<!-- [justify]="currentJustify" -->
+
+<ngb-tabset  #tabs >
+  <ngb-tab title="Convenzione" id="tab-selectbyconvenzione">
+    <ng-template ngbTabContent>
+        <div class="mt-2"></div>    
+        <form *ngIf="model" [formGroup]="form.at(0)" class="mt-1" >
+          <formly-form  [model]="model" [fields]="fields" [form]="form.at(0)" [options]="options[0]">
+          </formly-form>       
+        </form>
+      <!-- <p>Form value: {{ form.value | json }}</p> -->
+    </ng-template>
+  </ngb-tab>
+  <ngb-tab title="Allegati"  id="tab-selectbyallegati">    
+    <ng-template ngbTabContent>      
+      <div class="mt-2"></div>      
+        <form *ngIf="model" [formGroup]="form.at(1)" class="mt-1" >
+        <formly-form  [model]="model" [fields]="fieldsattachment" [form]="form.at(1)" [options]="options[1]">  
+        </formly-form>       
+        <!-- <p>Form value: {{ form.at(1).value | json }}</p> -->        
+        </form> 
+    </ng-template>
+  </ngb-tab>
+  <ngb-tab title="Attività">
+    <ng-template ngbTabContent>
+      <div class="mt-2"></div>      
+        <form *ngIf="model" [formGroup]="form.at(2)" class="mt-1" >
+          <formly-form  [model]="model" [fields]="fieldsusertask" [form]="form.at(2)" [options]="options[2]">  
+          </formly-form>       
+        </form>
+      <div class="mt-2"></div>
+      <ngb-accordion *ngIf="modelUserTaskDetail" #acc="ngbAccordion" activeIds="ngb-panel-0">
+        <ngb-panel title="Dettaglio Attività">
+          <ng-template ngbPanelContent>
+            <app-user-task-detail *ngIf="modelUserTaskDetail" [model]="modelUserTaskDetail"></app-user-task-detail>          
+          </ng-template>  
+        </ngb-panel>
+      </ngb-accordion>
+    </ng-template>
+  </ngb-tab>
+  <ngb-tab title="Scadenze">    
+    <ng-template ngbTabContent>      
+      <div class="mt-2"></div>               
+        <form *ngIf="model" [formGroup]="form.at(3)" class="mt-1" >
+        <formly-form  [model]="model" [fields]="fieldscadenze" [form]="form.at(3)" [options]="options[3]">  
+        </formly-form>       
+        <!-- <p>Form value: {{ form.at(1).value | json }}</p> -->
+        </form> 
+
+    </ng-template>
+  </ngb-tab>
+  <ngb-tab title="Eventi">
+    <ng-template ngbTabContent>      
+        <form *ngIf="model" [formGroup]="form.at(4)" class="mt-1" >
+        <formly-form  [model]="model" [fields]="fieldstask" [form]="form.at(4)" [options]="options[4]">  
+        </formly-form>       
+        </form>
+    </ng-template>
+  </ngb-tab>
+</ngb-tabset>
+
+
+
+<ng-template #statetemplate ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column" >
+    <span [ngSwitch]="value">                        
+      <span *ngSwitchCase="'attivo'" class="label label-rounded label-primary">{{value}}</span>                        
+      <span *ngSwitchCase="'inpagamento'" class="label label-rounded label-warning">{{value}}</span> 
+      <span *ngSwitchCase="'inemissione'" class="label label-rounded label-warning">{{value}}</span>   
+      <span *ngSwitchCase="'pagato'" class="label label-rounded label-success">{{value}}</span>     
+    </span>
+</ng-template>  
+
+<ng-template #stateattivita ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column" >
+  <span [ngSwitch]="value">                        
+    <span *ngSwitchCase="'aperto'" class="label label-rounded label-primary">{{value}}</span>                        
+    <span *ngSwitchCase="'annullato'" class="label label-rounded label-danger">{{value}}</span>     
+    <span *ngSwitchCase="'completato'" class="label label-rounded label-success">{{value}}</span>     
+  </span>
+</ng-template>  
+
+
+<!-- [pdfFile]="model.convenzione_pdf" -->
+<!-- <section id="viewer">
+  Simple PDF Viewer: open the test.pdf at the second page 
+  <simple-pdf-viewer #pdfSimpleViewer [src]=""></simple-pdf-viewer>
+</section> -->
+
+<br>
+<br>
+
+<!-- <div>
+  <button class="btn btn-primary border-0 rounded-0" (click)="onGenerate()" [disabled]="form.dirty" >              
+    <span class="oi oi-document"></span>
+    <span class="ml-2">Scarica convenzione</span>
+  </button>  
+</div> -->
+
+
+<!-- <p>Form status: {{ model | json }}</p> -->
+
+
+

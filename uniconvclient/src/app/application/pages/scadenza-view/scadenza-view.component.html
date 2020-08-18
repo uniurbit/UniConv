@@ -1,0 +1,55 @@
+<!-- Column -->
+<ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '0px' }"></ngx-loading>
+
+<div class="container-fluid">
+  <div class="btn-group mb-2">
+    <button *ngxPermissionsOnly="['ADMIN','SUPER-ADMIN']" class="btn btn-outline-primary rounded-lg"
+      (click)="onModify()">
+      <span class="oi oi-document"></span>
+      <span class="ml-2">Modifica</span>
+    </button>
+    <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onOpen()">
+      <span class="oi oi-document"></span>
+      <span class="ml-2">Apri convenzione</span>
+    </button>
+    <button class="btn  btn-outline-primary rounded-lg ml-1" (click)="onBack()">
+      <span class="oi oi-arrow-left"></span>
+      <span class="ml-2">Ritorna</span>
+    </button>
+  </div>
+  <ng-container *ngxPermissionsOnly="['ADMIN','SUPER-ADMIN']">
+    <app-scadenza-azioni *ngIf="scad" [model]="scad"></app-scadenza-azioni>
+  </ng-container>
+  <!-- <h3 class="card-title">Scadenza</h3>
+        <h6 class="card-subtitle">Dettagli scadenza, codice {{ scad?.id}}</h6> -->
+
+
+  <!--ANAGRAFICA d-flex align-items-center box-title m-t-40-->
+  <app-fase-wrapper [options]="{title: 'Scadenza', executed: 1}">
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+        <tbody>
+          <tr class="d-flex">
+            <td class="col-md-3">Titolo convenzione</td>
+            <td class="col-md-9">{{ scad?.convenzione?.descrizione_titolo}}</td>
+          </tr>
+          <tr class="d-flex">
+            <td class="col-md-3">Azienda o ente</td>
+            <td class="col-md-9">{{ scad?.convenzione?.aziende | myflatten }}</td>
+          </tr>
+          <tr class="d-flex">
+            <td class="col-md-3">Tranche prevista</td>
+            <td class="col-md-9">{{scad?.data_tranche}}</td>
+          </tr>
+          <tr class="d-flex">
+            <td class="col-md-3">Importo</td>
+            <td class="col-md-9">{{scad?.dovuto_tranche | mycurrency }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </app-fase-wrapper>
+  <!--FINE ANAGRAFICA-->
+  <app-scadenza-emessa *ngIf="scad" [scad]="scad"></app-scadenza-emessa>
+  <app-scadenza-inpagamento *ngIf="scad" [scad]="scad"></app-scadenza-inpagamento>
+</div>

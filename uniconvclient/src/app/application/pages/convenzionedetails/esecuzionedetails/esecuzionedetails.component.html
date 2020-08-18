@@ -1,0 +1,15 @@
+
+<app-fase-wrapper [options]="{title: 'Esecuzione', type: this.executedtype()}">
+  <div *ngIf="executed()>=0">       
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+          <tbody>            
+            <tr class="d-flex">                                          
+              <td class="col-md-3">Periodo</td>
+              <td class="col-md-9">dal {{conv.data_inizio_conv}} al {{conv.data_fine_conv}}</td>
+            </tr>                                      
+          </tbody>
+      </table>
+  </div>
+  </div>
+</app-fase-wrapper>

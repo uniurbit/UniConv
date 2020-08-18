@@ -1,0 +1,92 @@
+<!-- Column -->
+<ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '0px' }"></ngx-loading>
+
+<div class="container-fluid">
+    <div class="btn-group mb-2">
+        <button *ngxPermissionsOnly="['ADMIN_AMM','ADMIN','SUPER-ADMIN']"
+            class="btn btn-outline-primary rounded-lg" (click)="onModify()">
+            <span class="oi oi-document"></span>
+            <span class="ml-2">Modifica</span>
+        </button>
+        <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onBack()">
+            <span class="oi oi-arrow-left"></span>
+            <span class="ml-2">Ritorna</span>
+        </button>
+    </div>
+    <ng-container>
+        <app-convazioni-actions *ngIf="conv && !isDeleted()" [model]="conv" (change)="modelChange($event)"
+            (loading)="loadingChange($event)"></app-convazioni-actions>
+    </ng-container>
+
+    <!-- <app-collapse-riquadro-wrapper [options]="{ type: 'primary', title:'Convenzione', isCollapsed: true }">
+        <div class="table-responsive-md">
+            <table class="table table-sm table-hover">
+                <tbody>
+                    <tr>
+                        <td width="390">Codice</td>
+                        <td> {{ conv?.id}} </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </app-collapse-riquadro-wrapper> -->
+
+    <app-riquadro-wrapper *ngIf="conv && isDeleted()">
+        <div class="p-3 bg-danger text-white">
+            <b>La presente convenzione è stata cancellata {{ conv.deleted_at | date }} </b>
+        </div>
+    </app-riquadro-wrapper>
+
+    <!--ANAGRAFICA d-flex align-items-center box-title m-t-40-->
+    <app-fase-wrapper [options]="{title: 'Convenzione', executed: 1}">
+        <div class="table-responsive-md">
+            <table class="table table-sm table-hover">
+                <tbody>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Ambito</td>
+                        <td class="col-md-9"> {{conv?.ambito | translate}} </td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Azienda o Ente</td>
+                        <td class="col-md-9">{{ denominazione }} </td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Titolo</td>
+                        <td class="col-md-9">{{conv?.descrizione_titolo}} </td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Resp. Scientifico</td>
+                        <td class="col-md-9">{{conv?.resp_scientifico}}</td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Importo</td>
+                        <td class="col-md-9">{{conv?.corrispettivo | mycurrency }} </td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Durata</td>
+                        <td class="col-md-9">{{conv?.durata}} <span *ngIf="conv?.durata">mesi</span></td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Rinnovo</td>
+                        <td class="col-md-9">{{conv?.rinnovo_type | translate}}</td>
+                    </tr>
+                    <tr class="d-flex">
+                        <td class="col-md-3">Fascicolo</td>
+                        <td class="col-md-9">{{conv?.titolario_classificazione}} {{conv?.oggetto_fascicolo}}
+                            {{conv?.numero}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </app-fase-wrapper>
+    <!--FINE ANAGRAFICA-->
+    <app-approvazionedetails *ngIf="conv" [conv]="conv"></app-approvazionedetails>
+
+    <app-sottoscrizionedetails *ngIf="conv" [conv]="conv"></app-sottoscrizionedetails>
+
+    <app-repertoriazionedetails *ngIf="conv" [conv]="conv"></app-repertoriazionedetails>
+
+    <app-esecuzionedetails *ngIf="conv" [conv]="conv"></app-esecuzionedetails>
+
+    <app-scadenzedetails *ngIf="conv" [conv]="conv"></app-scadenzedetails>
+</div>

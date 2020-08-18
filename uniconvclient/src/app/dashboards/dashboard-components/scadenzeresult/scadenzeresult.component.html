@@ -1,0 +1,15 @@
+  <ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '4px' }"></ngx-loading>
+  <form [formGroup]="form" >
+  <formly-form [model]="model" [fields]="resultMetadata" [form]="form">
+    
+  </formly-form> 
+  </form>
+  
+  <ng-template #statetemplate ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column" >
+    <span [ngSwitch]="value">                        
+      <span *ngSwitchCase="'attivo'" class="label label-rounded label-primary">{{value}}</span>                        
+      <span *ngSwitchCase="'inpagamento'" class="label label-rounded label-warning">{{value}}</span> 
+      <span *ngSwitchCase="'inemissione'" class="label label-rounded label-warning">{{value}}</span>   
+      <span *ngSwitchCase="'pagato'" class="label label-rounded label-success">{{value}}</span>     
+    </span>
+  </ng-template>  

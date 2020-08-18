@@ -1,0 +1,45 @@
+<!-- ============================================================== -->
+<!-- Info card -->
+<!-- ============================================================== -->
+<!--<app-info-card></app-info-card>-->
+<!-- ============================================================== -->
+<!-- Info card -->
+<!-- ============================================================== -->
+
+<!-- ============================================================== -->
+<!-- Notifiche -->
+<!-- ============================================================== -->
+
+   
+<app-collapse-wrapper [options]="{title:'Convenzioni in esecuzione', type:'info'}">
+    <app-convenzioniresult [querymodel]="queryconvinesecuzione"></app-convenzioniresult>
+</app-collapse-wrapper>
+<!-- ============================================================== -->
+<!-- Notifiche -->
+<!-- ============================================================== -->
+
+<!-- ============================================================== -->
+<!--Lista task-->
+<!-- ============================================================== -->
+
+<div class="row">
+    <!-- column -->
+    <div class="col-lg-6">
+        <app-collapse-wrapper [options]="{title:'Scadenze', subtitle:'Tranche prossime alla scadenza', type:'warning'}">
+            <app-scadenzeresult [querymodel]="queryinscadenza"></app-scadenzeresult >
+        </app-collapse-wrapper>        
+    </div>    
+
+    <!-- column -->
+    <div class="col-lg-6">    
+        
+        <app-collapse-wrapper [options]="{title:'Scadenze', subtitle:'Tranche scadute ma non incassate', type:'danger'}">
+            <app-scadenzeresult [querymodel]="queryscadute"></app-scadenzeresult >
+        </app-collapse-wrapper>
+        
+    </div>
+</div>
+<!-- ============================================================== -->
+<!-- Lista task -->
+<!-- ============================================================== -->
+  

@@ -1,0 +1,57 @@
+{  
+    "NODATA": "Nessun dato",
+    "TOTAL": "Totali",
+    
+    "AZIENDALOC":{
+        "INDIRIZZO": "Indirizzo",
+        "PARTIVA": "Partita IVA",
+        "PEC": "PEC (oppure email di contatto per aziende o enti esteri)"
+    },
+
+    "DASHBOARD1":{      
+        "TITLE_ATTIVITA_UFFICIO": "Attività recenti ufficio",
+        "TITLE_MIE_ATTIVITA": "Attività assegnate a te"
+    },
+    
+    "TO": "Titolo oneroso",
+    "TG": "Titolo gratuito",
+
+    "istituzionale": "Istituzionale",
+    "commercicale": "Commerciale",
+
+    "proposta": "Proposta", 
+    "approvato": "Approvata", 
+    "inapprovazione": "In approvazione",                        
+    "da_firmare_direttore": "Stipula controparte", 
+    "da_firmare_controparte2": "Stipula UniUrb",  
+    "firmato": "Firmata",  
+    "repertoriato": "Repertoriata",   
+    "start": "Inizio",
+
+    "dip": "Dipartimentale",
+    "amm": "Amministrativa",
+
+    "non_rinnovabile": "Non rinnovabile",
+    "esplicito": "Rinnovo esplicito",
+    "tacito": "Rinnovo tacito",
+
+    "1": "DiGiur",
+    "8": "DESP",
+    "23": "DISB",
+    "20": "DiSPeA",
+    "21": "DISTUM", 
+    "25": "DISCUI",
+
+    "DiGiur_tooltip": "Dipartimento di Giurisprudenza",
+    "DESP_tooltip": "Dipartimento di Economia, Società, Politica (DESP)",
+    "DISB_tooltip": "Dipartimento di Scienze Biomolecolari (DISB)",
+    "DiSPeA_tooltip": "Dipartimento di Scienze Pure e Applicate (DiSPeA)",
+    "DISTUM_tooltip": "Dipartimento di Studi Umanistici (DISTUM)", 
+    "DISCUI_tooltip": "Dipartimento di Scienze della Comunicazione, Studi Umanistici e Internazionali (DISCUI)",
+ 
+    "attivo":  "Attiva",
+    "inemissione": "In emissione",
+    "inpagamento": "In pagamento",
+    "pagato": "Pagata"
+}
+  

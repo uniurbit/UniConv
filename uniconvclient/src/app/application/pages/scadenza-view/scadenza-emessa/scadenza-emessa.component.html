@@ -1,0 +1,40 @@
+<app-fase-wrapper [options]="{title: 'Emissione', executed: executed()}">
+  <div *ngIf="executed()>=-1">
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+        <tbody>
+          <tr class="d-flex">
+            <td class="col-md-3">
+              <span [ngSwitch]="scad?.state">
+                <span *ngSwitchCase="'inemissione'" class="label label-rounded label-warning">{{scad?.state}}</span>
+              </span>
+            </td>
+            <td class="col-md-7"></td>
+            <td class="col-md-2"></td>
+          </tr>
+          <tr class="d-flex">
+            <td class="col-md-3">Richiesta emissione</td>
+            <td class="col-md-7">{{scad?.data_emisrichiesta}}</td>
+            <td class="col-md-2"></td>
+          </tr>
+          <tr class="d-flex">              
+            <td class="col-md-3">
+                <span [ngSwitch]="scad?.tipo_emissione">
+                    <span *ngSwitchCase="'NOTA_DEBITO'">Fattura/Nota debito</span> 
+                    <span *ngSwitchCase="'FATTURA_ELETTRONICA'">Fattura/Nota debito</span> 
+                    <span *ngSwitchCase="'RICHIESTA_PAGAMENTO'">Richiesta pagamento</span> 
+                </span>              
+            <td class="col-md-7">
+              <app-rangedetails [numero]="scad?.num_fattura" [data]="scad?.data_fattura"></app-rangedetails>
+            </td>
+            <td class="col-md-2">
+              <!-- 'NOTA_DEBITO' 'FATTURA_ELETTRONICA' 'RICHIESTA PAGAMENTO'-->
+              <button type="button" title="Scarica" [disabled]="executed()<0" class="btn btn-primary btn-sm border-0 rounded-0 oi oi-data-transfer-download" (click)="download()">                  
+              </button>  
+            </td>
+          </tr>          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</app-fase-wrapper>

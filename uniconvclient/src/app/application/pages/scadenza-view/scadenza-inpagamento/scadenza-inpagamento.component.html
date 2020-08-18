@@ -1,0 +1,36 @@
+<app-fase-wrapper [options]="{title: 'Pagamento', executed: executed()}">
+  <div *ngIf="executed()>=-1">
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+        <tbody>
+          <tr class="d-flex">
+            <td class="col-md-3">
+              <span [ngSwitch]="scad?.state">
+                <span *ngSwitchCase="'inpagamento'" class="label label-rounded label-warning">{{scad?.state}}</span>
+              </span>
+            </td>
+          </tr>
+          <tr class="d-flex">
+            <td class="col-md-3">Ordinativo incasso</td>
+            <td class="col-md-9">
+              <app-rangedetails [numero]="scad?.num_ordincasso" [data]="scadenza?.data_ordincasso"></app-rangedetails>
+            </td>
+          </tr>
+          <tr class="d-flex" *ngIf="executed()>=0">
+            <td class="col-md-3">Prelievo</td>
+            <td class="col-md-9">
+              <span [ngSwitch]="scad?.prelievo">
+                <span *ngSwitchCase="'PRE_SI'">Si</span>
+                <span *ngSwitchCase="'PRE_NO'">No</span>
+              </span>
+            </td>
+          </tr>
+          <tr  class="d-flex" *ngIf="executed()>=0">
+              <td class="col-md-3">Note</td>
+              <td class="col-md-9">{{scad?.note}}</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</app-fase-wrapper>

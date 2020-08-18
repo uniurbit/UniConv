@@ -1,0 +1,60 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+categories:
+  - data-collection
+  - document-management
+description:
+  it:
+    features:
+      - 'Gestione delle convenzioni: inserimento, modifica e validazione '
+      - Storico convenzioni
+      - 'Dashboard uffici '
+      - Generazione contratto
+      - 'Nofiche uffici e docenti '
+    genericName: UniConv è una applicazione web
+    longDescription: >
+      ## UNICONV
+
+
+     UniConv è un’applicazione sviluppata dall’Università degli Studi di Urbino per supportare la dematerializzazione e la
+     gestione dei contratti avente ad oggetto attività di ricerca, di consulenza e di servizio svolte dalle strutture didattiche,
+     di ricerca ed amministrative dell’Ateneo, anche per conto o nell’interesse prevalente di soggetti terzi pubblici e
+     privati. Le due principali tipologie contrattuali gestite in UniConv sono: in ambito istituzionale, le convenzioni per
+     contributo alla ricerca; in ambito commerciale, le convenzioni per attività in conto terzi.
+
+    shortDescription: >-
+      UniConv è una applicazione web per gestione dei flussi documentali e dematerializzazione dell'attività contrattuale attiva dell'ateneo. 
+      L'applicazione è basata su Web API e sviluppata sul framework Laravel per la parte backend, Angular per la parte frontend e Shibboleth come sistema di autenticazione.
+developmentStatus: beta
+it:
+  conforme:
+    gdpr: false
+    lineeGuidaDesign: true
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: true
+  countryExtensionVersion: '0.2'
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+legal:
+  license: MIT
+localisation:
+  availableLanguages:
+    - it
+  localisationReady: false
+maintenance:
+  contacts:
+    - email: enrico.oliva@uniurb.it
+      name: Enrico Oliva
+  type: internal
+name: UniConv
+platforms:
+  - web
+releaseDate: '2020-08-01'
+softwareType: standalone/web
+url: 'https://github.com/enricouniurb/UniConv'

@@ -1,0 +1,55 @@
+<!--APPROVAZIONE CONFORME-->
+<!--visualizzabile se lo stato della convenzione è approvato-->                                                
+<app-fase-wrapper [options]="{title: 'Approvazione', executed: executed()}">
+    <div *ngIf="conv.schematipotipo=='schematipo'">       
+        <div class="table-responsive-md">
+            <table class="table table-sm table-hover">
+                <tbody>
+                     <tr class="d-flex">                                          
+                        <td class="col-md-3">Approvata</td>
+                        <td class="col-md-9"></td>
+                    </tr>
+                    <tr class="d-flex" *ngIf="appr.docAppr">
+                        <td class="col-md-3">{{appr.docAppr.descrDocumento}}</td>
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data"></app-rangedetails></td>
+                    </tr>                                      
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!--FINE APPROVAZIONE CONFORME-->
+
+    <!--APPROVAZIONE NON CONFORME-->
+    <!--visualizzabile se lo stato della convenzione è inapprovazione o approvato o oltre-->
+    <div *ngIf="conv.schematipotipo=='daapprovare'">                          
+        <div class="table-responsive-md">
+            <table class="table table-sm table-hover">
+                <tbody>
+                     <tr class="d-flex">                                           
+                        <td class="col-md-3">Richiesta approvazione degli organi                                                
+                                                                         
+                        </td>
+                        <td class="col-md-9">
+                            <span [ngSwitch]="conv.current_place">                        
+                                <span *ngSwitchCase="'inapprovazione'" class="label label-rounded label-warning ml-1">In approvazione</span>                                                                          
+                            </span>  
+                        </td>
+                    </tr>                                        
+                    <tr class="d-flex">
+                        <td class="col-md-3">Richiesta approvazione inviata a</td>
+                        <td class="col-md-9">{{appr?.richiestaname}}</td>
+                    </tr> 
+                    <tr class="d-flex" *ngIf="appr.docAppr">
+                        <td class="col-md-3">{{appr.docAppr.descrDocumento}}</td>                                            
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data"></app-rangedetails></td>
+                    </tr> 
+                    <tr class="d-flex" *ngIf="appr.docApprOrgani">
+                        <td class="col-md-3">{{appr.docApprOrgani.descrDocumento}}</td>
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docApprOrgani.numero" [data]="appr.docApprOrgani.data"></app-rangedetails></td>                                            
+                    </tr> 
+                </tbody>
+            </table>
+        </div>
+    </div>
+</app-fase-wrapper>
+<!--FINE APPROVAZIONE NON CONFORME-->

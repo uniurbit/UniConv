@@ -1,0 +1,27 @@
+
+<app-fase-wrapper [options]="{title: 'Conservazione', executed: executed()}">
+    <div *ngIf="executed()>=0">       
+        <div class="table-responsive-md">
+            <table class="table table-sm table-hover">
+                <tbody>            
+                    <tr  class="d-flex" *ngIf="conv.bollo_virtuale">                                           
+                        <td class="col-md-3">Bollo virtuale</td>
+                        <td class="col-md-9">
+                            <div *ngFor="let bollo of rep?.bolli">
+                                <span [ngSwitch]="bollo.codice">                        
+                                    <span *ngSwitchCase="'BOLLO_TEC_ALLEGATO'">Tecnici n. </span>   
+                                    <span *ngSwitchDefault>n. </span>                                                                       
+                                </span> 
+                                <span>{{ bollo.num_bolli }}</span>
+                            </div>
+                        </td>
+                    </tr>                        
+                    <tr class="d-flex">                                           
+                        <td class="col-md-3">Repertoriato</td>
+                        <td class="col-md-9"><app-rangedetails [numero]="rep.repertorio.numero" [data]="rep.repertorio.data"></app-rangedetails></td>                 
+                    </tr>           
+                </tbody>
+            </table>
+        </div>
+    </div>
+</app-fase-wrapper>
