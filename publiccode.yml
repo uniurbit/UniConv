@@ -7,6 +7,7 @@ name: UniConv
 releaseDate: '2019-04-15'
 url: 'https://github.com/uniurbit/UniConv'
 landingURL: 'https://github.com/uniurbit/UniConv'
+logo: docs/img/logo.png
 developmentStatus: stable
 softwareType: standalone/web
 roadmap: 'https://github.com/uniurbit/UniConv/issues'
