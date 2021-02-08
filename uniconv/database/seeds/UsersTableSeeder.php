@@ -45,7 +45,7 @@ class UsersTableSeeder extends Seeder
         if ($user==null){
             $user = User::firstOrCreate([
                 'email' => 'test.user@uniurb.it' ,
-                'password' => Hash::make( 'testuser' ) ,
+                'password' => Hash::make( 'testuser') ,
                 'name' => 'test user' ,
             ] );
         }

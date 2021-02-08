@@ -1,6 +1,6 @@
 import { NgbModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { NgModule } from '@angular/core';
+import { InjectionToken, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpModule } from '@angular/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -86,13 +86,13 @@ import { BaseComponent } from './base-component/base.component';
 import { RiquadroWrapperComponent } from './riquadro-wrapper/riquadro-wrapper.component';
 import { TranslateSelectPipe } from './pipe/translate-select.pipe';
 import { FormlyRiquadroWrapperComponent } from './dynamic-form/wrapper/formly-riquadro-wrapper/formly-riquadro-wrapper.component';
-import { NavigationComponent } from './header-navigation/navigation.component';
+import { HeaderNavigationComponent } from './header-navigation/header-navigation.component';
 import { CollapseRiquadroWrapperComponent } from './collapse-riquadro-wrapper/collapse-riquadro-wrapper.component';
 import { InputConfirmationDialogComponent } from './input-confirmation-dialog/input-confirmation-dialog.component';
 import { MyDiffdatePipe } from './pipe/custom.diffdatepipe';
 import { ViewListComponent } from './view-list/view-list.component';
 import { ListItemComponent } from './view-list/list-item/list-item.component';
-import { MyFlattenPipe } from './pipe/custom.flattenpipe';
+import { DEFAULT_FLATTENPIPE, MyFlattenPipe } from './pipe/custom.flattenpipe';
 
 
 
@@ -102,6 +102,7 @@ const DEFAULT_PERFECT_SCROLLBAR_CONFIG: PerfectScrollbarConfigInterface = {
   wheelPropagation: true,
   minScrollbarLength: 20
 };
+
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(httpClient: HttpClient) {
@@ -123,6 +124,15 @@ export function minValidationMessage(err, field) {
 export function maxValidationMessage(err, field) {
   return `Inserire un valore minore di ${field.templateOptions.max}`;
 }
+
+export function validationProvincia(ctr) {
+  return !ctr.value || /^[A-Z]{2}$/.test(ctr.value);
+}
+
+export function provinciaValidationMessage(err, field) {
+  return "Formato non valido: richiesti due caratteri maiuscoli";
+}
+
 
 export const customCurrencyMaskConfig = {
   align: 'left',
@@ -226,6 +236,23 @@ export const customCurrencyMaskConfig = {
         },
       },
       {
+        name: 'provincia',
+        extends: 'input',       
+        defaultOptions: {                            
+          templateOptions: {
+            required: true,                                  
+            minLength: 2,
+            maxLength: 2,           
+          },
+          validators: {
+            prov: {
+              expression: validationProvincia,
+              message: provinciaValidationMessage,
+            }
+          }          
+        },
+      },
+      {
         name: 'datatablelookup',
         component: TableLookupTypeComponent,
         defaultOptions: {
@@ -294,6 +321,7 @@ export const customCurrencyMaskConfig = {
   ],
   providers: [
     { provide: PERFECT_SCROLLBAR_CONFIG, useValue: DEFAULT_PERFECT_SCROLLBAR_CONFIG },
+    { provide: DEFAULT_FLATTENPIPE, useValue: "" },
   ],
   exports: [
     UserLoginComponent,
@@ -328,7 +356,7 @@ export const customCurrencyMaskConfig = {
     BaseResearchComponent,
     FullComponent,
     BlankComponent,    
-    NavigationComponent,
+    HeaderNavigationComponent,
     BreadcrumbComponent,
     SidebarComponent,
     TooltipWrapperComponent,
@@ -374,7 +402,7 @@ export const customCurrencyMaskConfig = {
     BaseResearchComponent,
     FullComponent,
     BlankComponent,
-    NavigationComponent,
+    HeaderNavigationComponent,
     BreadcrumbComponent,
     SidebarComponent,
     TooltipWrapperComponent,

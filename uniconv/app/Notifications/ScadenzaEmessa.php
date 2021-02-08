@@ -44,9 +44,10 @@ class ScadenzaEmessa extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)    
+                    ->bcc(config('unidem.administrator_email'))
                     ->greeting(' ')                                    
                     ->line('Emesso documento di debito per scadenza n. '.$this->scad->id.' (convenzione n.' .$this->scad->convenzione_id. ')')
-                    ->action('Apri la scadenza', url(Auth::user()->getIntendedUrl().'/home/scadenze/'.$this->scad->id))
+                    ->action('Apri la scadenza', url(Auth::user()->getIntendedUrl().'/home/scadenzeview/'.$this->scad->id))
                     ->line("Grazie per usare la nostra applicazione!")
                     ->salutation('Cordiali saluti, '.nl2br('Il team di UniConv'));
     }

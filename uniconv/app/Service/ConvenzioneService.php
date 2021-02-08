@@ -643,6 +643,31 @@ class ConvenzioneService implements ApplicationService
         return $scad;
     }
 
+    public function updateModificaEmissioneStep($request){
+        
+        $data = $request->all();        
+        $objdata = (object) $data;
+
+        if ($objdata->attachment1['attachmenttype_codice'] == 'FATTURA_ELETTRONICA' || $objdata->attachment1['attachmenttype_codice'] == 'NOTA_DEBITO' ){            
+
+            $attach['attachmenttype_codice'] = $objdata->attachment1['attachmenttype_codice'];            
+            $doc = $objdata->attachment1['doc'];
+            if (array_key_exists('nrecord',$doc))
+                $attach['nrecord'] = $doc['nrecord'];            
+            if (array_key_exists('num_prot',$doc))
+                $attach['num_prot'] = $doc['num_prot'];
+
+            $attach['emission_date'] =  $doc['data_prot']; 
+            $data['attachment1'] = $attach;
+        }
+
+        $scad = $this->convenzioneRepository->updateModificaEmissione($data);        
+
+        return $scad;
+    }
+
+
+
     public function updatePagamentoStep($request){
         $data = $request->all();        
         $objdata = (object) $data;

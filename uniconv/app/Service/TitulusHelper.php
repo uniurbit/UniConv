@@ -108,7 +108,7 @@ class TitulusHelper
                 $attachment1 = new AttachmentBean();
                 $attachment1->setFileName($attachment['filename']);
                 $temp_attch_type = AttachmentType::where('codice', $attachment['attachmenttype_codice'])->first();    
-                $attachment1->setDescription($temp_attch_type->descrizione);
+                $attachment1->setDescription($temp_attch_type->descrizione .' ('.$attachment['filename'].')');
                 //$attachment1->setMimeType("application/pdf");
                 $attachment1->setContent(base64_decode($attachment['filevalue']));      
                 array_push($attachBeans,  $attachment1);

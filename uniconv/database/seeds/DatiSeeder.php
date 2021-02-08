@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Seeder;
 use App\Convenzione;
 use App\MappingRuolo;
@@ -38,6 +39,15 @@ class DatiSeeder extends Seeder
         $adminUsers = [];
 
         $persColl = Personale::where('aff_org','005199')->get();
+        $this->insertUser($persColl, $adminUsers);
+
+        // $adminUsers = ['francesco.calzini@uniurb.it','daniela.capponi@uniurb.it',
+        // 'paola.casoli@uniurb.it','alessandra.cupparoni@uniurb.it','adele.guerra@uniurb.it','joseph.fontana@uniurb.it','roberto.pandolfi@uniurb.it'];
+        // $persColl = Personale::where('aff_org','004960')->get();
+        // $this->insertUser($persColl, $adminUsers);
+    }
+    
+    public function insertUser($persColl, $adminUsers){
         foreach($persColl as $pers){
             $user = new \App\User;                             
             $user->name = $this->onlyFirstUpper((string)$pers->nome).' '.$this->onlyFirstUpper((string)$pers->cognome);
@@ -53,14 +63,14 @@ class DatiSeeder extends Seeder
             }                        
         }        
     }
-    
+
     public function mappingruoli(){
     
         $this->insertOffice(config('unidem.unitaSuperAdmin'), 'super-admin');
         $this->insertOffice(config('unidem.unitaAdmin'), 'admin');
         $this->insertOffice(config('unidem.ufficiPerValidazione'), 'op_approvazione');
         $this->insertOffice(config('unidem.uffFiscale'), 'op_contabilita');      
-        $this->insertOffice(['005339','005340'], 'admin_amm');           
+        $this->insertOffice(['005339','005340','005361'], 'admin_amm');           
     }
 
     private function insertOffice(Array $offices, $rolename){

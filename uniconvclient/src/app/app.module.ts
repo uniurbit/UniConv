@@ -52,6 +52,7 @@ import { TranslateService, TranslateLoader, TranslateModule, MissingTranslationH
 import { RepertorioService } from './application/repertorio.service';
 import { MyMissingTranslationHandler } from './shared/MyMissingTranslationHandler';
 import { InputConfirmationDialogComponent } from './shared/input-confirmation-dialog/input-confirmation-dialog.component';
+import { SettingsService } from './services/settings.service';
 
 
 export function tokenGetter() {
@@ -80,7 +81,7 @@ export function appInitializerFactory(translate: TranslateService, injector: Inj
   declarations: [
     AppComponent,
     NotFoundComponent,    
-    TestTabComponent,    
+    TestTabComponent,        
 ],
   imports: [
     SharedModule.forRoot(), NgxPermissionsModule.forRoot(), NgbModule.forRoot(),
@@ -116,6 +117,7 @@ export function appInitializerFactory(translate: TranslateService, injector: Inj
     TipoPagamentoService,
     ClassificazioneService,     
     ConfirmationDialogService, 
+    SettingsService,
     { provide: RequestCache, useClass: RequestCacheWithMap },
     HttpInterceptorProviders,
     GlobalErrorHandlerProviders,        

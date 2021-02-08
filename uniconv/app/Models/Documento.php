@@ -55,7 +55,9 @@ class Documento extends Model {
     public function setRepertorioAttribute($value){
         if ($value){
             $this->attributes['repertorio'] = $value;
-            $this->attributes['numero'] = $value['numero'];
+            if (array_key_exists('numero', $this->attributes)) {
+                $this->attributes['numero'] = $value['numero'];
+            } 
         }                
     }
  

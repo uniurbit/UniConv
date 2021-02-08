@@ -37,6 +37,30 @@ class UnitaOrganizzativa extends Model
         return $this->tipo == 'DIP';
      }
 
+ /**
+     * restituisce un array dei dipartimenti 
+     * che afferiscono all'unità organizzativa corrente.
+     *
+     * @return Array
+     */
+    public function dipartimenti_cd_dip(){
+        if ($this->isPlesso()){
+            //Plesso Economico - Umanistico (DESP-DISTUM)
+            if ($this->id_ab == 26618){
+                return [21, 8]; //[26121,4504];
+            }
+            //Plesso Giuridico-Umanistico (DIGIUR-DISCUI)
+            if ($this->id_ab == 26616){
+                return [1,25]; //[26124,4499,49025];
+            }
+            //Plesso Scientifico (DiSPeA-DiSB)
+            if ($this->id_ab == 32718){
+                return[20,23]; //[26080,27605];
+            }     
+            //... aggiungere ulteriori associazioni      
+        }
+    }
+
      public function dipartimenti(){
         if ($this->isPlesso()){
             //Plesso Economico - Umanistico (DESP-DISTUM)

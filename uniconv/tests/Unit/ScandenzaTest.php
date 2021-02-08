@@ -184,6 +184,7 @@ class ScadenzaTest extends TestCase
         $request->replace($datarequest);
 
         $scad = $service->updateEmissioneStep($request);
+        $scad = $service->updateModificaEmissioneStep($request);
 
         //controllare il nuovo stato della scadenza 
         $this->assertNotNull($scad);    

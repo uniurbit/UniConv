@@ -95,12 +95,10 @@ export class RichiestaEmissioneComponent extends BaseEntityComponent {
       defaultValue: 'FATTURA_ELETTRONICA',
       templateOptions: {
         options: [
-          { codice: 'NOTA_DEBITO', descrizione: 'Emissione nota di debito' },
-          { codice: 'FATTURA_ELETTRONICA', descrizione: 'Fattura elettronica' },     
-          { codice: 'RICHIESTA_PAGAMENTO', descrizione: 'Richiesta pagamento' },                  
-        ],
-        valueProp: 'codice',
-        labelProp: 'descrizione',
+          { value: 'NOTA_DEBITO', label: 'Emissione nota di debito' },
+          { value: 'FATTURA_ELETTRONICA', label: 'Fattura elettronica' },     
+          { value: 'RICHIESTA_PAGAMENTO', label: 'Richiesta pagamento' },                  
+        ],  
         label: 'Tipo documento da emettere',
         required: true,
       }

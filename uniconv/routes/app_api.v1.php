@@ -56,6 +56,7 @@ Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'A
     Route::post('convenzioni/pdf','ConvenzioneController@uploadPDF');
     Route::post('convenzioni/query','ConvenzioneController@query');
     Route::post('convenzioni/export','ConvenzioneController@export');
+    Route::post('convenzioni/exportxls','ConvenzioneController@exportxls'); 
     Route::get('convenzioni/pagamenti/','ConvenzioneController@pagamenti');
     Route::get('convenzioni/attachmenttypes/','ConvenzioneController@attachemnttypes');
     Route::get('convenzioni/classificazioni/','ConvenzioneController@classificazioni');    
@@ -75,7 +76,8 @@ Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'A
     Route::post('convenzioni/bollorepertoriazionestep','ConvenzioneController@updateBolloRepertoriazioneStep');    
     Route::post('convenzioni/richiestaemissionestep','ConvenzioneController@updateRichiestaEmissioneStep');    
     Route::post('convenzioni/inviorichiestapagamentostep','ConvenzioneController@updateInvioRichiestaPagamentoStep');    
-    Route::post('convenzioni/emissionestep','ConvenzioneController@updateEmissioneStep');    
+    Route::post('convenzioni/emissionestep','ConvenzioneController@updateEmissioneStep');  
+    Route::post('convenzioni/modificaemissionestep','ConvenzioneController@updateModificaEmissioneStep');    
     Route::post('convenzioni/pagamentostep','ConvenzioneController@updatePagamentoStep');
 
     Route::post('convenzioni/registrazionesottoscrizione','ConvenzioneController@registrazioneSottoscrizione');
@@ -143,7 +145,7 @@ Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'A
 
     //Route::resource('dipartimenti','DipartimentoController');
     Route::get('dipartimenti/','DipartimentoController@index');
-    Route::get('dipartimenti/user/','DipartimentoController@getDipartimentiByUser');    
+    Route::get('dipartimenti/user/{id}','DipartimentoController@getDipartimentiByUser');    
     Route::get('dipartimenti/{id}','DipartimentoController@show');
     Route::post('dipartimenti/query','DipartimentoController@query');
     Route::get('dipartimenti/docenti/{codice}','DipartimentoController@getDocentiByDipartimento');
@@ -187,6 +189,8 @@ Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'A
     Route::put('scadenze/{id}', 'ScadenzaController@update');
     Route::delete('scadenze/{id}', 'ScadenzaController@delete');
     Route::get('scadenze/{id}/actions','ScadenzaController@nextPossibleActions'); 
+    Route::post('scadenze/export','ScadenzaController@export');
+    Route::post('scadenze/exportxls','ScadenzaController@exportxls');
 
     Route::get('mappinguffici', 'MappingUfficioController@index');
     Route::get('mappinguffici/{id}', 'MappingUfficioController@show');

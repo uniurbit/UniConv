@@ -54,6 +54,7 @@ class RichiestaEmissione extends Notification
         $this->data['urlChiusura'] = url(Auth::user()->getIntendedUrl().'/home/emissione/'.$this->scad->id);
         return (new MailMessage)
             ->cc(Auth::user()->email)
+            ->bcc(config('unidem.administrator_email'))
             ->subject('Richiesta emissione')    
             ->markdown('mail.richiesta.emissione',$this->data);
     }

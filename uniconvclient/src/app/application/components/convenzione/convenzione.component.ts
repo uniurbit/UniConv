@@ -17,6 +17,10 @@ import {Location} from '@angular/common';
 import { InfraMessageType } from 'src/app/shared/message/message';
 import ControlUtils from 'src/app/shared/dynamic-form/control-utils';
 import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/confirmation-dialog.service';
+import { AuthService } from 'src/app/core';
+import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
+import { TranslateService } from '@ngx-translate/core';
+import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
 
 
 @Component({
@@ -39,7 +43,9 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
   modelUserTaskDetail: any;
 
   transitions = new Subject<any>();
-
+  
+  translate: MyTranslatePipe;
+  flatten = new MyFlattenPipe('nome_utente');
   currency = new MycurrencyPipe();
 
   returnUrl: string = null;
@@ -103,11 +109,15 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
         icon: 'oi oi-document',
         onClick: ($event) => this.open()
       },
-       expressionProperties: {
-          'templateOptions.disabled': (model: any, formState: any) => {                        
-              return !!model.deleted_at
-          },
+      expressionProperties: {
+        'templateOptions.disabled': (model: any, formState: any) => {                        
+            return !!model.deleted_at
         },
+      },
+      hideExpression: (model: any, formState: any) => {
+        if (!this.canActivate())
+          return true;
+      }    
     },
     {
       key: 'attachments',
@@ -115,6 +125,8 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
       templateOptions: {
         btnHidden: true,
         btnRemoveHiddenFunc: (raw) => {
+          if (!this.canActivate())
+            return true;
           if (raw.attachmenttype_codice)
             return  !UploadfileComponent.fileToBeUploaded.includes(raw.attachmenttype_codice);
           return false;
@@ -130,7 +142,7 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
           );
         },
       },
-      hideExpression: (model: any, formState: any) => {
+      hideExpression: (model: any, formState: any) => {        
         return this.model.attachments == null || this.model.attachments.length == 0
       },
       fieldArray: {
@@ -282,115 +294,11 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
       }
     }
   ]
-  fieldsusertask: FormlyFieldConfig[] = [
-    {
-      className: 'section-label',
-      template: '<h5>Attività associate</h5>',
-    },
-    {
-      key: 'usertasks',
-      type: 'datatable',     
-      templateOptions: {
-        btnHidden: true,
-        label: 'Attività associate',
-        hidetoolbar: true,
-        limit: "20",
-        onDblclickRow: (event) => {
-          if (event.row.id) {
-            this.router.navigate(['home/tasks/', event.row.id]);
-          }
-        },
-        columns: [
-          { name: 'Oggetto', prop: 'subject', wrapper: 'value' },
-          { name: 'Stato', prop: 'state', wrapper: 'value' },
-          { name: 'Ufficio', prop: 'unitaorganizzativa_uo', wrapper: 'value' },
-        ],
-      },
-      fieldArray: {
-        template: '<hr />',
-        fieldGroupClassName: 'row',
-        fieldGroup: [{
-          className: 'col-md-3',
-          type: 'input',
-          key: 'subject',
-          templateOptions: {
-            disabled: true,
-          },
-        },
-        {
-          className: 'col-md-3',
-          type: 'input',
-          key: 'state',
-          templateOptions: {
-            disabled: true,
-          },
-        },
-        {
-          className: 'col-md-3',
-          type: 'input',
-          key: 'unitaorganizzativa_uo',
-          templateOptions: {
-            label: "Ufficio",
-            disabled: true,
-          },
-        },
-        ]
-      }
-    }
+  
+  fieldsusertask: FormlyFieldConfig[];
+  
+  //fieldstask: FormlyFieldConfig[];
 
-  ];
-  fieldstask: FormlyFieldConfig[] = [
-    {
-      className: 'section-label',
-      template: '<h5>Storia eventi</h5>',
-    },
-    {
-      key: 'logtransitions',
-      type: 'datatable',
-      templateOptions: {
-        btnHidden: true,
-        label: 'Storia eventi',
-        hidetoolbar: true,
-        limit: "20",
-        columns: [
-          { name: 'Utente', prop: 'user_id', wrapper: 'value' },
-          { name: 'Transizione', prop: 'transition_leave', wrapper: 'value' },
-          { name: 'Creata', prop: 'created_at', wrapper: 'value' },
-        ],
-      },
-      fieldArray: {
-        template: '<hr />',
-        fieldGroupClassName: 'row',
-        fieldGroup: [{
-          className: 'col-md-3',
-          type: 'input',
-          key: 'user_id',
-          templateOptions: {
-            disabled: true,
-          },
-        },
-        {
-          className: 'col-md-3',
-          type: 'input',
-          key: 'transition_leave',
-          templateOptions: {
-            disabled: true,
-          },
-        },
-        {
-          className: 'col-md-3',
-          type: 'input',
-          key: 'created_at',
-          templateOptions: {
-            label: "Assegnata",
-            disabled: true,
-          },
-        },
-        ]
-      }
-    }
-
-  ];
   fieldscadenze: FormlyFieldConfig[] = [
     {
       className: 'section-label',
@@ -416,6 +324,10 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
             return !!model.deleted_at
         },
       },
+      hideExpression: (model: any, formState: any) => {
+        if (!this.canActivate())
+          return true;
+      } 
     },
     {
       key: 'scadenze',
@@ -486,15 +398,21 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
     this.options.forEach(tabOptions => tabOptions.formState.isLoading = value);
   }
 
+  canActivate(){
+    return this.authService._roles.some((r) => ['ADMIN_AMM','ADMIN','SUPER-ADMIN'].includes(r));
+  }
+
   constructor(public confirmationDialogService: ConfirmationDialogService, 
     private service: ApplicationService, 
+    protected authService: AuthService,
     private route: ActivatedRoute, 
     protected router: Router, 
     private modalService: NgbModal, 
     public activeModal: NgbActiveModal,        
-    protected location: Location) 
+    protected location: Location,
+    private translateService: TranslateService) 
   {
-
+    this.translate = new MyTranslatePipe(translateService);
     //modello vuoto
     this.model = {
       transition: 'self_transition',
@@ -516,6 +434,64 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
       convenzione_from: null,
       rinnovo_type: rinnovoType.non_rinnovabile,
     }
+
+    this.fieldsusertask = [
+      {
+        className: 'section-label',
+        template: '<h5>Attività associate</h5>',
+      },
+      {
+        key: 'usertasks',
+        type: 'datatable',     
+        templateOptions: {
+          btnHidden: true,
+          label: 'Attività associate',
+          hidetoolbar: true,
+          limit: "20",
+          onDblclickRow: (event) => {
+            if (event.row.id) {
+              this.router.navigate(['home/tasks/', event.row.id]);
+            }
+          },
+          columns: [
+            { name: 'Oggetto', prop: 'subject', wrapper: 'value' },
+            { name: 'Stato', prop: 'state', wrapper: 'value' },
+            { name: 'Ufficio', prop: 'unitaorganizzativa_uo', wrapper: 'value', pipe: this.translate },
+            { name: 'Utente', prop: 'assignments', wrapper: 'value', pipe: this.flatten },
+            { name: 'Data e ora', prop: 'updated_at', wrapper: 'value' }
+          ]
+        },
+        fieldArray: {
+          fieldGroup: []
+        }
+      }
+  
+    ];
+
+    // this.fieldstask = [
+    //   {
+    //     className: 'section-label',
+    //     template: '<h5>Storia eventi</h5>',
+    //   },
+    //   {
+    //     key: 'logtransitions',
+    //     type: 'datatable',
+    //     templateOptions: {
+    //       btnHidden: true,
+    //       label: 'Storia eventi',
+    //       hidetoolbar: true,
+    //       limit: "20",
+    //       columns: [
+    //         { name: 'Transizione', prop: 'transition_leave', wrapper: 'value', pipe: this.translate },
+    //         { name: 'Effettuata', prop: 'updated_at', wrapper: 'value' },
+    //       ],
+    //     },
+    //     fieldArray: {
+    //       fieldGroup: []
+    //     }
+    //   }
+  
+    // ];
 
     this.fields = this.fields.concat(service.getInformazioniDescrittiveFields(this.model)); 
   }

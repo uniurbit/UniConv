@@ -6,12 +6,12 @@ export const ROUTES: RouteInfo[] = [
     title: 'Dashboard',
     icon: 'icon-Car-Wheel',
     class: 'has-arrow',
-    permissions: ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM'],
+    permissions: ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM','OP_UFF_BILANCIO'],
     extralink: false,
     submenu: [
       {
         path: 'dashboard/dashboard1',
-        title: 'Dashboard attività',
+        title: 'Attività',
         icon: '',
         class: '',
         permissions: ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM'],
@@ -20,19 +20,19 @@ export const ROUTES: RouteInfo[] = [
       },
       {
         path: 'dashboard/dashboard2',
-        title: 'Dashboard convenzioni',
+        title: 'Conv. dipartimentali',
         icon: '',
         class: '',
-        permissions: ['ADMIN','SUPER-ADMIN'],
+        permissions: ['ADMIN','SUPER-ADMIN','OP_UFF_BILANCIO'],
         extralink: false,
         submenu: []
       },
       {
         path: 'dashboard/dashboardconvamministrativa',
-        title: 'Dashboard convenzioni',
+        title: 'Conv. amministrative',
         icon: '',
         class: '',
-        permissions: ['ADMIN_AMM','SUPER-ADMIN'],
+        permissions: ['ADMIN_AMM','SUPER-ADMIN','OP_UFF_BILANCIO'],
         extralink: false,
         submenu: []
       },
@@ -86,7 +86,7 @@ export const ROUTES: RouteInfo[] = [
     class: '',
     extralink: false,
     submenu: [],
-    permissions: ['ADMIN_AMM','ADMIN','SUPER-ADMIN','VIEWER'],
+    permissions: ['ADMIN_AMM','ADMIN','SUPER-ADMIN','VIEWER','OP_UFF_BILANCIO'],
   },
   {
     path: 'scadenze',
@@ -95,8 +95,30 @@ export const ROUTES: RouteInfo[] = [
     class: '',
     extralink: false,
     submenu: [],
-    permissions: ['ADMIN','SUPER-ADMIN','VIEWER'], 
+    permissions: ['ADMIN','SUPER-ADMIN','VIEWER','OP_UFF_BILANCIO'], 
   }, 
+
+  // DOCUMENTAZIONE A SUPPORTO
+  {
+    path: '',
+    title: 'Documentazione',
+    icon: 'icon-Speach-Bubble',
+    class: 'has-arrow',
+    extralink: false,
+    permissions:  ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM','OP_UFF_BILANCIO','VIEWER'],
+    submenu: [
+      {
+        path: 'lineeguida/manuale',
+        title: 'Linee guida',
+        icon: '',
+        class: '',
+        extralink: false,
+        submenu: [],
+        permissions: ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM','OP_UFF_BILANCIO'],
+      },
+    ],
+  },
+
   {
     path: '',
     title: 'Fasi',

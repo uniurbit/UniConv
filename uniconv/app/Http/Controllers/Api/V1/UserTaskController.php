@@ -35,14 +35,15 @@ class UserTaskController extends Controller
         $id = $request->id;
         //Auth::user()->id                             
         $user=User::find($id);
-        return UserTask::with(['tasktype','user','assignments.personale','model'])
+        $result = UserTask::with(['tasktype','user','assignments.personale','modelwith'])
             ->whereHas('assignments', function ($query) use($user) {
                 $query->where('v_ie_ru_personale_id_ab', '=', $user->v_ie_ru_personale_id_ab);
             })
             ->where('state',UserTask::APERTO)
             ->orWhere('state',UserTask::INLAVORAZIONE)
             ->orderBy('id','desc')
-            ->paginate();                        
+            ->paginate();
+        return $result;                        
     }
 
     /**
@@ -56,7 +57,7 @@ class UserTaskController extends Controller
         $id = $request->id;               
         $user=User::find($id);
         $pers = Personale::find($user->v_ie_ru_personale_id_ab);       
-        return UserTask::with(['tasktype','user','closingUser','assignments.personale', 'model'])
+        return UserTask::with(['tasktype','user','closingUser','assignments.personale', 'modelwith'])
             ->where('unitaorganizzativa_uo',$pers->aff_org)
             ->orderBy('updated_at','desc')->paginate();           
     }

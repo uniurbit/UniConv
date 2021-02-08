@@ -14,6 +14,8 @@ class ModelHasAssignments  extends Model
     
     protected $fillable = ['v_ie_ru_personale_id_ab', 'model_id', 'model_type', 'cd_tipo_posizorg'];
 
+    protected $appends = ['nome_utente'];
+    
     /**
  * Set the keys for a save update query.
  *
@@ -73,4 +75,11 @@ protected function setKeysForSaveQuery(\Illuminate\Database\Eloquent\Builder $qu
         return $this->belongsTo(User::class,'v_ie_ru_personale_id_ab','v_ie_ru_personale_id_ab');
     }
 
+    public function getNomeUtenteAttribute()
+    {
+        if ($this->user){
+            return $this->user->name;
+        }
+        return null;
+    }
 }

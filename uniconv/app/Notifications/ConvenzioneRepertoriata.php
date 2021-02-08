@@ -45,7 +45,8 @@ class ConvenzioneRepertoriata extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)             
+        return (new MailMessage)          
+                    ->bcc(config('unidem.administrator_email'))   
                     ->greeting(' ')                           
                     ->line('La convenzione '.$this->conv->descrizione_titolo.' è stata repertoriata ('.$this->conv->num_rep.')')
                     ->action('Apri convenzione', url(Auth::user()->getIntendedUrl().'/home/convenzioni/'.$this->conv->id))

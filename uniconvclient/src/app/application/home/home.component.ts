@@ -32,9 +32,11 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         token = params.get('token');        
         if (token){
-            console.log("keep token");
-            authService.loginWithToken(token);
-            this.router.navigate(['home/convenzioni']);
+          console.log('keep token home component');
+          authService.loginWithToken(token);
+          const redirect = params.get('redirect');          
+          authService.redirectFirstLogin(redirect);
+            //this.router.navigate(['home/convenzioni']);
           }else{
             console.log("no token");
           }    

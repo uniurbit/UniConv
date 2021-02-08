@@ -144,15 +144,24 @@ export class AziendaLocComponent extends BaseEntityComponent {
             fieldGroupClassName: 'row',
             fieldGroup: [
               {
-                key: 'indirizzo1',
+                key: 'provincia',
+                type: 'provincia',
+                className: 'col-md-3',              
+                templateOptions: {                              
+                  maxLength: 2,
+                  required: true,                  
+                  label: 'Provincia',
+                  description: "Inserire EE per residenze all'estero"
+                },
+              },              
+              {
+                key: 'comune',
+                className: "col-md-6", 
                 type: 'input',      
-                className: "col-md-5",    
                 templateOptions: {
-                  translate: true,
-                  label: 'AZIENDALOC.INDIRIZZO',                   
-                  description: 'Via e località',
+                  label: 'Comune',
                   maxLength: 190,
-                  required: true,
+                  required: true,                
                 },
               },
               {
@@ -165,16 +174,23 @@ export class AziendaLocComponent extends BaseEntityComponent {
                   required: true,          
                 },
               },
+            ]
+          },
+          {
+            fieldGroupClassName: 'row',
+            fieldGroup: [
               {
-                key: 'comune',
-                className: "col-md-4", 
+                key: 'indirizzo1',
                 type: 'input',      
+                className: "col-md-6",    
                 templateOptions: {
-                  label: 'Comune',
+                  translate: true,
+                  label: 'AZIENDALOC.INDIRIZZO',                                    
                   maxLength: 190,
-                  required: true,                
+                  required: true,
                 },
-              }
+              },
+          
             ]
           },    
           {
@@ -211,8 +227,12 @@ export class AziendaLocComponent extends BaseEntityComponent {
 
   updateAzienda(data){
     this.form.get('denominazione').setValue(data.denominazione);
-    this.form.get('nome').setValue(data.nome);
-    this.form.get('cognome').setValue(data.cognome);
+    if (data.nome){
+      this.form.get('nome').setValue(data.nome);
+    }
+    if (data.cognome){
+      this.form.get('cognome').setValue(data.cognome);
+    }    
     this.form.get('cod_fisc').setValue(data.cod_fis);
     this.form.get('part_iva').setValue(data.part_iva);
 

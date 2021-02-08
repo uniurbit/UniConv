@@ -386,6 +386,30 @@ class ConvenzioneController extends Controller
         return response()->json($scad, 200);          
     }
 
+
+    public function updateModificaEmissioneStep(Request $request){
+             
+        if (!Auth::user()->hasPermissionTo('emissione scadenze')) {
+            abort(403, trans('global.utente_non_autorizzato'));
+        }
+
+        $this->validate($request, [
+            'id' => 'required',          
+            ]
+        );
+
+        $entity = Scadenza::findOrFail($request->id);       
+        if (!in_array($entity->state,['emesso', 'inpagamento', 'pagato'])) {            
+            abort(500, trans('global.scad_stato_non_valido'));
+        }    
+
+        $scad = $this->convenzioneService->updateModificaEmissioneStep($request);
+
+        return response()->json($scad, 200);          
+    }
+
+
+
     public function updatePagamentoStep(Request $request){
         
         if (!Auth::user()->hasPermissionTo('registrazionepagamento scadenze')) {
@@ -503,7 +527,7 @@ class ConvenzioneController extends Controller
         //NB lettura parametri con json() per test exportCsv
         $parameters = $request->json()->all();
 
-        $parameters['includes'] = 'aziende,tipopagamento';
+        $parameters['includes'] = 'aziende,tipopagamento,bolli';
         $parameters['columns'] =   implode (",", ['id',
             'descrizione_titolo',
             'user_id',
@@ -525,13 +549,18 @@ class ConvenzioneController extends Controller
             'nrecord',
             'numero',
             'num_rep',
+            'data_sottoscrizione',
             'data_inizio_conv',
             'data_fine_conv',
             'aziende.id',
             'aziende.denominazione',
             'tipopagamento.codice',
             'tipopagamento.descrizione',
-          
+            'rinnovo_type',   
+            'bollo_virtuale',       
+            'bolli.convenzioni_id',
+            'bolli.tipobolli_codice',
+            'bolli.num_bolli'
         ]);
 
         //se l'utente non ha il peremesso 'search all convenzioni' va filtrato 
@@ -545,6 +574,13 @@ class ConvenzioneController extends Controller
                     "operator" => "=",
                     "field" => "dipartimemto_cd_dip",                
                     "value" => $dip->cd_dip
+                ]);
+            }else if ($uo->isPlesso()){
+                //filtro per unitaorganizzativa dell'utente di inserimento (plesso)
+                array_push($parameters['rules'],[
+                    "operator" => "In",
+                    "field" => "dipartimemto_cd_dip",                
+                    "value" => $uo->dipartimenti_cd_dip()
                 ]);
             }else{
                 //filtro per unitaorganizzativa dell'utente di inserimento (servizio o un plesso)
@@ -579,6 +615,12 @@ class ConvenzioneController extends Controller
         return (new ConvenzioniExport($request,$findparam))->download('convenzioni.csv', \Maatwebsite\Excel\Excel::CSV,  [
             'Content-Type' => 'text/csv',
         ]);        
+    }
+
+    public function exportxls(Request $request){
+        //prendi i parametri 
+        $findparam = $this->queryparameter($request);                              
+        return (new ConvenzioniExport($request,$findparam))->download('convenzioni.xlsx');     
     }
 
 

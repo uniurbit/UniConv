@@ -77,6 +77,26 @@ export class AuthService {
     }
   }
 
+  redirectFirstLogin(redirect){
+    
+    if (redirect && redirect != 'home' && redirect != '/home' && redirect != ''){
+        console.log(redirect);
+        this.router.navigate([redirect]);       
+        return;                         
+    }
+    
+    //permissions: ['ADMIN','SUPER-ADMIN','OP_APPROVAZIONE','OP_CONTABILITA','ADMIN_AMM'],
+    const permissions = this.permissionsService.getPermissions();
+    if (permissions['ADMIN'] || permissions['OP_APPROVAZIONE'] || permissions['OP_CONTABILITA'] || permissions['ADMIN_AMM']){
+        this.router.navigate(['home/dashboard/dashboard1']);                    
+    }else if (permissions['SUPER-ADMIN'] || permissions['OP_UFF_BILANCIO']){
+        this.router.navigate(['home/convenzioni']);
+    }else {
+        this.router.navigate(['home']);
+    }
+
+  }
+
   resetFields(){
     this._username = '';
     this._id = null;
@@ -100,6 +120,7 @@ export class AuthService {
 
     localStorage.removeItem(AuthService.TOKEN);
     localStorage.clear();
+    sessionStorage.clear();
     this.permissionsService.flushPermissions();
     this.resetFields();
     this.loggedIn.next(false);

@@ -127,10 +127,10 @@ class UgovTest extends TestCase
         
         $pers = Personale::findByEmail('enrico.oliva@uniurb.it');
         $this->assertEquals('018087',$pers->matricola);
-        $this->assertEquals('NM',$pers->cd_ruolo);
+        $this->assertEquals('ND',$pers->cd_ruolo);
         $this->assertEquals(39842,$pers->id_ab);
         
-        $this->assertEquals('Personale TA a tempo determinato-Tesoro',$pers->ruolo->descr);
+        $this->assertEquals('Personale TA',$pers->ruolo->descr);
         $this->assertTrue($pers->ruolo->isPta());
         
         $this->assertEquals('SEV',$pers->unita->tipo);

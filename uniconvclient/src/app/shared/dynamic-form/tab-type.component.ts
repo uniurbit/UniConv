@@ -24,10 +24,7 @@ import { evalExpression } from './utils';
         </ng-template>
         <ng-template ngbTabContent>            
             <formly-field 
-                [model]="model"
-                [field]="f"
-                [options]="options"
-                [form]="form">
+                [field]="f">
             </formly-field>              
         </ng-template>
     </ngb-tab>

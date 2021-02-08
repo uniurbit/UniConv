@@ -8,6 +8,11 @@
       <span class="oi oi-document"></span>
       <span class="ml-2">Modifica</span>
     </button>
+    <button *ngxPermissionsOnly="['OP_UFF_BILANCIO']" class="btn btn-outline-primary rounded-lg"
+      (click)="onModify()">
+      <span class="oi oi-document"></span>
+      <span class="ml-2">Apri</span>
+    </button>
     <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onOpen()">
       <span class="oi oi-document"></span>
       <span class="ml-2">Apri convenzione</span>

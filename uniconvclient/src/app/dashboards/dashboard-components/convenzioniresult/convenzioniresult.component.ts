@@ -7,6 +7,8 @@ import { Router } from '@angular/router';
 import { DatePipe, TitleCasePipe } from '@angular/common';
 import { MycurrencyPipe } from 'src/app/shared/pipe/custom.currencypipe';
 import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
+import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-convenzioniresult',
@@ -31,25 +33,27 @@ export class ConvenzioniresultComponent implements OnInit {
 
   currency = new MycurrencyPipe();
   titlecase = new TitleCasePipe();
-  flatten = new MyFlattenPipe();
+  flatten = new MyFlattenPipe('');
+  translate: MyTranslatePipe = null;
 
-
-  constructor(private service: ApplicationService, private router: Router, private datePipe: DatePipe) { }
+  constructor(private service: ApplicationService, private router: Router, private datePipe: DatePipe,  private translateService: TranslateService) { }
 
   ngOnInit() {
 
     if (this.baseColumns == null || this.baseColumns.length == 0){
+      this.translate = new MyTranslatePipe(this.translateService);
       this.baseColumns =  [              
         { name: '#', prop: 'id', width: 60, maxWidth: 70},
         {name: "Descrizione Titolo", prop: "descrizione_titolo", width: 300},
         {name: "Azienda o ente", prop:'aziende', pipe: this.flatten, minWidth: 300 },
+        {name: 'Dipartimento', prop: 'dipartimemto_cd_dip', pipe: this.translate, width: 135, maxWidth: 135 },
         {name: "Responsabile scientifico", prop: "resp_scientifico"},
         {name: "Tipo convenzione", prop: "convenzione_type", cellTemplate: this.converter},
         {name: "Ambito", prop: "ambito", pipe: this.titlecase},
         {name: "Modalità di pagamento", prop: "tipopagamento.descrizione", width: 200},
         {name: "Corrispettivo IVA esclusa se applicabile", prop: "corrispettivo",  pipe: this.currency,},
-        {name: "Data inizio", prop: "data_inizio_conv"},
-        {name: "Data fine", prop: "data_fine_conv"},
+        {name: "Data inizio", prop: "data_inizio_conv",  type: 'date'},
+        {name: "Data fine", prop: "data_fine_conv",  type: 'date'},
         {name: "Stato", prop: "current_place"},
       ]              
     }
@@ -69,7 +73,7 @@ export class ConvenzioniresultComponent implements OnInit {
             footerHeight: 50,            
             scrollbarH: true,             
             hidetoolbar: true, 
-            detailRow: this.detailRow,
+            //detailRow: this.detailRow,
             selected: [],                        
             page: new Page(25),       
             onDblclickRow: (event) => this.onDblclickRow(event),

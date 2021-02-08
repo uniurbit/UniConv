@@ -144,8 +144,8 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                       { label: 'Si', value: 'daapprovare' },
                     ],
                   },
-                  lifecycle: {
-                    onInit: (form, field) => {
+                  hooks: {
+                    onInit: (field) => {
                       const tabs = this.fieldtabs.find(f => f.type === 'tabinfra');
                       const tabappr = tabs.fieldGroup[2];
                       field.formControl.valueChanges.subscribe(x => {
@@ -407,8 +407,8 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                       labelProp: 'descr',  
                       required: true,                     
                     },                    
-                    lifecycle: {
-                      onInit: (form, field, model) => {                                              
+                    hooks: {
+                      onInit: (field) => {                                              
                         field.templateOptions.options = this.service.getPersonaleUfficio(this.model.unitaorganizzativa_affidatario).pipe(                    
                         );                      
                       },

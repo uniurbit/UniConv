@@ -2,13 +2,13 @@
 
 {{-- contenuto email --}}
 @if (!empty($description))
-{{ trim($description) }}
+{!! trim(nl2br(e($description))) !!} 
 @endif
 
 @component('mail::button', ['url' => $urlInfo, 'color' => 'blue'])
 Informazioni convenzione
 @endcomponent
-
+<br>
 @component('mail::button', ['url' => $urlChiusura, 'color' => 'blue'])
 Gestisci la richiesta di emissione
 @endcomponent

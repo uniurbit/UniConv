@@ -8,6 +8,8 @@ import { DatePipe } from '@angular/common';
 import { ScadenzaService } from 'src/app/application/scadenza.service';
 import { MycurrencyPipe } from 'src/app/shared/pipe/custom.currencypipe';
 import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
+import { TranslateService } from '@ngx-translate/core';
+import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
 
 @Component({
   selector: 'app-scadenzeresult',
@@ -17,7 +19,8 @@ import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
 export class ScadenzeresultComponent implements OnInit {
   isLoading: boolean = false;
   currency = new MycurrencyPipe();
-  flatten = new MyFlattenPipe();
+  flatten = new MyFlattenPipe('');
+  translate: MyTranslatePipe = null;
   @ViewChild('statetemplate') statetemplate: TemplateRef<any>;
     
   @Input() 
@@ -28,34 +31,38 @@ export class ScadenzeresultComponent implements OnInit {
     data: new Array<any>(),
   }; 
   
-  resultMetadata = [
-    {
-      key: 'data',
-      type: 'datatablelookup',   
-      templateOptions: {
-        label: 'Risultati',   
-        columnMode: 'force',
-        scrollbarH: true,        
-        page: new Page(25),
-        hidetoolbar: true,      
-        onDblclickRow: (event) => this.onDblclickRow(event),
-        onSetPage: (pageInfo) => this.onSetPage(pageInfo),   
-        columns: [
-          { name: '#', prop: 'id', wrapper: 'value',  maxWidth:50 },
-          { name: 'Tranche prevista', prop: 'data_tranche', wrapper: 'value' },
-          { name: 'Titolo convenzione', prop:'convenzione.descrizione_titolo',  width:'300', wrapper: 'value'},
-          { name: "Azienda o ente", prop:'convenzione.aziende', pipe: this.flatten, maxWidth: 200 },
-          { name: 'Stato', prop: 'state', wrapper: 'value' },
-          { 
-            name: 'Importo', prop: 'dovuto_tranche', wrapper: 'value', width: 100,
-            maxWidth:120, pipe: this.currency,
-          },
-        ],   
-      },    
-    }
-  ];
+  resultMetadata: FormlyFieldConfig[];
   
-  constructor(private service: ScadenzaService, private router: Router, private datePipe: DatePipe) { }
+  constructor(private service: ScadenzaService, private router: Router, private datePipe: DatePipe, private translateService: TranslateService) { 
+    this.translate = new MyTranslatePipe(translateService);
+    this.resultMetadata = [
+      {
+        key: 'data',
+        type: 'datatablelookup',   
+        templateOptions: {
+          label: 'Risultati',   
+          columnMode: 'force',
+          scrollbarH: true,        
+          page: new Page(25),
+          hidetoolbar: true,      
+          onDblclickRow: (event) => this.onDblclickRow(event),
+          onSetPage: (pageInfo) => this.onSetPage(pageInfo),   
+          columns: [
+            { name: '#', prop: 'id', wrapper: 'value',  maxWidth:50 },
+            { name: 'Tranche prevista', prop: 'data_tranche', wrapper: 'value', type: 'date' },
+            { name: 'Titolo convenzione', prop:'convenzione.descrizione_titolo',  width:'300', wrapper: 'value'},
+            { name: "Azienda o ente", prop:'aziende', pipe: this.flatten, maxWidth: 200 },
+            { name: 'Dipartimento', prop: 'convenzione.dipartimemto_cd_dip', pipe: this.translate, width: 135, maxWidth: 135 },
+            { name: 'Stato', prop: 'state', wrapper: 'value' },
+            { 
+              name: 'Importo', prop: 'dovuto_tranche', wrapper: 'value', width: 100,
+              maxWidth:120, pipe: this.currency,
+            },
+          ],   
+        },    
+      }
+    ];
+  }
 
   ngOnInit() { 
   

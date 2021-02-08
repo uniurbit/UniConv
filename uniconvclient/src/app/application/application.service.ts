@@ -11,6 +11,7 @@ import { Cacheable, CacheBuster } from 'ngx-cacheable';
 import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirmation-dialog.service';
 import { truncate } from 'fs';
 import { cacheBusterNotifier } from '../shared/base-service/base.service'
+import { AuthService } from '../core';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -24,7 +25,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
 
   _baseURL: string;
 
-  constructor(protected http: HttpClient, public messageService: MessageService, public confirmationDialogService: ConfirmationDialogService) {
+  constructor(protected http: HttpClient, protected authService: AuthService, public messageService: MessageService, public confirmationDialogService: ConfirmationDialogService) {
     this._baseURL = AppConstants.baseApiURL;
   }
 
@@ -555,7 +556,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         templateOptions: {
           options: [
             { label: 'Istituzionale', value: 'istituzionale' },
-            { label: 'Commerciale', value: 'commercicale' },
+            { label: 'Commerciale', value: 'commerciale' },
           ],
           label: 'Ambito',
           required: true,
@@ -643,6 +644,15 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         catchError(this.handleError('export'))
       );
   }
+
+  exportxls(model): Observable<any> {
+    return this.http
+      .post(this._baseURL + `/convenzioni/exportxls`, model, { responseType: 'blob'}).pipe(
+        tap(sub => this.messageService.info('Export effettuato con successo')),
+        catchError(this.handleError('export'))
+      );
+  }
+
 
   getConvenzioneById(id: number): Observable<any> {
     return this.http
@@ -909,6 +919,21 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
+  modificaEmissioneStep(data: any, retrow: boolean = false): Observable<any>{
+    const url = `${this._baseURL + '/convenzioni/modificaemissionestep'}`;
+    let res = this.http.post(url, data, httpOptions)
+      .pipe(
+        tap(sub =>
+          this.messageService.info('Modifica emissione effettuata con successo')
+        ),
+        catchError(this.handleError('modificaEmissioneStep', null, retrow))
+      );
+    return res;
+  }
+
+  @CacheBuster({
+    cacheBusterNotifier: cacheBusterNotifier
+  })
   pagamentoStep(data: any, retrow: boolean = false): Observable<any>{
     const url = `${this._baseURL + '/convenzioni/pagamentostep'}`;
     let res = this.http.post(url, data, httpOptions)
@@ -936,9 +961,9 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
 
   @Cacheable()
   getDipartimenti(): Observable<any> {
-    return this.http.get<any>(this._baseURL + '/dipartimenti/user/', httpOptions).pipe(      
+    return this.http.get<any>(this._baseURL + '/dipartimenti/user/'+this.authService.userid, httpOptions).pipe(      
         map(x => {
-         return x.map(el => {return { cd_dip: parseInt(el.cd_dip), nome_breve: el.nome_breve }})
+          return x == null ? [] : x.map(el => {return { cd_dip: parseInt(el.cd_dip), nome_breve: el.nome_breve }})
         }
       )
     );          

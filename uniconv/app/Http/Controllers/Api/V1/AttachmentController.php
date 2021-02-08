@@ -113,9 +113,13 @@ class AttachmentController extends Controller
                     }
                 }else{
                     $attach['filevalue'] =  base64_encode($app->content);                                                    
-                    if ($attach->filetype == 'link'){
-                        $attach['filename'] = $app->title.'.pdf';
-                    }
+                    if ($attach->filetype == 'link'){                     
+                        if ($this->mime2ext($app->mimeType)){
+                            $attach['filename'] = $app->title.'.'.$this->mime2ext($app->mimeType);
+                        }else{
+                            $attach['filename'] = $app->title;
+                        }                            
+                    }                                            
                 }
             }
         }else{
@@ -145,4 +149,48 @@ class AttachmentController extends Controller
 
         return response()->json(null);
     }
+
+
+    private function mime2ext($mime) {
+        $mime_map = [                          
+            'image/bmp'                                                                 => 'bmp',
+            'image/x-bmp'                                                               => 'bmp',
+            'image/x-bitmap'                                                            => 'bmp',
+            'image/x-xbitmap'                                                           => 'bmp',
+            'image/x-win-bitmap'                                                        => 'bmp',
+            'image/x-windows-bmp'                                                       => 'bmp',
+            'image/ms-bmp'                                                              => 'bmp',
+            'image/x-ms-bmp'                                                            => 'bmp',
+            'application/bmp'                                                           => 'bmp',
+            'application/x-bmp'                                                         => 'bmp',
+            'application/x-win-bitmap'                                                  => 'bmp',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'   => 'docx',
+            'image/gif'                                                                 => 'gif',
+            'image/jpeg'                                                                => 'jpeg',
+            'image/pjpeg'                                                               => 'jpeg',         
+            'application/pkcs7-mime'                                                    => 'p7m',
+            'application/x-pkcs7-mime'                                                  => 'p7c',
+            'application/x-pkcs7-certreqresp'                                           => 'p7r',
+            'application/pkcs7-signature'                                               => 'p7s',
+            'application/pdf'                                                           => 'pdf',
+            'application/octet-stream'                                                  => 'pdf',
+            'image/png'                                                                 => 'png',
+            'image/x-png'                                                               => 'png',
+            'application/vnd.ms-office'                                                 => 'doc',
+            'application/msword'                                                        => 'doc',                        
+            'application/msexcel'                                                       => 'xls',
+            'application/x-msexcel'                                                     => 'xls',
+            'application/x-ms-excel'                                                    => 'xls',
+            'application/x-excel'                                                       => 'xls',
+            'application/x-dos_ms_excel'                                                => 'xls',
+            'application/xls'                                                           => 'xls',
+            'application/x-xls'                                                         => 'xls',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'         => 'xlsx',
+            'application/vnd.ms-excel'                                                  => 'xlsx',                                    
+            'text/plain'                                                                => 'txt',
+        ];
+    
+        return isset($mime_map[$mime]) ? $mime_map[$mime] : false;
+    }
+
 }

@@ -56,7 +56,6 @@ import { TableColumn } from '@swimlane/ngx-datatable';
 {{ value }}    
 </ng-template>  
 
-
 <ng-template #expaderdetailcolumn let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
   <div style="padding-left:5px;">
     <a    
@@ -107,7 +106,7 @@ export class TableTypeComponent extends FieldArrayType {
               column.cellTemplate = this.valuecolumn; 
           }                       
         }
-        });
+      });
 
     } else{
       this.to.columns =  this.field.fieldArray.fieldGroup.map(el => {      

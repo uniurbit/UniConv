@@ -8,17 +8,20 @@ use Illuminate\Support\Facades\Auth;
 use App\User;
 use App\Http\Controllers\Controller;
 
-//Importing laravel-permission models
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Role;
+use App\Permission;
 use Illuminate\Support\Facades\Log;
 use App\Service\LogActivityService;
+use Hash;
+use Exception;
+use DB;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
 
     public function __construct() {
-       // $this->middleware(['isAdmin']); //isAdmin middleware lets only users with a //specific permission permission to access these resources
+
     }
 
     /**
@@ -28,7 +31,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {        
-        //LogActivityService::addToLog('user index');
 
         $id = $request->get('userId');
         $query = $request->all();
@@ -47,7 +49,6 @@ class UserController extends Controller
      */
     public function create()
     {
-        //LogActivityService::addToLog('user create');
         $roles = Role::get();
         return view('users.create', ['roles'=>$roles]);
     }
@@ -60,25 +61,39 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //LogActivityService::addToLog('user store');
          //Validate name, email and password fields
          $this->validate($request, [
             'name'=>'required|max:120',
             'email'=>'required|email|unique:users',
-            'password'=>'required|min:6|confirmed'
+            'v_ie_ru_personale_id_ab' => 'required|unique:users', 
+            // 'nome' => 'required',
+            // 'cognome' => 'required',
+            // 'cf' => 'required',            
         ]);
 
-        $user = User::create($request->only('email', 'name', 'password')); //Retrieving only the email and password data
+        //,'nome','cognome','cf'
+        $input = $request->only(['name', 'email', 'password', 'v_ie_ru_personale_id_ab','blocked_date']); 
+        DB::beginTransaction(); 
+        $user = new User();  
+        try {                             
+            $user->fill($input);              
+            $user->password =  Hash::make(Str::random(10));
+            $user->save();                
 
-        $roles = $request['roles']; //Retrieving the roles field
-        //Checking if a role was selected
-        if (isset($roles)) {
+            $roles = $request['roles']; //Retrieving the roles field
+            //Checking if a role was selected
+            if (isset($roles)) {
 
-            foreach ($roles as $role) {
-            $role_r = Role::where('id', '=', $role)->firstOrFail();            
-            $user->assignRole($role_r); //Assigning role to user
-            }
-        }                
+                foreach ($roles as $role) {                
+                    $user->assignRole($role); //Assigning role to user
+                }
+            }    
+        } catch(\Exception $e) {
+            
+            DB::rollback();
+            throw $e;
+        }
+        DB::commit(); 
         return $user;
     }
 
@@ -104,8 +119,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //LogActivityService::addToLog('user update');
-        $user = User::findOrFail($id); //Get role specified by id
+        $user = User::findOrFail($id); 
 
         //Validate name, email and password fields  
         $this->validate($request, [
@@ -114,7 +128,8 @@ class UserController extends Controller
             'roles' => 'required'
             //'password'=>'required|min:6|confirmed'
         ]);
-        $input = $request->only(['name', 'email', 'password', 'v_ie_ru_personale_id_ab','blocked_date']); //Retreive the name, email and password fields        
+        //'nome','cognome','cf'
+        $input = $request->only(['name', 'email', 'password', 'v_ie_ru_personale_id_ab','blocked_date']); 
         $user->fill($input)->save();
 
         if($request->roles <> ''){
@@ -138,9 +153,6 @@ class UserController extends Controller
 
         return $user;
         
-        // redirect()->route('users.index')
-        //     ->with('flash_message',
-        //      'User successfully edited.');
     }
 
     /**
@@ -151,7 +163,6 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //LogActivityService::addToLog('user delete');
          //Find a user with a given id and delete
          $user = User::findOrFail($id); 
          $user->delete();
@@ -161,8 +172,6 @@ class UserController extends Controller
 
     public function query(Request $request){
 
-        //LogActivityService::addToLog('user query');
-
         $app = $request->json();
         $parameters = $request->json()->all();
         $parameters['includes'] = 'roles'; 
@@ -171,9 +180,6 @@ class UserController extends Controller
         $queryBuilder = new QueryBuilder(new User, $request, $findparam);
                         
         return $queryBuilder->build()->paginate();     
-
-        //costruzione della query
-
     }
 
     public function roles(Request $request)

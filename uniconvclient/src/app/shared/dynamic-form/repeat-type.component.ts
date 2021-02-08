@@ -16,8 +16,7 @@ import { ConfirmationDialogService } from '../confirmation-dialog/confirmation-d
     </button>  
   </div>   
   <div *ngFor="let subfield of field.fieldGroup; let i = index;">
-      <formly-group     
-        [model]="model[i]"          
+      <formly-group              
         [field]="subfield">              
       </formly-group>              
       <div *ngIf="!to.btnRemoveHidden" class="mb-2">

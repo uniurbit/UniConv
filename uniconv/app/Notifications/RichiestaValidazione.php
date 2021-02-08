@@ -55,6 +55,7 @@ class RichiestaValidazione extends Notification
 
         return (new MailMessage)
             ->cc([$emailresp, Auth::user()->email]) 
+            ->bcc(config('unidem.administrator_email'))
             ->subject('Richiesta approvazione')    
             ->markdown('mail.richiesta.validazione',$this->data);
     }

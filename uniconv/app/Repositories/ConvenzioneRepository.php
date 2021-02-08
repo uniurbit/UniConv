@@ -486,6 +486,42 @@ class ConvenzioneRepository extends BaseRepository {
        DB::commit();
        return $scad;
     }
+
+    public function updateModificaEmissione($data){
+        DB::beginTransaction();
+        try {
+            //leggere scadenza
+            $scad = Scadenza::find($data['id']);
+            
+            $attachs = $scad->attachments->whereIn('attachmenttype_codice',['FATTURA_ELETTRONICA','NOTA_DEBITO']);
+            if ($attachs){                
+                $attachs->each->delete();
+            }
+
+            //salvare eventuale numero fattura e numero protocollo
+            if ($data['attachment1']['attachmenttype_codice'] == 'FATTURA_ELETTRONICA' || $data['attachment1']['attachmenttype_codice'] == 'NOTA_DEBITO'){
+                $scad->data_fattura = $data['data_fattura'];
+                $scad->num_fattura = $data['num_fattura'];
+            }
+
+            $scad->save();
+
+            //salvare allegati ...             
+            if (array_key_exists('attachment1',$data)){              
+                $this->saveAttachments(array($data['attachment1']), $scad);
+            }else{
+                throw new Exception("Nessun file in allegato", 1);                
+            }            
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            throw $e;
+       }
+
+       DB::commit();
+       return $scad;
+    }
+
     
     public function updatePagamento($data){
         DB::beginTransaction();  

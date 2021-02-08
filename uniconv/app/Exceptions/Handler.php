@@ -42,7 +42,7 @@ class Handler extends ExceptionHandler
     public function report(Exception $exception)
     {
         if ($this->shouldReport($exception)) {
-            //$this->sendExceptionEmail($exception);
+            $this->sendExceptionEmail($exception);
         }
 
         Log::error($exception);

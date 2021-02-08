@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\ScadenzaResource;
 use App\Http\Resources\WorkflowUserTaskResource;
 use App\Http\Resources\WorkflowScadenzaResource;
+use App\Exports\ScadenzeExport;
 use Auth;
 class ScadenzaController extends Controller
 {
@@ -94,16 +95,12 @@ class ScadenzaController extends Controller
         return $entity;
     }
     
-    public function query(Request $request){ 
-
-        if (!Auth::user()->hasAnyPermission(['search all scadenze', 'search orgunit scadenze'])) {
-            abort(403, trans('global.utente_non_autorizzato'));
-        }
-
+    public function queryparameter(Request $request){
+        
         $app = $request->json();
         $parameters = $request->json()->all();
-        $parameters['includes'] = 'convenzione,convenzione.aziende';
-        $parameters['columns'] = 'id,data_tranche,dovuto_tranche,state,convenzione_id,convenzione.id,convenzione.descrizione_titolo,convenzione.unitaorganizzativa_uo';
+        $parameters['includes'] = 'aziende,convenzione';
+        $parameters['columns'] = 'id,data_tranche,dovuto_tranche,state,aziende.id,aziende.denominazione,convenzione_id,convenzione.id,convenzione.descrizione_titolo,convenzione.unitaorganizzativa_uo,convenzione.dipartimemto_cd_dip';
 
         //se l'utente NON è un super-admin le query vanno filtrate per appartenenza
         if (!Auth::user()->hasPermissionTo('search all scadenze')){           
@@ -117,6 +114,13 @@ class ScadenzaController extends Controller
                     "field" => "convenzione.dipartimemto_cd_dip",                
                     "value" => $dip->cd_dip
                 ]);
+            }else if ($uo->isPlesso()){
+                //filtro per unitaorganizzativa dell'utente di inserimento (plesso)
+                array_push($parameters['rules'],[
+                    "operator" => "In",
+                    "field" => "convenzione.dipartimemto_cd_dip",                
+                    "value" => $uo->dipartimenti_cd_dip()
+                ]);
             }else{
                 //filtro per unitaorganizzativa dell'utente di inserimento (servizio o un plesso)
                 array_push($parameters['rules'],[
@@ -128,8 +132,17 @@ class ScadenzaController extends Controller
         }
 
 
-        $findparam =new \App\FindParameter($parameters);      
+       return new \App\FindParameter($parameters);      
 
+    }
+
+    public function query(Request $request){ 
+
+        if (!Auth::user()->hasAnyPermission(['search all scadenze', 'search orgunit scadenze'])) {
+            abort(403, trans('global.utente_non_autorizzato'));
+        }
+
+        $findparam = $this->queryparameter($request);  
         $queryBuilder = new QueryBuilder(new Scadenza, $request, $findparam);
                 
         return $queryBuilder->build()->paginate();       
@@ -143,5 +156,29 @@ class ScadenzaController extends Controller
             WorkflowScadenzaResource::withoutWrapping();
             return WorkflowScadenzaResource::collection(collect($entity->workflow_transitions_self()));                     
         }                
+    }
+
+    public function export(Request $request){
+        
+        if (!Auth::user()->hasAnyPermission(['search all scadenze', 'search orgunit scadenze'])) {
+            abort(403, trans('global.utente_non_autorizzato'));
+        }
+
+        //prendi i parametri 
+        $findparam = $this->queryparameter($request);          
+        return (new ScadenzeExport($request,$findparam))->download('scadenze.csv', \Maatwebsite\Excel\Excel::CSV,  [
+            'Content-Type' => 'text/csv',
+        ]);        
+    }
+
+    public function exportxls(Request $request){
+        
+        if (!Auth::user()->hasAnyPermission(['search all scadenze', 'search orgunit scadenze'])) {
+            abort(403, trans('global.utente_non_autorizzato'));
+        }
+
+        //prendi i parametri 
+        $findparam = $this->queryparameter($request);          
+        return (new ScadenzeExport($request,$findparam))->download('scadenze.xlsx');
     }
 }

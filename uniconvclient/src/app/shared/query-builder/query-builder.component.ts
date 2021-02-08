@@ -18,7 +18,7 @@ import ControlUtils from '../dynamic-form/control-utils';
 export class QueryBuilderComponent implements OnInit, OnChanges {
   onDestroy$ = new Subject<void>();
 
-  @Input() builderoptions: FormlyTemplateOptions;
+  @Input() builderoptions: FormlyTemplateOptions = null;
 
   @Input() rules;
 
@@ -85,12 +85,15 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
                 field.form.get('field').valueChanges.pipe(
                   takeUntil(this.onDestroy$),   
                   startWith(field.model.field),              
-                  tap(selectedField => {                                     
+                  tap(selectedField => {     
+                    const op = field.model ? field.model.operator : undefined;                                
                     field.formControl.setValue('');
                     if (this.keymetadata[selectedField] )                                  
                       field.templateOptions.options = this.getOperators(selectedField,field.model);  
-                      if (field.templateOptions.options[0] !== undefined) 
-                        field.formControl.setValue(field.templateOptions.options[0].value);                                                                           
+                      if (op == undefined && field.templateOptions.options[0] !== undefined) 
+                        field.formControl.setValue(field.templateOptions.options[0].value);    
+                      else               
+                        field.formControl.setValue(op);                                                    
                   }),
                 ).subscribe();
               },
@@ -143,6 +146,8 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
                     tap(selectedField => {
                      
                       if (this.keymetadata[selectedField]) {
+                        //restituiamo il tipo per esecuzione query
+                        field.model.type = this.keymetadata[selectedField].type;
                         field.formControl.reset();
                         field.type = this.keymetadata[selectedField].type;
                         field.wrappers = ['form-field'];
@@ -268,6 +273,7 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
     if (this.operatorsCache[field]) {
       return this.operatorsCache[field];
     }
+    //non eseguito quando l'operatore è in cache
     let operators = this.defaultEmptyList;
     const fieldObject = this.keymetadata[field];    
     let type = fieldObject.type;  
@@ -290,9 +296,9 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
           `Please define an 'operators' property on the field or use the 'operatorMap' binding to fix this.`);
       }
       //TODO sistemare i tipi nullable da dove lo si vede? se non è required 
-      if (!fieldObject.templateOptions.required) {
-        operators = operators.concat(['is null', 'is not null']);
-      }
+      // if (!fieldObject.templateOptions.required) {
+      //   operators = operators.concat(['is null', 'is not null']);
+      // }
     } else {
       console.warn(`No 'type' property found on field: '${field}'`);
     }

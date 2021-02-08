@@ -11,15 +11,29 @@
         <!-- Comment Row -->        
         <div *ngIf="model">
         <div class="d-flex flex-row comment-row m-t-0"  *ngFor="let task of model" >
-            <div class="comment-text w-100">                 
-                <span class="float-right">                    
-                    <span *ngIf="task.model_type == 'App\\\Convenzione'">Convenzione n. {{task.model_id}}</span>
-                    <span *ngIf="task.model_type == 'App\\\Scadenza'">Scadenza n. {{task.model_id}} (convenzione n. {{task.model.convenzione_id}})</span>                     
-                </span>
-                <h6 *ngIf="!task.namelist" class="font-medium">...</h6>   
-                <h6 *ngIf="task.namelist" class="font-medium">{{task.namelist | titlecase}}</h6>                
-                <span class="m-b-15 d-block">{{task.subject}}</span>                    
-                <div class="comment-footer">
+            <div class="comment-text w-100"> 
+                <table class="table table-sm table-borderless mb-0 p-0">                 
+                    <tr>
+                        <td style="width: 30%;">
+                            <h6 *ngIf="!task.namelist" class="font-medium">...</h6>   
+                            <h6 *ngIf="task.namelist" class="font-medium">{{task.namelist | titlecase}}</h6>                         
+                        </td>
+                        <td style="width: 70%;" class="text-right">
+                            <ng-container *ngIf="task.model_type == 'App\\\Convenzione'">                                             
+                                <span style="max-height: 100px;" title="{{ task?.modelwith?.descrizione_titolo }}">Convenzione  n. {{task.model_id}}</span> <br>
+                                <span class="text-muted">Azienda: {{ task?.modelwith?.list_azienda_denominazione }}</span>
+                            </ng-container>
+                            <ng-container *ngIf="task.model_type == 'App\\\Scadenza'">                                             
+                                <span *ngIf="task.model_type == 'App\\\Scadenza'" title="{{ task?.modelwith?.convenzione?.descrizione_titolo }}">Scadenza n. {{task.model_id}} (Convenzione n. {{task?.modelwith?.convenzione_id}})</span> <br> 
+                                <span class="text-muted">Azienda: {{ task?.modelwith?.convenzione?.list_azienda_denominazione }}</span>  
+                            </ng-container>                      
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="width: 30%;"> <span class="m-b-15 d-block">{{task.subject}}</span> </td>
+                    </tr>
+                </table>                            
+                <div class="comment-footer ml-1">
                     <span class="text-muted float-right">{{ task.readable_created_at.date | date:'d MMMM, yyyy' }}</span>                  
                     <span [ngSwitch]="task.state">                        
                         <span *ngSwitchCase="'aperto'" class="label label-rounded label-primary">{{task.state}}</span>                        
@@ -47,6 +61,7 @@
                     </span>
                 </div>               
             </div>
+           
         </div>
         </div>       
     

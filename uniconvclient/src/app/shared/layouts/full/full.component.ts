@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/core';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AppConstants } from 'src/app/app-constants';
+import { environment } from 'src/environments/environment';
+import { SettingsService } from 'src/app/services/settings.service';
 
 @Component({
   selector: 'app-full-layout',
@@ -16,27 +18,30 @@ import { AppConstants } from 'src/app/app-constants';
 export class FullComponent implements OnInit, OnDestroy {
   public config: PerfectScrollbarConfigInterface = {};
   onDestroy$ = new Subject<void>();
-    
-  constructor(private authService: AuthService, public router: Router) {
-    
+
+  constructor(private authService: AuthService, public router: Router, public settingService: SettingsService) {
+
     let token = null;
-  
+    this.options.theme = this.settingService.getSetting('THEME');
+
     router.events.pipe(takeUntil(this.onDestroy$)).subscribe(s => {
       if (s instanceof NavigationEnd) {
         let params: URLSearchParams;
-        if (s.url.includes('/home'))
+        if (s.url.includes('/home')) {
           params = new URLSearchParams(s.url.split('/home')[1]);
-        else{
+        } else {
           params = new URLSearchParams(s.url.split('/')[1]);
         }
-        token = params.get('token');        
-        if (token){
-            console.log("keep token");
+        token = params.get('token');
+        if (token) {
+            console.log('keep token');
             authService.loginWithToken(token);
-            this.router.navigate(['home/dashboard/dashboard1']);
-          }else{
-            console.log("no token");
-          }    
+            const redirect = params.get('redirect');
+            console.log('redirect '+redirect);
+            authService.redirectFirstLogin(redirect);                
+          } else {
+            console.log('no token');
+          }
       }
     });
 
@@ -56,7 +61,7 @@ export class FullComponent implements OnInit, OnDestroy {
     theme: 'light', // two possible values: light, dark
     dir: 'ltr', // two possible values: ltr, rtl
     layout: 'vertical', // fixed value. shouldn't be changed.
-    sidebartype: 'full', // four possible values: full, iconbar, overlay, mini-sidebar 
+    sidebartype: 'full', // four possible values: full, iconbar, overlay, mini-sidebar
     sidebarpos: 'fixed', // two possible values: fixed, absolute
     headerpos: 'fixed', // two possible values: fixed, absolute
     boxed: 'full', // two possible values: full, boxed
@@ -65,26 +70,28 @@ export class FullComponent implements OnInit, OnDestroy {
     logobg: 'skin6' // six possible values: skin(1/2/3/4/5/6)
   };
 
-
-
-  
   Logo() {
     this.expandLogo = !this.expandLogo;
   }
 
   ngOnInit() {
-    if (this.router.url === '/') {
-      this.router.navigate(['home/']);
+    if (this.router.url === '/') {      
+      if (this.authService.isAuthenticated()){        
+        this.authService.redirectFirstLogin(null);
+      }else{
+        this.router.navigate(['home/']);
+      }      
     }
     this.defaultSidebar = this.options.sidebartype;
     this.handleSidebar();
+    
+
   }
 
   ngOnDestroy(): void {
     this.onDestroy$.next();
     this.onDestroy$.complete();
   }
-
 
   @HostListener('window:resize', ['$event'])
   onResize(event) {
@@ -138,7 +145,11 @@ export class FullComponent implements OnInit, OnDestroy {
     }
   }
 
-  get documentationUrl(){
+  get documentationUrl() {
     return AppConstants.documentationURL;
+  }
+
+  isDebug() {
+    return !environment.production
   }
 }

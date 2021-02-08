@@ -57,6 +57,7 @@ import { InsConvAmmComponent } from '../application/pages/ins-conv-amm.component
 import { RegistrazioneCompletamentoDirettoreComponent } from '../application/pages/registrazione/registrazione-completamento-direttore/registrazione-completamento-direttore.component';
 import { RegistrazioneCompletamentoControparteComponent } from '../application/pages/registrazione/registrazione-completamento-controparte/registrazione-completamento-controparte.component';
 import { RegistrazioneBolloRepertoriazioneComponent } from '../application/pages/registrazione/registrazione-bollo-repertoriazione/registrazione-bollo-repertoriazione.component';
+import { LinkEsterniComponent } from '../application/link-esterni/link-esterni.component';
 
 const externalLoginUrlProvider = new InjectionToken('externalUrlRedirectResolver');
 
@@ -647,6 +648,16 @@ const routes: Routes = [
         }
       },      
       { 
+        path: 'emissione',  component: EmissioneComponent,  canActivate:[AuthGuard], 
+        data: {
+          title: 'Emissione',
+          urls: [
+            { title: 'Home', url: '/home' },
+            { title: 'Emissione' }
+          ]
+        }
+      },
+      { 
         path: 'emissione/:id',  component: EmissioneComponent,  canActivate:[AuthGuard], 
         data: {
           title: 'Emissione',
@@ -687,6 +698,12 @@ const routes: Routes = [
         }
       },
 
+        // LINK AI DOCUMENTI
+        {
+          path: 'lineeguida/:val',
+          component: LinkEsterniComponent, canActivate: [AuthGuard], pathMatch: 'full',
+        },
+
       { path: 'test',  component: TestTabComponent,  canActivate:[AuthGuard] },     
   ]}, 
   { path: 'error', component: SystemErrorComponent },
@@ -698,8 +715,13 @@ const routes: Routes = [
     {
         provide: externalLoginUrlProvider,
         useValue: (route: ActivatedRouteSnapshot) => {
-            //const externalUrl = route.paramMap.get('externalUrl');
-            window.open(environment.API_URL + 'api/loginSaml', '_self');
+          const externalUrl = route.queryParams['redirect'];
+          console.log(externalUrl);
+          if (externalUrl){
+            window.open(environment.API_URL + 'api/loginSaml?redirect='+externalUrl, '_self');
+          }else{
+            window.open(environment.API_URL + 'api/loginSaml');
+          }
         },
     },
   ],

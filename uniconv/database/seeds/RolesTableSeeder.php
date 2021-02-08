@@ -118,17 +118,21 @@ class RolesTableSeeder extends Seeder
         $role->revokePermissionTo('search all convenzioni');
         $role->revokePermissionTo('search all scadenze');
         $role->revokePermissionTo('ui convenzioni amm');
-
+        $role->revokePermissionTo('all dipartimenti');
+        
         $role = Role::create(['name' => 'admin_amm']);
         $role->givePermissionTo(Permission::all());
         $role->revokePermissionTo('search all convenzioni');
         $role->revokePermissionTo('search all scadenze');
         $role->revokePermissionTo('ui convenzioni dip');
-
+        $role->revokePermissionTo('all dipartimenti');
         
         $role = Role::create(['name' => 'limited']); 
         $role->givePermissionTo(['search orgunit convenzioni', 'search orgunit scadenze']);     
        
+        $role = Role::create(['name' => 'op_uff_bilancio']); 
+        $role->givePermissionTo(['view convenzioni', 'view scadenze', 'view attachments', 'search all convenzioni', 'search all scadenze', 'all dipartimenti']);     
+
         $this->command->info('created roles');
 
     }

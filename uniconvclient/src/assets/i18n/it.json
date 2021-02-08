@@ -17,6 +17,7 @@
     "TG": "Titolo gratuito",
 
     "istituzionale": "Istituzionale",
+    "commerciale": "Commerciale",
     "commercicale": "Commerciale",
 
     "proposta": "Proposta", 
@@ -52,6 +53,28 @@
     "attivo":  "Attiva",
     "inemissione": "In emissione",
     "inpagamento": "In pagamento",
-    "pagato": "Pagata"
+    "pagato": "Pagata",
+
+    "005019" : "DISB",
+    "004424" : "DESP",
+    "004940" : "DISCUI",
+    "004419" : "DiGiur",
+    "004939" : "DISTUM",
+    "004919" : "DiSPeA",
+    "005479" : "DISCUI",
+    "005579" : "DISCUI",
+  
+    "store_proposta" : "Proposta",
+    "store_to_approvato": "Approvato",
+    "store_to_inapprovazione" : "Da approvare",
+    "store_validazione" : "Approvato",
+    "firma_da_controparte1" : "Firmato controparte",      
+    "firma_da_direttore2" : "Firmato direttore",
+    "firma_da_direttore1" : "Firmato direttore",
+    "firma_da_controparte2" : "Firmato controparte",            
+    "repertorio" : "Repertoriato",
+    "cancella_sottoscrizione_uniurb" : "Annulla sottoscrizione",
+    "cancella_sottoscrizione_contr" : "Annulla sottoscrizione"
+
 }
   

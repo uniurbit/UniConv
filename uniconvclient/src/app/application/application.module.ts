@@ -89,6 +89,8 @@ import { RegistrazioneCompletamentoControparteComponent } from './pages/registra
 import { RegistrazioneCompletamentoDirettoreComponent } from './pages/registrazione/registrazione-completamento-direttore/registrazione-completamento-direttore.component';
 import { RegistrazioneBolloRepertoriazioneComponent } from './pages/registrazione/registrazione-bollo-repertoriazione/registrazione-bollo-repertoriazione.component';
 import { RepertorioService } from './repertorio.service';
+import { LinkEsterniComponent } from './link-esterni/link-esterni.component';
+import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 registerLocaleData(localeIt);
 @NgModule({
@@ -101,7 +103,8 @@ registerLocaleData(localeIt);
     NgxDatatableModule,      
     RouterModule,
     LoadingModule,
-    CoreModule,  
+    CoreModule,      
+    PdfViewerModule,
   ], 
   exports: [
     ConvenzioneComponent,
@@ -122,7 +125,8 @@ registerLocaleData(localeIt);
     PersoneinterneTitulus, StruttureInterneTitulus, ClassificazioneComponent, ClassificazioniComponent, MappingUfficiTitulus, MappingUfficioTitulus, StruttureEsterneTitulus,
     DocumentiTitulus, ScadenzaComponent, ScadenzeComponent, BolloRepertoriazioneComponent, RichiestaEmissioneComponent, EmissioneComponent, PagamentoComponent, 
     InvioRichiestaPagamentoComponent, ConvenzionedetailsComponent, ApprovazionedetailsComponent, SottoscrizionedetailsComponent, RepertoriazionedetailsComponent, 
-    ScadenzedetailsComponent, EsecuzionedetailsComponent, RangedetailsComponent, LogAttivitaComponent, MappingRuoli, MappingRuolo, FaseWrapperComponent, ConvazioniActionsComponent, RegistrazioneSottoscrizioneComponent, ScadenzaViewComponent, ScadenzaEmessaComponent, ScadenzaInpagamentoComponent, ScadenzaAzioniComponent, InsConvAmmComponent, RegistrazioneCompletamentoControparteComponent, RegistrazioneCompletamentoDirettoreComponent, RegistrazioneBolloRepertoriazioneComponent
+    ScadenzedetailsComponent, EsecuzionedetailsComponent, RangedetailsComponent, LogAttivitaComponent, MappingRuoli, MappingRuolo, FaseWrapperComponent, ConvazioniActionsComponent, RegistrazioneSottoscrizioneComponent, ScadenzaViewComponent, ScadenzaEmessaComponent, ScadenzaInpagamentoComponent, ScadenzaAzioniComponent, InsConvAmmComponent, RegistrazioneCompletamentoControparteComponent, RegistrazioneCompletamentoDirettoreComponent, RegistrazioneBolloRepertoriazioneComponent,
+    LinkEsterniComponent
 
   ],
   providers: [ 

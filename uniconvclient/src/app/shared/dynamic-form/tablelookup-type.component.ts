@@ -5,6 +5,7 @@ import { TableColumn } from '@swimlane/ngx-datatable';
 import { Router } from '@angular/router';
 import { Page, PagedData } from '../lookup/page';
 import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
+import { NgbStringAdapter } from 'src/app/NgbStringAdapter';
 
 @Component({
   selector: 'app-tablelookup-type',
@@ -59,10 +60,13 @@ import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants';
 `
 })
 
+
 export class TableLookupTypeComponent extends FieldArrayType {  
 
   @ViewChild('table') table: any;
   @ViewChild('expaderdetailcolumn') public expaderdetailcolumn: TemplateRef<any>;     
+
+  adapter = new NgbStringAdapter();   
 
   constructor(private differs: KeyValueDiffers) {    
     super();          
@@ -70,6 +74,11 @@ export class TableLookupTypeComponent extends FieldArrayType {
         
   ngOnInit() {      
     this.setPage({ offset: this.to.page.pageNumber ? this.to.page.pageNumber : 0, limit: this.to.page.size});
+
+    if(this.to.detailRow){
+      //template only getter
+      //this.table.rowDetail.template = this.to.detailRow;
+    }
 
     if (!('selected' in this.to)){
       Object.defineProperty(this.to,'selected',{
@@ -80,7 +89,23 @@ export class TableLookupTypeComponent extends FieldArrayType {
       this.to.selected= [];
     }
 
-    if (typeof this.to.columns == 'undefined'){      
+
+    //costruzione dinamica delle colonne partendo dai campi aggiunta eventuali proprietà 
+    //di colonna all'interno delle template option dei campi
+
+    //la generazione automatica parte dal template del campo ng-formly
+    //dove si possono specificare le proprietà della colonna nel campo column (width, resizable...)
+    //
+    //cellTemplate accetta una stringa che è il nome del template da associare alla colonna
+    //
+    if (typeof this.to.columns == 'undefined'){
+      //configurazione basata sulla dichiarazione delle colonne nel json 
+      // modalità implicità di costruzione delle colonne 
+        // columns: [
+        //   { name: 'Id', prop: 'id', width: 10},
+        //   { name: 'Nome utente', prop: 'name' },
+        //   { name: 'Email', prop: 'email' },
+        // ],          
       this.to.columns =  this.field.fieldArray.fieldGroup.map(el => {      
         
         let c = { 
@@ -102,7 +127,22 @@ export class TableLookupTypeComponent extends FieldArrayType {
         }
         return c;
       });      
-    }  //fine costruzione dinamica    
+    }  //fine costruzione dinamica
+
+    //se c'è la riga di dettaglio aggiungere come prima colonna l'expander
+    if (this.to.detailRow){
+      this.to.columns = [
+        {
+          width: 50, 
+          canAutoResize:false,
+          cellTemplate: this.expaderdetailcolumn,
+          resizable: false,
+        },
+        ...this.to.columns
+      ]
+    }
+
+    
   }
 
   getFields( field: FormlyFieldConfig, column: TableColumn, rowIndex: number ) : any {         
@@ -119,23 +159,37 @@ export class TableLookupTypeComponent extends FieldArrayType {
   }
 
   onSort(event) {
-    const sort = event.sorts[0];
-    this.model.sort((a , b) => {   
-        const valuea = this.getDescendantProp(a,sort.prop);
-        const valueb = this.getDescendantProp(b,sort.prop);
-        if (valuea != null && valueb != null){             
-          if (typeof valuea ===  "number"){
-              return ((valuea>valueb ? 1 : valuea<valueb ? -1 : 0) * (sort.dir === 'desc' ? -1 : 1));  
-          }    
-          return (valuea.localeCompare(valueb) * (sort.dir === 'desc' ? -1 : 1));    
-        }
-    });          
+    if (this.to.onSort){
+      this.to.onSort(event);
+    }else{
+      const sort = event.sorts[0];      
 
-    this.formControl.patchValue(this.model);   
+      this.table.rows.sort((a , b) => {   
+          const valuea = this.getDescendantProp(a,sort.prop);
+          const valueb = this.getDescendantProp(b,sort.prop);
+          if (valuea != null && valueb != null){             
+            if (typeof valuea ===  "number" && typeof valueb === "number"){
+                //return (valuea > valueb) * (sort.dir === 'desc' ? -1 : 1);  
+                return ((valuea>valueb ? 1 : valuea<valueb ? -1 : 0) * (sort.dir === 'desc' ? -1 : 1));  
+            } else if (event.column.type  && event.column.type == "date"){
+              const da = this.adapter.fromModel(valuea);
+              const db = this.adapter.fromModel(valueb);
+              return (<any>new Date(da.year,da.month-1,da.day) - <any>new Date(db.year,db.month-1,db.day)) * (sort.dir === 'desc' ? -1 : 1);
+            } else if (event.column.pipe.constructor.name == 'MyFlattenPipe'){
+              const fa = event.column.pipe.transform(valuea);
+              const fb = event.column.pipe.transform(valueb);
+              return (fa.localeCompare(fb) * (sort.dir === 'desc' ? -1 : 1));  
+            }
+            return (valuea.localeCompare(valueb) * (sort.dir === 'desc' ? -1 : 1));    
+          }
+      });        
+    }
+
+    this.table.offset = this.to.page.pageNumber; 
   }
 
   onSelect({ selected }) {
-
+      //console.log('Select Event', selected, this.selected);
   }
 
   onEvents(event) {
@@ -159,9 +213,11 @@ export class TableLookupTypeComponent extends FieldArrayType {
 
 
   onDetailToggle(event) {
+    //console.log('Detail Toggled', event);
   }
 
   toggleExpandRow(row) {
+    //console.log('Toggled Expand Row!', row);
     this.table.rowDetail.toggleExpandRow(row);
   }
 }

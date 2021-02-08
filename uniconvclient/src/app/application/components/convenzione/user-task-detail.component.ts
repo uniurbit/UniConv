@@ -65,8 +65,8 @@ export class UserTaskDetailComponent implements OnInit {
               placeholder: '',
               options: []
             },
-            lifecycle: {
-              onInit: (formInit, fieldInit) => {
+            hooks: {
+              onInit: (fieldInit) => {
                 fieldInit.templateOptions.options = this.service.getNextPossibleActionsFromTask(this.model.id);
               },
             },

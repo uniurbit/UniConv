@@ -49,6 +49,7 @@ export class EmissioneComponent extends BaseEntityComponent {
 
   taskemission = new Subject<any>();
   attachid = null;
+  update = false;
 
   fields: FormlyFieldConfig[] = [
     {
@@ -91,6 +92,16 @@ export class EmissioneComponent extends BaseEntityComponent {
               if (data.convenzione && data.convenzione.attachments && data.convenzione.attachments.length > 0){
                 this.attachid = data.convenzione.attachments.find(x => x.attachmenttype_codice == 'DOC_BOLLATO_FIRMATO');
               }
+              if(this.update){
+                this.model =  {...this.model, ...data};  
+                this.options.formState.model = this.model; 
+                if (data.attachments){
+                  const attach = data.attachments.find(x => x.attachmenttype_codice == 'FATTURA_ELETTRONICA' || x.attachmenttype_codice == 'NOTA_DEBITO')
+                  if (attach){
+                    this.model.attachment1.doc = { num_prot: attach.num_prot, oggetto: ''};
+                  }
+                }                
+              }
               this.model.attachment1.attachmenttype_codice = data.tipo_emissione;
               return data.dovuto_tranche +' - ' + 'Convenzione n. '+data.convenzione.id+' - '+data.convenzione.descrizione_titolo;
             }
@@ -124,9 +135,11 @@ export class EmissioneComponent extends BaseEntityComponent {
                 valueProp: 'codice',
                 labelProp: 'descrizione',
                 label: 'Tipo documento',
-                disabled: true,
                 required: true,
-              }
+              },
+              expressionProperties: {
+                'templateOptions.disabled': (model: any, formState: any) => { return model.attachmenttype_codice; },
+              },
             },
             {
               key: 'filename',
@@ -269,6 +282,13 @@ export class EmissioneComponent extends BaseEntityComponent {
                 setTimeout(() => {                  
                   this.model = {...this.model, ...result};   
                   this.options.formState.model = this.model; 
+                  
+                  if (result.attachments){
+                    const attach = result.attachments.find(x => x.attachmenttype_codice == 'FATTURA_ELETTRONICA' || x.attachmenttype_codice == 'NOTA_DEBITO')
+                    if (attach){
+                      this.model.attachment1.doc = { num_prot: attach.num_prot, oggetto: ''};
+                    }
+                  }   
 
                   if (this.model.usertasks){
                     const task = (this.model.usertasks as Array<any>).filter(x => x.workflow_place == 'inemissione' && (x.state == 'aperto'))[0];
@@ -281,6 +301,8 @@ export class EmissioneComponent extends BaseEntityComponent {
               this.isLoading=false;
             }
           );
+        }else{
+          this.update=true;
         }        
       });    
   }
@@ -293,14 +315,28 @@ export class EmissioneComponent extends BaseEntityComponent {
       tosubmit.attachment1 = {...this.model.attachment1, ...this.form.value.attachment1 }
       tosubmit.attachment1.doc = {...this.model.attachment1.doc, ...this.form.value.attachment1.doc }
 
-      this.service.emissioneStep(tosubmit,true).subscribe(
-        result => {          
-          this.isLoading = false;          
-          this.router.navigate(['home/dashboard/dashboard1']);                
-        },
-        error => {
-          this.isLoading = false;       
+      if (this.update && (['emesso','inpagamento'].includes(this.model.state))){
+        this.service.modificaEmissioneStep(tosubmit,true).subscribe(
+          result => {          
+            this.isLoading = false;          
+            this.router.navigate(['home/dashboard/dashboard1']);                
+          },
+          error => {
+            this.isLoading = false;       
         });
+      }else{
+        this.service.emissioneStep(tosubmit,true).subscribe(
+          result => {          
+            this.isLoading = false;          
+            this.router.navigate(['home/dashboard/dashboard1']);                
+          },
+          error => {
+            this.isLoading = false;       
+        });       
+      }
+    
+
+      
     }
   }
 

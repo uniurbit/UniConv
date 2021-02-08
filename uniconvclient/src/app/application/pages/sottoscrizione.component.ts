@@ -490,7 +490,7 @@ export class SottoscrizioneComponent extends BaseEntityComponent {
           type: 'input',          
           templateOptions: {
             label: 'Email Azienda o Ente',
-            disabled: true,
+            readonly: true,
             description: 'Contatti delle aziende o enti associate alla convenzione',  
             //required: true,                               
           },          

@@ -3,7 +3,7 @@
     <h4 *ngIf="title">{{title}}</h4>
 
     <div class="btn-toolbar mb-4" role="toolbar">
-        <div class="btn-group">
+        <div class="btn-group" *ngxPermissionsOnly="['ADMIN_AMM','ADMIN','SUPER-ADMIN']">
             <button *ngIf="activeNew" class="btn btn-outline-primary rounded-lg" (click)="onNew()" >              
                 <span class="oi oi-document"></span>
                 <span class="ml-2">Nuovo</span>

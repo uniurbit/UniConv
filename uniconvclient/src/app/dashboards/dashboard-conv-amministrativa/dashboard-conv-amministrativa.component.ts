@@ -21,19 +21,21 @@ export class DashboardConvAmministrativaComponent implements OnInit {
   public baseColumns = [];
   public columnsInScadenza = [];
 
-  flatten = new MyFlattenPipe();
-  
-  constructor(public service: DashboardService, private datePipe: DatePipe, private translateService: TranslateService) { 
+  flatten = new MyFlattenPipe('');
+   
+  translate: MyTranslatePipe = null;
 
+  constructor(public service: DashboardService, private datePipe: DatePipe, private translateService: TranslateService) { 
+    this.translate = new MyTranslatePipe(translateService);
     this.baseColumns = [ 
       { name: '#', prop: 'id', width: 60, maxWidth: 70},
        {name: "Descrizione Titolo", prop: "descrizione_titolo", width: 300},
        {name: "Azienda o ente", prop:'aziende', pipe: this.flatten, minWidth: 300 },
        {name: "Responsabile scientifico", prop: "resp_scientifico"},
-       {name: "Tipo convenzione", prop: "convenzione_type", pipe: new MyTranslatePipe(translateService)},
+       {name: "Tipo convenzione", prop: "convenzione_type", pipe: this.translate},
        {name: "Ambito", prop: "ambito", pipe: new TitleCasePipe()},    
-       {name: "Data inizio", prop: "data_inizio_conv"},
-       {name: "Data fine", prop: "data_fine_conv"},
+       {name: "Data inizio", prop: "data_inizio_conv", type: 'date' },
+       {name: "Data fine", prop: "data_fine_conv", type: 'date'},
        {name: "Stato", prop: "current_place"}, 
        
      ]

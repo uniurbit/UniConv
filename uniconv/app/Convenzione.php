@@ -170,6 +170,9 @@ class Convenzione extends \App\Models\BaseEntity
         return $this->belongsToMany('App\AziendaLoc','convenzione_azienda','convenzione_id','azienda_id');             
     }
 
+    public function listAziendaDenominazione(){
+        return $this->aziende->implode('denominazione', ', ');        
+    }
 
     /**
      *  Ritorna l'elenco dei task eseguiti
@@ -305,4 +308,13 @@ class Convenzione extends \App\Models\BaseEntity
             return null;
         }
     }
+
+    public function bolli_atti_prov(){    
+        return $this->bolli()->where('tipobolli_codice','BOLLO_ATTI')->first();
+    }
+
+    public function bolli_allegato(){    
+        return $this->bolli()->where('tipobolli_codice','BOLLO_TEC_ALLEGATO')->first();
+    }
+    
 }

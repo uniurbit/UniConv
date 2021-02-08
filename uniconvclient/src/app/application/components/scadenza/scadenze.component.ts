@@ -10,6 +10,7 @@ import { MycurrencyPipe } from 'src/app/shared/pipe/custom.currencypipe';
 import { TranslateService } from '@ngx-translate/core';
 import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
 import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
+import { ApplicationService } from '../../application.service';
 
 @Component({
   selector: 'app-scadenze', 
@@ -38,17 +39,14 @@ export class ScadenzeComponent extends BaseResearchComponent {
             type: 'date',
             templateOptions: {
               label: 'Tranche prevista',
-              required: true,
-              column: { cellTemplate: 'valuecolumn'}
+              required: true,          
             }
           },
           {
             key: 'dovuto_tranche',
-            type: 'maskcurrency',
+            type: 'number',
             templateOptions: {
               label: 'Importo',
-              required: true,
-              column: { cellTemplate: 'valuecolumn', pipe: this.currency}
             }
           },
           {
@@ -62,8 +60,7 @@ export class ScadenzeComponent extends BaseResearchComponent {
               entityLabel: 'Convenzione',
               codeProp: 'id',
               descriptionProp: 'descrizione_titolo',
-              isLoading: false, 
-              column: { cellTemplate: 'valuecolumn', width: 100}
+              isLoading: false,               
             }   
           },
           {
@@ -71,8 +68,25 @@ export class ScadenzeComponent extends BaseResearchComponent {
             type: 'string',
             templateOptions: {
               label: 'Titolo convenzione',
-              required: true,
-              column: { cellTemplate: 'valuecolumn', width: 300}
+              required: true,              
+            }
+          },
+          {
+            key: 'convenzione.dipartimemto_cd_dip',
+            type: 'select',
+            templateOptions: {
+              options: this.appService.getDipartimenti(),
+              valueProp: 'cd_dip',
+              labelProp: 'nome_breve',
+              label: 'Dipartimento'
+            },
+          },
+          {
+            key: 'aziende.denominazione',
+            type: 'string',
+            templateOptions: {
+              label: 'Denominazione azienda',
+              required: true,              
             }
           },
           {
@@ -86,22 +100,22 @@ export class ScadenzeComponent extends BaseResearchComponent {
                 { label: 'In pagamento ', value: 'inpagamento' },
                 { label: 'Pagata ', value: 'pagato' },
               ],
-              required: true,
-              column: { cellTemplate: 'valuecolumn'}
+              required: true,           
             }
           }
 
         ];
 
   resultMetadata: FormlyFieldConfig[];
-  flatten = new MyFlattenPipe();
+  flatten = new MyFlattenPipe('');
 
-  constructor(protected service: ScadenzaService, router: Router, route: ActivatedRoute, translateService: TranslateService)  {    
+  constructor(protected service: ScadenzaService, protected appService: ApplicationService, router: Router, route: ActivatedRoute, translateService: TranslateService)  {    
     super(router,route);    
     this.routeAbsolutePath = 'home/scadenze'     
     this.translate = new MyTranslatePipe(translateService);
     this.prefix = 'scadenze';
-
+    this.enabledExport = true;
+    
     this.initRule();
 
     if (this.rules == null){
@@ -137,10 +151,11 @@ export class ScadenzeComponent extends BaseResearchComponent {
           onSetPage: (pageInfo) => this.onSetPageWithInit(pageInfo),    
           columns: [
             { name: '#', prop: 'id', width: 50, maxWidth: 80},
-            { name: 'Tranche prevista', prop: 'data_tranche', with: 100, maxWidth: 150},
+            { name: 'Tranche prevista', prop: 'data_tranche', with: 100, maxWidth: 150, type: 'date'},
             { name: 'Importo', prop: 'dovuto_tranche', pipe: this.currency, width: 100, maxWidth: 100 },
             { name: 'Titolo convenzione', prop: 'convenzione.descrizione_titolo', with: 400},
-            { name: 'Azienda o ente', prop:'convenzione.aziende', pipe: this.flatten, minWidth: 200 },
+            { name: 'Azienda o ente', prop:'aziende', pipe: this.flatten, minWidth: 200 },
+            { name: 'Dipartimento', prop: 'convenzione.dipartimemto_cd_dip', pipe: this.translate, width: 135, maxWidth: 135 },
             { name: 'Stato', prop: 'state', pipe: this.translate, with: 100, maxWidth: 150 },
           ]  
         },

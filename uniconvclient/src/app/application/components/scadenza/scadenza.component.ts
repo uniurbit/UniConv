@@ -10,6 +10,8 @@ import { Location } from '@angular/common';
 import { encode, decode } from 'base64-arraybuffer';
 import { of, Observable, Subject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
+import { NgxPermissionsService } from 'ngx-permissions';
+import { AuthService } from 'src/app/core';
 @Component({
   selector: 'app-scadenza',
   templateUrl: '../../../shared/base-component/base-entity.component.html',
@@ -34,6 +36,8 @@ export class ScadenzaComponent extends BaseEntityComponent {
             onClick: ($event) => this.open()
           },
           hideExpression: (model: any) => {
+            if (!this.canActivate())
+              return true;
             return !model.id ||
               (model.id && model.state != 'attivo');
           },
@@ -47,6 +51,8 @@ export class ScadenzaComponent extends BaseEntityComponent {
             onClick: ($event) => this.openInvioRichiestaPagamento()
           },
           hideExpression: (model: any) => {
+            if (!this.canActivate())
+              return true;
             return !model.id ||
               (model.id && model.state != 'attivo');
           },
@@ -59,6 +65,8 @@ export class ScadenzaComponent extends BaseEntityComponent {
             onClick: ($event) => this.openTaskRichiestaEmissione()
           },
           hideExpression: (model: any) => {
+            if (!this.canActivate())
+              return true;
             return !model.id ||
               (model.id && model.state != 'inemissione');
           },
@@ -71,11 +79,13 @@ export class ScadenzaComponent extends BaseEntityComponent {
             onClick: ($event) => this.openRegistrazioneIncasso()
           },
           hideExpression: (model: any) => {
+            if (!this.canActivate())
+              return true;
             return !model.id ||
               (model.id && model.state != 'inpagamento');
           },
         },
-      ]
+      ],         
     },
     {
       wrappers: ['riquadro'],
@@ -182,12 +192,10 @@ export class ScadenzaComponent extends BaseEntityComponent {
               defaultValue: 'FATTURA_ELETTRONICA',
               templateOptions: {
                 options: [
-                  { codice: 'NOTA_DEBITO', descrizione: 'Emissione nota di debito' },
-                  { codice: 'FATTURA_ELETTRONICA', descrizione: 'Fattura elettronica' },
-                  { codice: 'RICHIESTA_PAGAMENTO', descrizione: 'Richiesta pagamento' },
-                ],
-                valueProp: 'codice',
-                labelProp: 'descrizione',
+                  { value: 'NOTA_DEBITO', label: 'Emissione nota di debito' },
+                  { value: 'FATTURA_ELETTRONICA', label: 'Fattura elettronica' },     
+                  { value: 'RICHIESTA_PAGAMENTO', label: 'Richiesta pagamento' },                  
+                ], 
                 label: 'Tipo documento da emettere',
               }
             },
@@ -286,8 +294,7 @@ export class ScadenzaComponent extends BaseEntityComponent {
               { label: 'Nessun prelievo', value: 'PRE_NO' },
               { label: 'Prelievo applicabile', value: 'PRE_SI' },
             ],
-            label: 'Prelievo',
-            required: true,
+            label: 'Prelievo',            
           },
         },
         {
@@ -430,7 +437,12 @@ export class ScadenzaComponent extends BaseEntityComponent {
 
   ];
 
-  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected route: ActivatedRoute, protected router: Router, protected location: Location) {
+
+  canActivate(){
+    return this.authService._roles.some((r) => ['ADMIN_AMM','ADMIN','SUPER-ADMIN'].includes(r));
+  }
+
+  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected authService: AuthService, protected route: ActivatedRoute, protected router: Router, protected location: Location) {
     super(route, router, location);
     this.activeNew = true;
     this.isRemovable = true;

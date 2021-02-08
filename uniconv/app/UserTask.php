@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Brexis\LaravelWorkflow\Traits\WorkflowTrait;
 use Workflow;
 use Symfony\Component\Workflow\Transition;
+use App\ConvenzioneWithAziende;
+use App\ScadenzaWithConvenzione;
+use Illuminate\Database\Eloquent\Relations\Relation;
 class UserTask extends Model
 {
 
@@ -30,17 +33,32 @@ class UserTask extends Model
     protected $fillable = ['workflow_place', 'workflow_transition', 'subject', 'description', 'state','unitaorganizzativa_uo', 
         'respons_v_ie_ru_personale_id_ab', 'owner_user_id', 'closing_user_id', 'data'];
   
-
     protected $casts = [
         'data' => 'array',      
-        'created_at' => 'datetime:d-m-Y H:m:s',
+        'created_at' => 'datetime:d-m-Y H:m',
+        'updated_at' => 'datetime:d-m-Y H:m',
     ];    
 
     protected $appends = ['readable_created_at'];
 
     public function model()
     {
+        Relation::morphMap([
+            'App\Convenzione' => 'App\Convenzione',
+            'App\Scadenza' => 'App\Scadenza',
+        ]);
+
         return $this->morphTo();
+    }
+
+    public function modelwith()
+    {
+        Relation::morphMap([
+            'App\Convenzione' => 'App\ConvenzioneWithAziende',
+            'App\Scadenza' => 'App\ScadenzaWithConvenzione',
+        ]);
+
+        return $this->morphTo(null,'model_type','model_id');
     }
 
     public function checkAndChangeState(){

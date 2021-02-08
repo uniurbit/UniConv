@@ -131,7 +131,7 @@ export class ConvenzioniComponent extends BaseResearchComponent {
       templateOptions: {
         options: [
           { label: 'Istituzionale', value: 'istituzionale' },
-          { label: 'Commerciale', value: 'commercicale' },
+          { label: 'Commerciale', value: 'commerciale' },
         ],
         label: 'Ambito',
         required: true,
@@ -175,7 +175,20 @@ export class ConvenzioniComponent extends BaseResearchComponent {
         label: 'Data fine',
         required: true,
       },       
-    },     
+    },  
+    {
+      key: 'bollo_virtuale',
+      type: 'select',
+      className: "col-md-4",
+      templateOptions: {
+        options: [
+          { label: 'Sì', value: true },
+          { label: 'No', value: false },
+        ],
+        label: 'Bollo virtuale',
+        required: true,
+      },
+    },    
     {
       key: 'current_place',
       type: 'select',
@@ -197,7 +210,7 @@ export class ConvenzioniComponent extends BaseResearchComponent {
   ];
 
   currency = new MycurrencyPipe();
-  flatten = new MyFlattenPipe();
+  flatten = new MyFlattenPipe('');
   translate: MyTranslatePipe;
   
   resultMetadata: FormlyFieldConfig[];
@@ -264,8 +277,8 @@ export class ConvenzioniComponent extends BaseResearchComponent {
                 name: 'Corrispettivo',  prop: 'corrispettivo', 
                 cellClass: "text-right", width:'200', pipe: this.currency              
               },
-              { name: 'Data inizio', prop: 'data_inizio_conv' },      
-              { name: 'Data fine', prop: 'data_fine_conv' },                    
+              { name: 'Data inizio', prop: 'data_inizio_conv', type: 'date' },      
+              { name: 'Data fine', prop: 'data_fine_conv', type: 'date' },                    
               { name: 'Stato', prop: 'current_place',  pipe: this.translate },                    
             ]                                
           },

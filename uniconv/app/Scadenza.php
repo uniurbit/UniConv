@@ -132,7 +132,7 @@ class Scadenza extends Model
         if($input != null && $input != '00-00-0000') {
             return Carbon::createFromFormat('Y-m-d', $input)->format(config('unidem.date_format'));
         }else{
-            return '';
+            return null;
         }
     }
 
@@ -162,7 +162,7 @@ class Scadenza extends Model
         if($input != null && $input != '00-00-0000') {
             return Carbon::createFromFormat('Y-m-d', $input)->format(config('unidem.date_format'));
         }else{
-            return '';
+            return null;
         }
     }
 
@@ -194,4 +194,10 @@ class Scadenza extends Model
         return $this->morphMany(UserTask::class, 'model');
     }
 
+    public function aziende()
+    {
+        $relation = $this->belongsToMany('App\AziendaLoc','convenzione_azienda','convenzione_id','azienda_id','convenzione_id','id');        
+        return $relation; 
+    }
+   
 }

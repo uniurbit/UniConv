@@ -3,6 +3,8 @@
 namespace App\Models\Titulus;
 
 use Spatie\ArrayToXml\ArrayToXml;
+use Auth;
+use App;
 
 
 // /doc/oggetto	oggetto
@@ -76,25 +78,25 @@ class Documento extends ModelBase
 
 
     public function addAzienda($azienda){
-    //     <rif_esterni>
-    //     <rif_esterno data_prot="20040101" n_prot="1243">
-    //       <nome cod="SE000095" xml:space="preserve">Ditta srl</nome>
-    //       <referente cod="PE000928" nominativo="Mario Rossi"/>
-    //       <indirizzo email="mrossi@ditta.it"
-    //                  fax="051 451242"
-    //                  tel="051 452844"
-    //                  xml:space="preserve">
-    //          Via Manzoni 2 - 40033 Casalecchio di Reno - BO - Italia
-    //       </indirizzo>
-    //     </rif_esterno>
-    //   </rif_esterni>
+        //     <rif_esterni>
+        //     <rif_esterno data_prot="20040101" n_prot="1243">
+        //       <nome cod="SE000095" xml:space="preserve">Ditta srl</nome>
+        //       <referente cod="PE000928" nominativo="Mario Rossi"/>
+        //       <indirizzo email="mrossi@ditta.it"
+        //                  fax="051 451242"
+        //                  tel="051 452844"
+        //                  xml:space="preserve">
+        //          Via Manzoni 2 - 40033 Casalecchio di Reno - BO - Italia
+        //       </indirizzo>
+        //     </rif_esterno>
+        //   </rif_esterni>
 
-    //azienda
-    // 'denominazione' => 'azienda di test',
-    // 'contatto_email' => 'email@test.it',
-    // 'pec_email' => 'email@pec.it',
-    // 'cod_fisc' => '1234567891011',
-    // 'indirizzo1' => 'test', 
+        //azienda
+        // 'denominazione' => 'azienda di test',
+        // 'contatto_email' => 'email@test.it',
+        // 'pec_email' => 'email@pec.it',
+        // 'cod_fisc' => '1234567891011',
+        // 'indirizzo1' => 'test', 
 
         //il rif_esterno è l'azienda a cui si invia è obbligatorio! 
         $rif_esterno = new Rif('rif_esterno');
@@ -105,8 +107,14 @@ class Documento extends ModelBase
     
         //if ($azienda->indirizzo1){
         $indirizzo = new Element('indirizzo');
-        $indirizzo->rootElementAttributes->email = $azienda->contatto_email;
-        $indirizzo->rootElementAttributes->email_certificata = $azienda->pec_email;
+        if (App::environment('local') || App::environment('preprod')) {
+            //per debug viene inviata la PEC a chi esegue l'operazione di sottoscrizione
+            $indirizzo->rootElementAttributes->email = Auth::user()->email;
+            $indirizzo->rootElementAttributes->email_certificata = Auth::user()->email;
+        } else {
+            $indirizzo->rootElementAttributes->email = $azienda->contatto_email;
+            $indirizzo->rootElementAttributes->email_certificata = $azienda->pec_email;
+        }
         $indirizzo->_value = $azienda->indirizzoToString();
         $rif_esterno->indirizzo = $indirizzo;        
         //}
@@ -116,6 +124,7 @@ class Documento extends ModelBase
         }else{
             $this->attributes['rif_esterni'] = array($rif_esterno);
         }
+    
     }
 
     public function addClassifCod($titolario){

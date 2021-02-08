@@ -104,6 +104,14 @@ export class BaseService extends CoreSevice implements ServiceQuery, ServiceEnti
       );
   }
 
+  exportxls(model): Observable<any> {
+    return this.http
+      .post(this._baseURL + `/${this.basePath}/exportxls`, model, { responseType: 'blob'}).pipe(
+        tap(sub => this.messageService.info('Export effettuato con successo')),
+        catchError(this.handleError('export'))
+      );
+  }
+
   store(model: any, retrow: boolean = false): Observable<any>{
     //crea il modello
     const url = `${this._baseURL}/${this.basePath}`;

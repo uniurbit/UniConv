@@ -15,6 +15,10 @@ class LogTransitions extends Model
 
     protected $fillable = ['transition_leave','user_id'];
 
+    protected $casts = [
+        'updated_at' => 'datetime:d-m-Y H:m',
+    ];  
+    
     public function model()
     {
         return $this->morphTo();

@@ -138,6 +138,14 @@ export class AziendaService implements ServiceQuery {
       );
   }
 
+  exportxls(model): Observable<any> {
+    return this.http
+      .post(this._baseURL + `/exportxls`, model, { responseType: 'blob'}).pipe(
+        tap(sub => this.messageService.info('Export effettuato con successo')),
+        catchError(this.handleError('export'))
+      );
+  }
+
   getAzienda(id: number): Observable<any> {
     return this.http
       .get(this._baseURL+'/aziende/'+id.toString(),httpOptions).pipe(
