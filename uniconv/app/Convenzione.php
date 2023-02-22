@@ -71,6 +71,7 @@ class Convenzione extends \App\Models\BaseEntity
         'num_rep',
         'data_inizio_conv',
         'data_fine_conv',
+        'data_stipula',
         'bollo_virtuale',
         'data_sottoscrizione',
         'convenzione_from',
@@ -161,13 +162,25 @@ class Convenzione extends \App\Models\BaseEntity
         return $this->hasMany('App\Scadenza','convenzione_id','id');
     }
 
+    public function scadenzeusertasks(){
+        
+            return $this->hasManyThrough(
+                'App\UserTask',
+                'App\Scadenza',
+                'convenzione_id', // Foreign key on scadenza table...
+                'model_id', // Foreign key on UserTask table...
+                'id', // Local key on convenzione table...
+                'id' // Local key on users table...
+            )->where('model_type','App\Scadenza');        
+    }
+
     public function bolli(){
         return $this->hasMany('App\Bollo','convenzioni_id','id');
     }
 
     public function aziende()
     {
-        return $this->belongsToMany('App\AziendaLoc','convenzione_azienda','convenzione_id','azienda_id');             
+        return $this->belongsToMany('App\AziendaLoc','convenzione_azienda','convenzione_id','azienda_id')->withTimestamps()->withPivot('ordine')->orderBy('convenzione_azienda.ordine');            
     }
 
     public function listAziendaDenominazione(){
@@ -309,12 +322,64 @@ class Convenzione extends \App\Models\BaseEntity
         }
     }
 
+
+    /**
+     * Set attribute to date format
+     * @param $input
+     */
+    public function setDataStipulaAttribute($input)
+    {
+        if($input != '') {
+            $this->attributes['data_stipula'] = Carbon::createFromFormat(config('unidem.date_format'), $input)->format('Y-m-d');
+        }else{
+            $this->attributes['data_stipula'] = null;
+        }
+    }
+
+    /**
+     * Get attribute from date format
+     * @param $input
+     *
+     * @return string
+     */
+    public function getDataStipulaAttribute($input)
+    {
+        if($input != null && $input != '00-00-0000') {
+            return Carbon::createFromFormat('Y-m-d', $input)->format(config('unidem.date_format'));
+        }else{
+            return null;
+        }
+    }
+
+
     public function bolli_atti_prov(){    
         return $this->bolli()->where('tipobolli_codice','BOLLO_ATTI')->first();
     }
 
     public function bolli_allegato(){    
-        return $this->bolli()->where('tipobolli_codice','BOLLO_TEC_ALLEGATO')->first();
+        return $this->bolli()->where('tipobolli_codice','BOLLO_ALLEGATI')->first();
+    }
+
+    // { value: 'DCD', label: 'Delibera Consiglio di Dipartimento' },
+    // { value: 'DDD', label: 'Decreto del direttore di dipartimento' },
+    public function tipo_documento_approvazione(){
+        $attach = $this->attachments()->whereIn('attachmenttype_codice',['DCD','DDD'])->first();
+        if ($attach){
+            return __('global.'.$attach->attachmenttype_codice);
+        }
     }
     
+    public function data_documento_approvazione(){
+        $attach = $this->attachments()->whereIn('attachmenttype_codice',['DCD','DDD'])->first();
+        if ($attach){
+            return $attach->emission_date;
+        }
+    }
+
+    public function numero_documento_approvazione(){
+        $attach = $this->attachments()->whereIn('attachmenttype_codice',['DCD','DDD'])->first();
+        if ($attach){
+            return $attach->docnumber;
+        }
+    }
 }

@@ -24,6 +24,8 @@ class Documento extends Model {
     ];
     
     protected $hidden = ['physdoc'];
+    
+    //protected $appends = ['numero'];
 
     protected $queryparam = [
         'doc_bozza',	
@@ -55,7 +57,7 @@ class Documento extends Model {
     public function setRepertorioAttribute($value){
         if ($value){
             $this->attributes['repertorio'] = $value;
-            if (array_key_exists('numero', $this->attributes)) {
+            if (array_key_exists('numero', $value)) {
                 $this->attributes['numero'] = $value['numero'];
             } 
         }                

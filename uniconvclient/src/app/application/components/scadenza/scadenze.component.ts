@@ -141,7 +141,7 @@ export class ScadenzeComponent extends BaseResearchComponent {
         type: 'datatablelookup',
         wrappers: ['accordion'],      
         templateOptions: {
-          label: 'Scadenziario',   
+          label: 'Scadenze',   
           columnMode: 'force',
           scrollbarH: false,        
           page: new Page(25),
@@ -150,6 +150,7 @@ export class ScadenzeComponent extends BaseResearchComponent {
           onDblclickRow: (event) => this.onDblclickRow(event),
           onSetPage: (pageInfo) => this.onSetPageWithInit(pageInfo),    
           columns: [
+            { name: '', prop: 'id',  with: 60, maxWidth: 60, cellTemplate: this.apri },
             { name: '#', prop: 'id', width: 50, maxWidth: 80},
             { name: 'Tranche prevista', prop: 'data_tranche', with: 100, maxWidth: 150, type: 'date'},
             { name: 'Importo', prop: 'dovuto_tranche', pipe: this.currency, width: 100, maxWidth: 100 },

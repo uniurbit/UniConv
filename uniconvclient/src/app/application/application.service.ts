@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { map, catchError, tap, startWith, takeUntil, publishReplay, refCount } from 'rxjs/operators';
+import { map, catchError, tap, startWith, takeUntil, publishReplay, refCount, delay, distinctUntilChanged, filter } from 'rxjs/operators';
 import { MessageService, ServiceQuery, ServiceEntity } from '../shared';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { Field, FormlyFieldConfig } from '@ngx-formly/core';
 import { AppConstants } from '../app-constants';
 import { Convenzione, FileAttachment, convenzioneFrom } from './convenzione';
 import { saveAs } from 'file-saver';
@@ -12,6 +12,8 @@ import { ConfirmationDialogService } from '../shared/confirmation-dialog/confirm
 import { truncate } from 'fs';
 import { cacheBusterNotifier } from '../shared/base-service/base.service'
 import { AuthService } from '../core';
+import { BolloRepertoriazioneComponent } from './pages/bollorepertoriazione.component';
+import { GlobalConstants } from './global-constants';
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -29,7 +31,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     this._baseURL = AppConstants.baseApiURL;
   }
 
-  getInformazioniDescrittiveFields(comp: Convenzione): any[] {
+  getInformazioniDescrittiveFields(comp: Convenzione, aziende_min = 1): any[] {
     return [
       {
         wrappers: ['riquadro'],
@@ -60,7 +62,52 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
               isLoading: false,
             },
           },
+          {            
+            fieldGroupClassName: 'row',
+            fieldGroup: [
+                {
+                  key: 'unitaorganizzativa_uo',
+                  type: 'select',
+                  className: "col-md-6",
+                  templateOptions: {                    
+                    label: 'Unità organizzativa',
+                    required: true,                 
+                  },                
+                  hideExpression: (model, formState) => {
+                    if (formState.model) {
+                      return formState.model.convenzione_from && formState.model.convenzione_from == convenzioneFrom.dip;
+                    } else if (model) {
+                      return model.convenzione_from && model.convenzione_from == convenzioneFrom.dip
+                    } else {
+                      return false;
+                    }
+                  },
+                  hooks: {
+                    onInit: (field: FormlyFieldConfig) => {
+                      field.form.get('user').valueChanges.pipe(                                                              
+                        startWith(field.model.user),                        
+                        tap<any>(user => {
+                          //console.log('onInit user', user);
+                          //se è nuovo posso impostare l'uo di default
+                          //field.formControl.setValue('');
+                          if (user && user.id) {
+                            field.templateOptions.options = this.getPersonaleafferenzeorganizzative(user.id).pipe(              
+                              tap(items => {
+                                if (items.length == 1){
+                                  field.formControl.setValue(items[0].value); 
+                                }
+                              }),                                                  
+                            );
+                          }
+                        })).subscribe();
+                    }                  
+                  }
+                },
+
+              ]
+          }          
         ]
+        
       },
       //intestazione
       {
@@ -91,7 +138,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                 type: 'selectinfra',
                 className: "col-md-6",
                 templateOptions: {
-                  options:[],
+                  options: [],
                   valueProp: 'cd_dip',
                   labelProp: 'nome_breve',
                   label: 'Dipartimento',
@@ -101,17 +148,17 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                   },
                   populateAsync: () => {
                     return this.getDipartimenti();
-                  },                        
+                  },
                 },
                 hideExpression: (model, formState) => {
-                  if (formState.model){
-                    return formState.model.convenzione_from  && formState.model.convenzione_from == convenzioneFrom.amm
-                  }else if (model){
-                    return model.convenzione_from  && model.convenzione_from == convenzioneFrom.amm
-                  }else{
+                  if (formState.model) {
+                    return formState.model.convenzione_from && formState.model.convenzione_from == convenzioneFrom.amm
+                  } else if (model) {
+                    return model.convenzione_from && model.convenzione_from == convenzioneFrom.amm
+                  } else {
                     return false;
                   }
-                }             
+                }
               },
               {
                 key: 'resp_scientifico',
@@ -122,10 +169,15 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                   required: true,
                   maxLength: 40,
                 },
+                expressionProperties: {          
+                  'templateOptions.required': (model: any, formState: any) => {
+                    return model.convenzione_from !== convenzioneFrom.amm;
+                  }                  
+                },
               },
             ]
-          }, 
-      
+          },
+
           {
             fieldGroupClassName: 'row',
             fieldGroup: [
@@ -161,13 +213,19 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
               {
                 key: 'convenzione_type',
                 type: 'select',
-                className: "col-md-4",  
+                className: "col-md-4",
                 defaultValue: 'TO',
                 templateOptions: {
                   options: [
                     { label: 'Titolo oneroso', value: 'TO' },
                     { label: 'Titolo gratuito', value: 'TG' },
                   ],
+                  change: (field: FormlyFieldConfig) => {
+                    if (field.formControl.value == 'TG') {
+                      field.form.get('tipopagamenti_codice').setValue(null);                      
+                      field.form.get('corrispettivo').setValue(null);                  
+                    } 
+                  },                  
                   label: 'Tipo convenzione',
                   required: true,
                 },
@@ -180,7 +238,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                   options: this.getPagamenti(),
                   valueProp: 'codice',
                   labelProp: 'descrizione',
-                  label: 'Modalità di pagamento',
+                  label: 'Modalità di pagamento',                  
                   required: true,
                   inizialization: () => {
                     return comp.tipopagamento
@@ -191,19 +249,21 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                 },
                 expressionProperties: {
                   'templateOptions.disabled': 'model.convenzione_type == "TG"',
+                  'templateOptions.required': 'model.convenzione_type !== "TG"'
                 },
               },
               {
                 key: 'corrispettivo',
-                type: 'maskcurrency',                    
+                type: 'maskcurrency',
                 className: "col-md-4",
-                templateOptions: {              
+                templateOptions: {
                   label: 'Corrispettivo IVA esclusa se applicabile',
                   required: true,
-                  min: 0,                            
+                  min: 0,
                 },
                 expressionProperties: {
                   'templateOptions.disabled': 'model.convenzione_type == "TG"',
+                  'templateOptions.required': 'model.convenzione_type !== "TG"'
                 },
               },
             ]
@@ -221,14 +281,26 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                   options: [
                     { label: 'Non rinnovabile', value: 'non_rinnovabile' },
                     { label: 'Rinnovo esplicito', value: 'esplicito' },
-                    { label: 'Rinnovo tacito', value: 'tacito' },            
+                    { label: 'Rinnovo tacito', value: 'tacito' },
                   ],
                   label: 'Tipo rinnovo',
                   required: true,
                 },
               },
+              {
+                key: 'data_stipula',
+                type: 'datepicker',
+                className: "col-md-6",
+                templateOptions: {
+                  label: 'Data di stipula convenzione',
+                },
+                hideExpression: (model: any, formState: any) => {
+                  return !model.id;
+                }
+              },
             ]
           },
+          //data inizio e fine convenzione
           {
             fieldGroupClassName: 'row',
             fieldGroup: [
@@ -236,227 +308,254 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
                 key: 'data_inizio_conv',
                 type: 'datepicker',
                 className: "col-md-6",
-                templateOptions: {                
+                templateOptions: {
                   label: 'Data inizio convenzione',
                 },
                 hideExpression: (model: any, formState: any) => {
                   return !model.id;
-                }   
+                }
               },
               {
                 key: 'data_fine_conv',
                 type: 'datepicker',
-                className: "col-md-6",        
-                templateOptions: {        
+                className: "col-md-6",
+                templateOptions: {
                   label: 'Data fine convenzione',
-                },   
+                },
                 hideExpression: (model: any, formState: any) => {
                   return !model.id;
-                }      
-              }            
-            ]       
+                }
+              }
+            ]
           },
-          {                
+        ]
+      },
+      //bolli 
+      {
+        wrappers: ['riquadro'],
+        templateOptions: {
+          title: 'Bollo virtuale'
+        },
+        fieldGroup: [
+          //bollo contratto atti e provv.
+          {
+            key: 'bollo_atti',
             fieldGroupClassName: 'row',
             fieldGroup: [
-            {
-              key: 'bolli',
-              type: 'repeat',
-              className: 'col-md-8', 
-              templateOptions: {                    
-                min: 1,         
-                label: 'Bolli'          
-              },  
-              fieldArray: {
-                fieldGroupClassName: 'row',          
-                fieldGroup: [{
-                  key: 'num_bolli',
-                  type: 'number',
-                  className: 'col-md-4',        
-                  templateOptions: {
-                    required: true,
-                    label: 'Numero bolli',
-                    description: 'Calcolare un bollo ogni 100 righe di convenzione',       
-                  },           
-                  expressionProperties: {
-                    'templateOptions.description': (model: any, formState: any) => 
-                    { 
-                      return (model.tipobolli_codice == 'BOLLO_ATTI') ?  'Calcolare un bollo ogni 100 righe di convenzione' : '';
-                    },
-                  }
-                }, 
-                {
-                  key: 'tipobolli_codice',
-                  type: 'select',
-                  className: "col-md-6",
-                  defaultValue: 'BOLLO_ATTI',            
-                  templateOptions: {              
-                    options: [
-                      { label: 'Atti e provvedimenti', value: 'BOLLO_ATTI' },
-                      { label: 'Allegati tecnici', value: 'BOLLO_TEC_ALLEGATO' },
-                    ],
-                    label: 'Applicazione',
-                    required: true,
-                  },
-                },
-              
-              ],          
-              },
-              hideExpression: (model, formstate) => {
-                return (!comp.id) || (comp.id && comp.bollo_virtuale == false);
-              },
-              validators: {
-                unique: {
-                  expression: (c) => {           
-                    if (c.value)  {                              
-                      var valueArr = c.value.map(function(item){ return item.tipobolli_codice }).filter(x => x != null );
-                      var isDuplicate = valueArr.some(function(item, idx){ 
-                          return valueArr.indexOf(item) != idx 
-                      });              
-                      return !isDuplicate;
-                    }
-                    return true;
-                  },
-                  message: (error, field: FormlyFieldConfig) => `Tipo bollo ripetuto`,
-                },
-                atleasttype: {
-                  expression: (c) => { 
-                    const f = c.value.find(x => x.tipobolli_codice == 'BOLLO_ATTI');  
-                    if (f){
-                      return true;
-                    }
-                    return false;
-                  },
-                  message: (error, field: FormlyFieldConfig) => `Richiesto il bollo 'Atti e provvedimenti'`,
-                }
-              },
-            },             
-          ]
-          },   
-        ]
-      },    
-          //Aziende o enti
-          {
-            wrappers: ['riquadro'],
-            templateOptions: {
-              title: 'Aziende o enti'
-            },
-            fieldGroup: [
               {
-                key: 'aziende',
-                type: 'repeat',
-                validation: {
-                  show: true
-                },
-                templateOptions: {
+                key: 'num_righe',
+                type: 'numfix',
+                className: 'col-md-4',
+                templateOptions: {    
+                  translate: true,              
                   min: 1,
-                },    
-                validators: {
-                  atleastone: {
-                    expression: (c) => {
-                      if (c.value) {
-                        if (c.value.length < 1) {
-                          return false;
-                        }
-                      } else {
-                        return false;
-                      }
-                      return true;
-                    },
-                    message: (error, field: FormlyFieldConfig) => `Inserire almeno un azienda o ente`,
-                  }
-                },             
-                fieldArray: {
-                  fieldGroupClassName: 'row',
-                  fieldGroup:  [      
-                  {
-                    //key: 'azienda',
-                    type: 'externalobject',
-                    className: "col-md-12",
-                    defaultValue: { id: null, denominazione: '' },
-                    templateOptions: {             
-                      label: 'Azienda o ente',
-                      type: 'string',
-                      entityName: 'aziendaLoc',
-                      entityLabel: 'Aziende o enti registrati a sistema',
-                      entityPath: 'home/aziendeloc',
-                      codeProp: 'id',
-                      enableNew: true,
-                      required: true,
-                      descriptionProp: 'denominazione',
-                    },           
-                  },
-                ],
+                  required: true,
+                  label: 'num_righe_bolli_atti',
+                },
+              },
+              {
+                key: 'tipobolli_codice',
+                type: 'select',
+                className: "col-md-4",
+                defaultValue: 'BOLLO_ATTI',
+                templateOptions: {
+                  translate: true,    
+                  options: GlobalConstants.tariffa_bolli['BOLLO_ATTI'],                
+                  label: 'tariffa_bolli_atti',
+                  required: true,
+                },
+              },
+              {
+                key: 'num_bolli',
+                type: 'numfix',
+                className: 'col-md-4',
+                templateOptions: {
+                  translate: true,
+                  min: 1,
+                  required: true,
+                  label: 'num_bolli_atti',
                 },
               },
             ],
           },
-          //Fascicolo
+          //bollo allegato  
           {
-            wrappers: ['riquadro'],
-            templateOptions: {
-              title: 'Fascicolo'
-            },
+            key: 'bollo_allegati',
+            fieldGroupClassName: 'row',
             fieldGroup: [
               {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    key: 'titolario_classificazione',
-                    type: 'select',
-                    className: "col-md-4",            
-                    templateOptions: {
-                      options: this.getClassificazioni(),
-                      labelProp: 'descrizione',
-                      valueProp: 'codice',
-                      label: 'Classificazione',
-                      required: true,
-                    },
-                    expressionProperties: {
-                      'templateOptions.disabled': (model: any, formState: any) => {                        
-                          return model.id;
-                      },
-                    },
+                key: 'num_righe',
+                type: 'numfix',
+                className: 'col-md-4',
+                templateOptions: {
+                  required: false,
+                  translate: true,
+                  min: 1,
+                  label: 'num_righe_bolli_allegati',
+                },
+                expressionProperties: {
+                  'templateOptions.required': (model: any, formState: any, field: FormlyFieldConfig) => {                   
+                    return model!=null && model.num_bolli != null && model.num_bolli > 0;
                   },
-                  {
-                    key: 'oggetto_fascicolo',
-                    type: 'string',
-                    className: "col-md-8",
-                    templateOptions: {
-                      label: 'Oggetto del fascicolo',
-                      required: true,
-                      maxLength: 500
-                    },
-                    expressionProperties: {
-                      'templateOptions.disabled': (model: any, formState: any) => {                        
-                          return model.id;
-                      },
-                    },            
-                  },
-                ],
-                  
+                },
               },
               {
-                fieldGroupClassName: 'row',
-                fieldGroup: [
-                  {
-                    key: 'numero',
-                    type: 'string',            
-                    className: "col-md-6",                   
-                    templateOptions: {              
-                      label: 'Fascicolo',              
-                      disabled: true,     
-                    },
-                    hideExpression: (model: any, formState: any) => {
-                      return !model.id;
-                    }            
+                key: 'tipobolli_codice',
+                type: 'select',
+                className: "col-md-4",
+                defaultValue: 'BOLLO_ALLEGATI',
+                templateOptions: {
+                  translate: true,
+                  options: GlobalConstants.tariffa_bolli['BOLLO_ALLEGATI'],                                    
+                  label: 'tariffa_bolli_allegati',
+                },
+              },
+              {
+                key: 'num_bolli',
+                type: 'numfix',
+                className: 'col-md-4',
+                templateOptions: {
+                  required: false,
+                  translate: true,
+                  min: 1,
+                  label: 'num_bolli_allegati',
+                },
+                expressionProperties: {                  
+                  'templateOptions.required': (model: any, formState: any, field: FormlyFieldConfig) => {
+                     return model!=null && model.num_righe != null && model.num_righe > 0;         
+                  } 
+                },
+              },
+            ],
+          },
+        ],
+        hideExpression: (model, formstate) => {
+          return (!model.id) || (model.id && model.bollo_virtuale == false);
+        },
+      },
+
+      //Aziende o enti
+      {
+        wrappers: ['riquadro'],
+        templateOptions: {
+          title: 'Aziende o enti'
+        },
+        fieldGroup: [
+          {
+            key: 'aziende',
+            type: 'repeat',
+            validation: {
+              show: true
+            },
+            templateOptions: {
+              min: aziende_min, 
+            },
+            validators: {
+              atleastone: {
+                expression: (c) => {
+                  if (c.value) {
+                    if (c.value.length < 1) {
+                      return false;
+                    }
+                  } else {
+                    return false;
                   }
-                ]
-              }    
+                  return true;
+                },
+                message: (error, field: FormlyFieldConfig) => `Inserire almeno un azienda o ente`,
+              }
+            },
+            fieldArray: {
+              fieldGroupClassName: 'row',
+              fieldGroup: [
+                {
+                  //key: 'azienda',
+                  type: 'externalobjectasync',
+                  className: "col-md-12",
+                  defaultValue: { id: null, denominazione: '' },
+                  templateOptions: {
+                    label: 'Azienda o ente',
+                    type: 'numfix',
+                    entityName: 'aziendaLoc',
+                    entityLabel: 'Aziende o enti registrati a sistema',
+                    entityPath: 'home/aziendeloc',
+                    codeProp: 'id',
+                    enableNew: true,
+                    required: true,
+                    descriptionProp: 'denominazione',
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      //Fascicolo
+      {
+        wrappers: ['riquadro'],
+        templateOptions: {
+          title: 'Fascicolo'
+        },
+        fieldGroup: [
+          {
+            fieldGroupClassName: 'row',
+            fieldGroup: [
+              {
+                key: 'titolario_classificazione',
+                type: 'select',
+                className: "col-md-4",
+                templateOptions: {
+                  options: this.getClassificazioni(),
+                  labelProp: 'descrizione',
+                  valueProp: 'codice',
+                  label: 'Classificazione',
+                  required: true,
+                },
+                expressionProperties: {
+                  'templateOptions.disabled': (model: any, formState: any) => {
+                    return model.id;
+                  },
+                },
+              },
+              {
+                key: 'oggetto_fascicolo',
+                type: 'string',
+                className: "col-md-8",
+                templateOptions: {
+                  label: 'Oggetto del fascicolo',
+                  required: true,
+                  maxLength: 500
+                },
+                expressionProperties: {
+                  'templateOptions.disabled': (model: any, formState: any) => {
+                    return model.id;
+                  },
+                },
+              },
+            ],
+
+          },
+          {
+            fieldGroupClassName: 'row',
+            fieldGroup: [
+              {
+                key: 'numero',
+                type: 'string',
+                className: "col-md-6",
+                templateOptions: {
+                  label: 'Fascicolo',
+                  disabled: true,
+                },
+                hideExpression: (model: any, formState: any) => {
+                  return !model.id;
+                }
+              }
             ]
-          }  
-        ];
+          }
+        ]
       }
+    ];
+  }
 
   getById(id: any): Observable<any> {
     return this.getConvenzioneById(id);
@@ -487,7 +586,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         },
         modelOptions: {
           updateOn: 'blur',
-        }, 
+        },
       },
 
 
@@ -518,9 +617,8 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         className: "col-md-6",
         templateOptions: {
           label: 'Responsabile scientifico',
-          required: true, 
-                
-        }
+          required: true,
+        },       
       },
       {
         key: 'aziende.id',
@@ -573,7 +671,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
           label: 'Modalità di pagamento',
           required: true
         }
-      }, 
+      },
       {
         key: 'corrispettivo',
         type: 'input',
@@ -590,8 +688,8 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         templateOptions: {
           label: 'Data inizio',
           required: true,
-        },        
-      },  
+        },
+      },
       {
         key: 'data_fine_conv',
         type: 'date',
@@ -599,21 +697,21 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
         templateOptions: {
           label: 'Data fine',
           required: true,
-        },       
-      },     
+        },
+      },
       {
         key: 'current_place',
         type: 'select',
         className: "col-md-6",
         templateOptions: {
           options: [
-            { value: 'proposta', label: 'Proposta' }, 
-            { value: 'approvato', label: 'Approvata' }, 
-            { value: 'inapprovazione', label: 'In approvazione' },                        
+            { value: 'proposta', label: 'Proposta' },
+            { value: 'approvato', label: 'Approvata' },
+            { value: 'inapprovazione', label: 'In approvazione' },
             { value: 'da_firmare_direttore', label: 'Stipula controparte' }, //Da controfirmare UniUrb
             { value: 'da_firmare_controparte2', label: 'Stipula UniUrb' },  //Da controfirmare controparte
-            { value: 'firmato', label: 'Firmata' },  
-            { value: 'repertoriato', label: 'Repertoriata' },            
+            { value: 'firmato', label: 'Firmata' },
+            { value: 'repertoriato', label: 'Repertoriata' },
           ],
           label: 'Stato',
           required: true,
@@ -634,12 +732,12 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
       );
   }
 
-  export(model): Observable<any> {   
+  export(model): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
     })
     return this.http
-      .post(this._baseURL + '/convenzioni/export', model,{ headers, responseType: 'text'}).pipe(
+      .post(this._baseURL + '/convenzioni/export', model, { headers, responseType: 'text' }).pipe(
         tap(sub => this.messageService.info('Export effettuato con successo')),
         catchError(this.handleError('export'))
       );
@@ -647,7 +745,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
 
   exportxls(model): Observable<any> {
     return this.http
-      .post(this._baseURL + `/convenzioni/exportxls`, model, { responseType: 'blob'}).pipe(
+      .post(this._baseURL + `/convenzioni/exportxls`, model, { responseType: 'blob' }).pipe(
         tap(sub => this.messageService.info('Export effettuato con successo')),
         catchError(this.handleError('export'))
       );
@@ -687,7 +785,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     }
   }
 
-  createSchemaTipo(convenzione: Convenzione, retrow: boolean = false): any {    
+  createSchemaTipo(convenzione: Convenzione, retrow: boolean = false): any {
     const url = `${this._baseURL + '/convenzioni/createschematipo'}`;
     let res = this.http.post<Convenzione>(url, convenzione, httpOptions)
       .pipe(
@@ -711,7 +809,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
       );
     return res;
   }
- 
+
   remove(id: any): Observable<any> {
     throw new Error("Method not implemented.");
   }
@@ -734,16 +832,16 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   }
 
   annullaConvenzione(data: any, retrow: boolean = false): any {
-      const url = `${this._baseURL + '/convenzioni/annullaconvenzione'}`;
-      let res = this.http.post(url,data, httpOptions)
-        .pipe(
-          tap(sub => {
-            this.messageService.info('Annullamento effettuato con successo');
-            return sub;
-          }),
-          catchError(this.handleError('annullaConvenzione'))
-        );
-      return res;
+    const url = `${this._baseURL + '/convenzioni/annullaconvenzione'}`;
+    let res = this.http.post(url, data, httpOptions)
+      .pipe(
+        tap(sub => {
+          this.messageService.info('Annullamento effettuato con successo');
+          return sub;
+        }),
+        catchError(this.handleError('annullaConvenzione'))
+      );
+    return res;
 
   }
 
@@ -771,7 +869,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  validationStep(data: any, retrow: boolean = false): Observable<any>{
+  validationStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/validationstep'}`;
     let res = this.http.post<FileAttachment>(url, data, httpOptions)
       .pipe(
@@ -784,7 +882,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   }
 
 
-  sottoscrizioneStep(data: any, retrow: boolean = false): Observable<any>{
+  sottoscrizioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/sottoscrizionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -796,7 +894,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  complSottoscrizioneStep(data: any, retrow: boolean = false): Observable<any>{
+  complSottoscrizioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/complsottoscrizionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -808,7 +906,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  bolloRepertoriazioneStep(data: any, retrow: boolean = false): Observable<any>{
+  bolloRepertoriazioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/bollorepertoriazionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -820,7 +918,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  cancellazioneSottoscrizione(data: any, retrow: boolean = false): Observable<any>{
+  cancellazioneSottoscrizione(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/cancellazionesottoscrizione'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -832,7 +930,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  registrazioneSottoscrizione(data: any, retrow: boolean = false): Observable<any>{
+  registrazioneSottoscrizione(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/registrazionesottoscrizione'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -843,8 +941,8 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
       );
     return res;
   }
-  
-  registrazioneComplSottoscrizione(data: any, retrow: boolean = false): Observable<any>{
+
+  registrazioneComplSottoscrizione(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/registrazionecomplsottoscrizione'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -856,10 +954,10 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     return res;
   }
 
-  
 
-    
-  registrazioneBolloRepertoriazione(data: any, retrow: boolean = false): Observable<any>{
+
+
+  registrazioneBolloRepertoriazione(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/registrazionebollorepertoriazione'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -874,7 +972,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
-  richiestaEmissioneStep(data: any, retrow: boolean = false): Observable<any>{
+  richiestaEmissioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/richiestaemissionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -889,7 +987,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
-  invioRichiestaPagamentoStep(data: any, retrow: boolean = false): Observable<any>{
+  invioRichiestaPagamentoStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/inviorichiestapagamentostep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -900,11 +998,11 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
       );
     return res;
   }
-  
+
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
-  emissioneStep(data: any, retrow: boolean = false): Observable<any>{
+  emissioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/emissionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -919,7 +1017,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
-  modificaEmissioneStep(data: any, retrow: boolean = false): Observable<any>{
+  modificaEmissioneStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/modificaemissionestep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -934,7 +1032,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @CacheBuster({
     cacheBusterNotifier: cacheBusterNotifier
   })
-  pagamentoStep(data: any, retrow: boolean = false): Observable<any>{
+  pagamentoStep(data: any, retrow: boolean = false): Observable<any> {
     const url = `${this._baseURL + '/convenzioni/pagamentostep'}`;
     let res = this.http.post(url, data, httpOptions)
       .pipe(
@@ -945,7 +1043,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
       );
     return res;
   }
-  
+
   //@Cacheable()
   getNextActions(id): Observable<any> {
     const url = `${this._baseURL}/convenzioni/${id}/actions`
@@ -953,7 +1051,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   }
 
   @Cacheable()
-  getTitulusDocumentURL(id): Observable<any>{
+  getTitulusDocumentURL(id): Observable<any> {
     return this.http.get(this._baseURL + '/convenzioni/gettitulusdocumenturl/' + id.toString(), httpOptions).pipe(
       catchError(this.handleError('getTitulusDocumentURL', null, true))
     )
@@ -961,13 +1059,24 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
 
   @Cacheable()
   getDipartimenti(): Observable<any> {
-    return this.http.get<any>(this._baseURL + '/dipartimenti/user/'+this.authService.userid, httpOptions).pipe(      
-        map(x => {
-          return x == null ? [] : x.map(el => {return { cd_dip: parseInt(el.cd_dip), nome_breve: el.nome_breve }})
-        }
+    return this.http.get<any>(this._baseURL + '/dipartimenti/user/' + this.authService.userid, httpOptions).pipe(
+      map(x => {
+        return x == null ? [] : x.map(el => { return { cd_dip: parseInt(el.cd_dip), nome_breve: el.nome_breve } })
+      }
       )
-    );          
+    );
   }
+  
+  @Cacheable()
+  getPersonaleafferenzeorganizzative(id): Observable<any> {    
+    return this.http.get<any>(this._baseURL + '/users/personaleafferenzeorganizzative/' + id, httpOptions).pipe(
+      map(x => {
+        return x == null ? [] : x.map(el => { return { value: el.cd_csa, label: el.nome_uo } })
+      }
+      )
+    );
+  }
+
 
   @Cacheable()
   getDirettoreDipartimento(codiceDip): Observable<any> {
@@ -983,7 +1092,7 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   getAttachemntTypes(): Observable<any> {
     return this.http.get(this._baseURL + '/convenzioni/attachmenttypes/', httpOptions);
   }
-  
+
   @Cacheable()
   getClassificazioni(): Observable<any> {
     return this.http.get(this._baseURL + '/convenzioni/classificazioni', httpOptions);
@@ -991,12 +1100,12 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
 
   @Cacheable()
   getValidationOffices(): Observable<any> {
-    return this.http.get(this._baseURL + '/convenzioni/uffici/'+'validazione', httpOptions);
+    return this.http.get(this._baseURL + '/convenzioni/uffici/' + 'validazione', httpOptions);
   }
 
   @Cacheable()
   getUfficiFiscali(): Observable<any> {
-    return this.http.get(this._baseURL + '/convenzioni/uffici/'+'inemissione', httpOptions);
+    return this.http.get(this._baseURL + '/convenzioni/uffici/' + 'inemissione', httpOptions);
   }
 
   @Cacheable()
@@ -1008,14 +1117,14 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   }
 
   static isResponsabileUfficio(posizorg: string): boolean {
-    return posizorg == 'RESP_UFF' || posizorg == 'COOR_PRO_D' || posizorg == 'VIC_RES_PL' || posizorg =='RESP_PLESSO' || posizorg == 'DIRIGENTE';
+    return posizorg == 'RESP_UFF' || posizorg == 'COOR_PRO_D' || posizorg == 'VIC_RES_PL' || posizorg == 'RESP_PLESS' || posizorg == 'DIRIGENTE';
   }
 
 
   @Cacheable()
   getAziende(id): Observable<any> {
     if (id) {
-      return this.http.get(this._baseURL + '/convenzioni/'+ id.toString() +'/aziende/', httpOptions);
+      return this.http.get(this._baseURL + '/convenzioni/' + id.toString() + '/aziende/', httpOptions);
     }
     return of([]);
   }
@@ -1023,13 +1132,13 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
   @Cacheable()
   getMinimal(id): Observable<any> {
     if (id) {
-      return this.http.get(this._baseURL + '/convenzioni/getminimal/'+ id.toString(), httpOptions);
+      return this.http.get(this._baseURL + '/convenzioni/getminimal/' + id.toString(), httpOptions);
     }
     return of([]);
   }
 
 
-  download(id): Observable<any>{
+  download(id): Observable<any> {
     if (id) {
       return this.http.get(this._baseURL + '/attachments/download/' + id.toString(), httpOptions).pipe(catchError(this.handleError('download', null, false)));
     }
@@ -1047,35 +1156,35 @@ export class ApplicationService implements ServiceQuery, ServiceEntity {
     );
   }
 
-/**
-   * Handle Http operation that failed.
-   * Let the app continue.
-   * @param operation - name of the operation that failed
-   * @param result - optional value to return as the observable result
-   */
+  /**
+     * Handle Http operation that failed.
+     * Let the app continue.
+     * @param operation - name of the operation that failed
+     * @param result - optional value to return as the observable result
+     */
   protected handleError<T>(operation = 'operation', result?: T, retrow: boolean = false) {
     return (error: any): Observable<T> => {
-      
- 
+
+
       console.error(error);
 
       this.messageService.error(`L'operazione di ${operation} è terminata con errori: ${error.message}`, true, false, error);
-   
+
       if (!retrow)
         return of(result as T);
-      else 
+      else
         return throwError(error);
     };
   }
 
-  data:any;
-  getRichiestaEmissioneData(){ 
-     return this.data; 
-  } 
-  setRichiestaEmissioneData(data:any){
-      this.data = data;
+  data: any;
+  getRichiestaEmissioneData() {
+    return this.data;
   }
-  
+  setRichiestaEmissioneData(data: any) {
+    this.data = data;
+  }
+
 
 
 }

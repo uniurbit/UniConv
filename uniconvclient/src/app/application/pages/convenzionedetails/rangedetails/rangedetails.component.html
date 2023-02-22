@@ -1,4 +1,9 @@
+<ngx-loading [show]="isLoading" [config]="{ backdropBorderRadius: '0px' }"></ngx-loading>
 <span *ngIf="numero">{{labeln}} <span>{{numero}}</span></span>
 <span *ngIf="numero && data"> {{labeldel}} <span>{{data}}</span></span>
 <span *ngIf="!numero && data"> {{labelil}} <span>{{data}}</span></span>
 <span *ngIf="!numero && !data">#</span>
+<div class="btn-group float-right mr-3" *ngIf="id">            
+<button type="button" title="Scarica documento" class="btn btn-primary btn-sm border-0 rounded-0 oi oi-data-transfer-download" (click)="download(id)">
+</button>
+</div>

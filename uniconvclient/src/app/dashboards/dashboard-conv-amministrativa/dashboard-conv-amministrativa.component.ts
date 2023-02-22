@@ -22,7 +22,6 @@ export class DashboardConvAmministrativaComponent implements OnInit {
   public columnsInScadenza = [];
 
   flatten = new MyFlattenPipe('');
-   
   translate: MyTranslatePipe = null;
 
   constructor(public service: DashboardService, private datePipe: DatePipe, private translateService: TranslateService) { 

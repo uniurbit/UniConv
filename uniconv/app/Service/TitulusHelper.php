@@ -9,6 +9,7 @@ use App\Permission;
 use App\Repositories\ConvenzioneRepository;
 use DateTime;
 use Auth;
+use App;
 use App\Http\Resources\WorkflowConvenzione;
 use App\Http\Resources\WorkflowConvenzioneSchemaTipoResource;
 use Workflow;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Api\V1\StrutturaInternaController;
 use App\Http\Controllers\Api\V1\PersonaInternaController;
 use PDF;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TitulusHelper 
 {
@@ -87,9 +89,16 @@ class TitulusHelper
         if ($unitaorganizzativa_uo){
             TitulusHelper::addRPA_Titulus($doc,$unitaorganizzativa_uo);        
             TitulusHelper::addCC_Titulus($doc);
-        }else{
-            TitulusHelper::addRPA($doc);        
+        }else{            
+            //unità organizzativa a cui è associata la convenzione 
+            //caso convenzioni amministrative
+            TitulusHelper::addRPA_Titulus($doc, $conv->unitaorganizzativa_uo);        
+            //in cc utente corrente ... 
             TitulusHelper::addCC_Titulus($doc);
+        }
+
+        if (App::environment(['local','preprod'])) {         
+            $doc->addCC("Attività sistemistiche e software Gestionali e Documentali", "Oliva Enrico");
         }
         
         if ($tipodoc ==  Documento::ARRIVO){
@@ -108,7 +117,7 @@ class TitulusHelper
                 $attachment1 = new AttachmentBean();
                 $attachment1->setFileName($attachment['filename']);
                 $temp_attch_type = AttachmentType::where('codice', $attachment['attachmenttype_codice'])->first();    
-                $attachment1->setDescription($temp_attch_type->descrizione .' ('.$attachment['filename'].')');
+                $attachment1->setDescription($temp_attch_type->descrizione.' ('.$attachment['filename'].')');
                 //$attachment1->setMimeType("application/pdf");
                 $attachment1->setContent(base64_decode($attachment['filevalue']));      
                 array_push($attachBeans,  $attachment1);
@@ -148,14 +157,19 @@ class TitulusHelper
     * funzione prende in ingresso un documento o un fascicolo (struttura xml)
     * e aggiunge un riferimento interno RPA
     * il riferimento è il responsabile ufficio della persona che è Loggata nel sistema o passata come parametro
+    *
+    * usare solo per utenti non responsabili di una UO
+    *
+    * @param $element oggetto xml
+    * @param $userid id utente
     */
     public static function addRPA($element, $userid = null){        
         $pers = null;
         //lettura responsabile da ugov
         if ($userid){
-            $pers =  User::find($userid)->personaleRespons()->first();   
+            $pers =  User::find($userid)->findPersonaleRespons();   
         }else{
-            $pers =  Auth::user()->personaleRespons()->first();   
+            $pers =  Auth::user()->findPersonaleRespons();   
         }
         $mapping = $pers->mappingufficio()->first();
 
@@ -188,7 +202,7 @@ class TitulusHelper
     * e aggiunge l'utente corrente come operatore incaricato
     */
     public static function addCC_Titulus($element){  
-        $pers =  Auth::user()->personaleRespons()->first(); 
+        $pers =  Auth::user()->personaleRelation()->first(); 
         $ctrPers = new PersonaInternaController();
         $persint = $ctrPers->getminimalByName($pers->utenteNomepersona); 
 
@@ -221,12 +235,38 @@ class TitulusHelper
     }
 
 
-    public static function downloadAttachment($num_prot){
+    public static function downloadAttachment($num_prot, $filename=null){
         $sc = new SoapControllerTitulus(new SoapWrapper);                
         $response = $sc->loadDocument($num_prot,false);        
         $obj = simplexml_load_string($response);
         $document = $obj->Document;        
-        $doc = $document->doc;                
+        $doc = $document->doc;   
+        Log::info('Chiamata loadDocument [' . $response . ']'); 
+        
+        //cerca se il "Nome dell'allegato" è all'interno del titolo dell'allegato
+        if ($filename){
+            foreach ($doc->files->children('xw',true) as $file) {                      
+                $title = (string) $file->attributes()->title;
+                if (Str::contains($title, $filename)) {
+                    $fileId = (string) $file->attributes()->name;                            
+                    $attachmentBean =  $sc->getAttachment($fileId);
+                    $attachmentBean->title =  (string) $file->attributes()->title;  
+                    return $attachmentBean;
+                }                
+            }                    
+            if ($doc->immagini && $doc->immagini[0]){
+                foreach ($doc->immagini->children('xw',true) as $file) {                      
+                    $title = (string) $file->attributes()->title;
+                    if (Str::contains($title, $filename)) {
+                        $fileId = (string) $file->attributes()->name;                            
+                        $attachmentBean =  $sc->getAttachment($fileId);
+                        $attachmentBean->title =  (string) $file->attributes()->title;  
+                        return $attachmentBean;
+                    }                
+                }           
+            }
+        }
+        
         foreach ($doc->files->children('xw',true) as $file) {
             //restuisce il primo
             $fileId = (string) $file->attributes()->name;            

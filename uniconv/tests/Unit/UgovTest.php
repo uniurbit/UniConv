@@ -95,13 +95,14 @@ class UgovTest extends TestCase
         }));    
     }
 
+    //./vendor/bin/phpunit  --testsuite Unit --filter testDirettoreDipartimento
     public function testDirettoreDipartimento()
     {
         $dip = Dipartimento::Dipartimenti()->where('cd_dip','1')->first();
         $direttore = $dip->direttoreDipartimento()->first();
         echo($direttore);
-        $this->assertEquals('PAOLO',$direttore->nome);
-        $this->assertEquals('MOROZZO DELLA ROCCA',$direttore->cognome);
+        $this->assertEquals('LICIA',$direttore->nome);
+        $this->assertEquals('CALIFANO',$direttore->cognome);
 
     }
 
@@ -125,7 +126,7 @@ class UgovTest extends TestCase
         $pers = Personale::find(39842);
         $this->assertEquals('enrico.oliva@uniurb.it',$pers->email);
         
-        $pers = Personale::findByEmail('enrico.oliva@uniurb.it');
+        $pers = Personale::findByEmail('enrico.oliva@uniurb.it')->first();
         $this->assertEquals('018087',$pers->matricola);
         $this->assertEquals('ND',$pers->cd_ruolo);
         $this->assertEquals(39842,$pers->id_ab);

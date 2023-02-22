@@ -44,7 +44,9 @@ export class GlobalErrorHandlerService implements ErrorHandler {
                 //this.toastr.error(GlobalErrorHandlerService.DEFAULT_ERROR_TITLE, 'Oops!');
         }
         
-      } else {  
+      } else {
+          //A client-side or network error occurred.	          
+          //console.error('An error occurred:', error.message);     
           throw error;     
       }     
     }

@@ -17,7 +17,7 @@ import { map } from 'rxjs/operators';
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{ 'btn_salva' | translate }}</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -31,7 +31,7 @@ import { map } from 'rxjs/operators';
       <formly-form [model]="model" [fields]="fields" [form]="form" [options]="options">
       </formly-form>
   </form>
-  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">Salva</button>
+  <button class="btn btn-primary mt-3" type="button"  [disabled]="!form.valid"  (click)="onSubmit()">{{ 'btn_salva' | translate }}</button>
   </div>
   `,
   styles: []
@@ -125,7 +125,7 @@ export class EmissioneComponent extends BaseEntityComponent {
             {
               key: 'attachmenttype_codice',
               type: 'select',
-              className: "col-md-5",          
+              className: "col-md-5",                       
               templateOptions: {
                 options: [
                   { codice: 'NOTA_DEBITO', descrizione: 'Emissione nota di debito' },
@@ -172,6 +172,7 @@ export class EmissioneComponent extends BaseEntityComponent {
               templateOptions: {
                 label: 'Numero di protocollo',     
                 type: 'string',
+                subpattern: /^[0-9]+-[a-zA-Z]+-\d{7}$/,
                 entityName: 'documento',
                 entityLabel: 'Documenti',
                 codeProp: 'num_prot',

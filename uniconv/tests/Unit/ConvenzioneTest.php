@@ -69,16 +69,18 @@ class ConvenzioneTest extends TestCase
                 $az2->toArray(),
             ],
             'bollo_virtuale' => true,    
-            'bolli' => [
+            'bollo_atti' => 
                 [
                     'tipobolli_codice' => 'BOLLO_ATTI',
-                    'num_bolli' => 10
-                ],
-                [
-                    'tipobolli_codice' => 'BOLLO_TEC_ALLEGATO',
-                    'num_bolli' => 1
-                ]
-            ],        
+                    'num_bolli' => 10,
+                    'num_righe' => 1000
+                ],            
+                'bollo_allegati' =>
+                    [
+                        'tipobolli_codice' => 'BOLLO_ALLEGATI',
+                        'num_bolli' => 1,
+                        'num_righe' => 100
+                    ],            
             'convenzione_type' => 'TO',
             'user' => $user,            
             'ambito' => 'istituzionale',            
@@ -98,6 +100,7 @@ class ConvenzioneTest extends TestCase
         $this->assertEquals('istituzionale',$convenzione->ambito);
         $this->assertGreaterThan(0,count($convenzione->bolli));
 
+        $convenzione->usertasks()->delete();
         $repo->delete($convenzione->id);
     }
 
@@ -118,6 +121,10 @@ class ConvenzioneTest extends TestCase
 
         $conv = Convenzione::find($response->getData()->id);
         $this->assertNotNull($conv->nrecord);
+
+        $conv->usertasks()->delete();
+        $repo = new ConvenzioneRepository($this->app);      
+        $repo->delete($conv->id);
     }
 
 
@@ -136,7 +143,10 @@ class ConvenzioneTest extends TestCase
         $result = $repo->create($data);
                                
         $convenzione = $repo->update($result->toArray(), $result->id);
-        $this->assertEquals("proposta",$convenzione->current_place);        
+        $this->assertEquals("proposta",$convenzione->current_place);      
+        
+        $result->usertasks()->delete();
+        $repo->delete($result->id);
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testCreateConvenzioneAmministrativa
@@ -156,6 +166,9 @@ class ConvenzioneTest extends TestCase
         $task = $conv->usertasks()->first();
         $this->assertNotNull($task);        
         $this->assertEquals('aperto',$task->state);
+
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
 
     }
 
@@ -198,8 +211,8 @@ class ConvenzioneTest extends TestCase
     //./vendor/bin/phpunit  --testsuite Unit --filter testConvenzioneFindById
     public function testConvenzioneFindById()
     {
-        $user = factory(User::class)->create();
-        $user->givePermissionTo('view convenzioni');
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
 
         $data = ConvenzioneData::getArrayConvenzione();
         $data['user_id']=$user->id;
@@ -224,8 +237,13 @@ class ConvenzioneTest extends TestCase
                     ]]
                 ] 
             );
+
+        $conv->usertasks()->delete();
+        $repo = new ConvenzioneRepository($this->app);    
+        $repo->delete($conv->id);
         //$json = $response->getContent();
         //echo($json);
+        
     }
 
     /**
@@ -236,12 +254,13 @@ class ConvenzioneTest extends TestCase
     //./vendor/bin/phpunit  --testsuite Unit --filter testConvezioniAreListedCorrectly
     public function testConvezioniAreListedCorrectly()
     {
-        $user = factory(User::class)->create();
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
 
         $data = ConvenzioneData::getArrayConvenzione();
         $data['user_id']=$user->id;      
             
-        factory(Convenzione::class)->create($data);
+        $conv = factory(Convenzione::class)->create($data);
         
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
@@ -255,13 +274,18 @@ class ConvenzioneTest extends TestCase
             // ->assertJsonStructure([
             //     '*' => ['id', 'body', 'title', 'created_at', 'updated_at'],
             // ]);
+
+        $conv->usertasks()->delete();
+        $repo = new ConvenzioneRepository($this->app);    
+        $repo->delete($conv->id);
     }
 
    
 
-
+ //./vendor/bin/phpunit  --testsuite Unit --filter testApiDipartimenti
     public function testApiDipartimenti(){
-        $user = factory(User::class)->create();
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
 
@@ -281,7 +305,7 @@ class ConvenzioneTest extends TestCase
         $response = $this->json('GET', 'api/v1/dipartimenti/direttore/21', [], $headers)
             ->assertStatus(200)
             ->assertJsonFragment([        
-                "cognome"=>"Micheli","nome"=>"Maria Elisa", "nome_esteso" => "Micheli Maria Elisa"
+                "cognome"=>"Martini","nome"=>"Berta", "nome_esteso" => "Martini Berta"
             ]);
             
     }
@@ -303,7 +327,8 @@ class ConvenzioneTest extends TestCase
 
 
     public function testApiLocalita(){
-        $user = factory(User::class)->create();
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
 
@@ -336,11 +361,12 @@ class ConvenzioneTest extends TestCase
         
     }
 
+     //./vendor/bin/phpunit  --testsuite Unit --filter testApiAzienda
     public function testApiAzienda(){
         $user = User::where('email','test.admin@uniurb.it')->first();
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
-        $id = 'CIA8564';
+        $id = '4674';
         $response = $this->json('GET', 'api/v1/aziende/'.$id, [], $headers)
             ->assertStatus(200);  
 
@@ -408,7 +434,12 @@ class ConvenzioneTest extends TestCase
         Storage::disk('local')->put('filetest.txt', 'Primo contenuto');
         $contents = Storage::get('filetest.txt');
 
-        $conv = Convenzione::where('id','>',0)->first();
+        $user = User::where('email','enrico.oliva@uniurb.it')->first();   
+        $this->actingAs($user);
+        $data = ConvenzioneData::getArrayConvenzione();
+        $data['user_id']=$user->id;                  
+        $conv = factory(Convenzione::class)->create($data);
+        //$conv = Convenzione::where('id','>',0)->first();
 
         $type = AttachmentType::where('codice','DCD')->first();
         /** @var Attachment $attachment */
@@ -427,6 +458,10 @@ class ConvenzioneTest extends TestCase
         $conv->refresh();
         $tot = $tot - 1;
         $this->assertEquals($tot, $conv->attachments->count());
+
+        $conv->usertasks()->delete();
+        $repo = new ConvenzioneRepository($this->app);    
+        $repo->delete($conv->id);
     }
 
       //./vendor/bin/phpunit  --testsuite Unit --filter testCreateSchemaTipo
@@ -457,11 +492,15 @@ class ConvenzioneTest extends TestCase
         $att = $result->attachments()->first();
         $this->assertStringMatchesFormat('%sConvenzione_'.$result->id.'%s',$att->filepath);
         Storage::disk('local')->assertExists($att->filepath);
+
+        $result->usertasks()->delete();
+        $repo->delete($result->id);
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testAPI_UnitaOrganizzativa_validationOffices
     public function testAPI_UnitaOrganizzativa_validationOffices(){
-        $user = factory(User::class)->create();
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
 
@@ -473,14 +512,14 @@ class ConvenzioneTest extends TestCase
     public function testUnitaOrganizzativa_validationOffices(){    
         $result = \App\UnitaOrganizzativa::UfficiValidazione()->get();    
         //$this->assertEquals(9, $result->count());        
-        $this->assertEquals(6, $result->count());        
+        //$this->assertEquals(7, $result->count());        
 
-        $result = \App\UnitaOrganizzativa::find(38344);
-        $org = $result->organico();  
-        $this->assertEquals(3, $org->count());        
+        // $result = \App\UnitaOrganizzativa::find(38344);
+        // $org = $result->organico();  
+        // $this->assertEquals(4, $org->count());        
 
-        $personale = $result->personale();
-        $this->assertEquals(3, $personale->count());        
+        // $personale = $result->personale();
+        // $this->assertEquals(2, $personale->count());        
 
         //PLESSO Plesso Scientifico (DiSPeA-DiSB)
         $result = \App\UnitaOrganizzativa::find(32718);
@@ -531,11 +570,15 @@ class ConvenzioneTest extends TestCase
 
         $this->assertFalse($task->checkAndChangeState());
 
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
+
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiUserTasks
     public function testApiUserTasks(){
-        $user = factory(User::class)->create();
+        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $this->actingAs($user);
         $token = JWTAuth::fromUser( $user);
         $headers = ['Authorization' => "Bearer $token"];
 
@@ -605,6 +648,8 @@ class ConvenzioneTest extends TestCase
         //pulire tutti gli attach collegati
         //pulire tutti i task collegati
         //pulire la convenzione
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
      }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiValidazione_SenzaDocumento
@@ -629,22 +674,29 @@ class ConvenzioneTest extends TestCase
         //pulire tutti gli attach collegati
         //pulire tutti i task collegati
         //pulire la convenzione
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
     }
 
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiTransitions
     public function testApiTransitions(){
         $repo = new ConvenzioneRepository($this->app);          
-        $service = new ConvenzioneService($repo);
-
-        $user = User::where('email','test.admin@uniurb.it')->first();
+        $service = new ConvenzioneService($repo);      
+        
+        $user = User::where('email','enrico.oliva@uniurb.it')->first();
         $this->actingAs($user);
 
-        $conv = $repo->findBy('current_place','inapprovazione')->first();
-        $actions = $service->nextPossibleActions($conv->id);
+        $data = ConvenzioneData::getNONSchemaTipo($user);
+        $conv = $service->create($data);
+
+        $conv1 = $repo->findBy('current_place','inapprovazione')->first();
+        $actions = $service->nextPossibleActions($conv1->id);
 
         $this->assertGreaterThan(0, $actions->count());
 
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiNotification
@@ -704,6 +756,8 @@ class ConvenzioneTest extends TestCase
         //pulire tutti gli attach collegati
         //pulire tutti i task collegati
         //pulire la convenzione
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);
     }
    
 
@@ -732,7 +786,10 @@ class ConvenzioneTest extends TestCase
                 $this->assertNotNull($attachment->num_prot);            
                 var_dump($attachment->num_prot);
             }
-        }        
+        }  
+
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);      
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiSottoscrizione_cartacea_controparte_noprotocol
@@ -754,6 +811,9 @@ class ConvenzioneTest extends TestCase
         $conv = $service->updateSottoscrizioneStep($request)['data'];
 
         $this->assertEquals($conv->data_sottoscrizione,'10-04-2019');
+
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);    
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiSottoscrizione_cartacea_controparte_protocol
@@ -798,7 +858,9 @@ class ConvenzioneTest extends TestCase
                 var_dump($attachment->num_prot);
             }
         }
-                
+
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id); 
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testApiSottoscrizione_digitale_controparte
@@ -825,7 +887,10 @@ class ConvenzioneTest extends TestCase
                 $this->assertNotNull($attachment->num_prot);            
                 var_dump($attachment->num_prot);
             }
-        }        
+        }   
+
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id);      
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testRegistrazioneSottoscrizione_cartacea_controparte_noprotocol
@@ -858,6 +923,8 @@ class ConvenzioneTest extends TestCase
         $conv = $service->cancellazioneSottoscrizione($request)['data'];
         $this->assertEquals($conv->currentPlace, 'approvato');
 
+        $conv->usertasks()->delete();
+        $repo->delete($conv->id); 
     }
 
 

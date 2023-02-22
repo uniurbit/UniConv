@@ -46,9 +46,11 @@
                   <span *ngSwitchCase="'PRE_NO'">No</span>                  
                 </span>
             </td>
-            <td>
-              <button type="button" title="Apri vista scadenza" class="btn btn-primary btn-sm border-0 rounded-0 oi oi-external-link" (click)="onClick(scadenza?.id)">                  
+            <td class="float-right">
+              <ng-container *ngxPermissionsOnly="['ADMIN','SUPER-ADMIN','OP_CONTABILITA','ADMIN_AMM','OP_UFF_BILANCIO']">
+              <button type="button" title="Apri vista scadenza" class="btn btn-primary btn-sm border-0 rounded-0 oi oi-external-link mr-3" (click)="onClick(scadenza?.id)">                  
               </button>  
+              </ng-container>
             </td>
           </tr>                                           
       </tbody>

@@ -18,7 +18,7 @@ import { NgbStringAdapter } from 'src/app/NgbStringAdapter';
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{ 'btn_salva' | translate }}</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -32,7 +32,7 @@ import { NgbStringAdapter } from 'src/app/NgbStringAdapter';
       <formly-form [model]="model" [fields]="fields" [form]="form" [options]="options">
       </formly-form>
   </form>
-  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">Salva</button>
+  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">{{ 'btn_salva' | translate }}</button>
   </div>
   `,
   styles: []
@@ -177,6 +177,7 @@ export class FirmaControparteComponent extends BaseEntityComponent {
                     label: 'Numero di protocollo',
                     required: true,
                     type: 'string',
+                    subpattern: /^[0-9]+-[a-zA-Z]+-\d{7}$/,
                     entityName: 'documento',
                     entityLabel: 'Documenti',
                     codeProp: 'num_prot',
@@ -230,7 +231,7 @@ export class FirmaControparteComponent extends BaseEntityComponent {
                 label: 'Scegli il documento',
                 type: 'input',
                 placeholder: 'Scegli file documento',
-                accept: 'application/pdf', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,            
+                accept: 'application/pdf,.p7m,application/pkcs7-mime', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,            
                 onSelected: (selFile, field) => { this.onSelectCurrentFile(selFile, field); }
               },          
             },
@@ -244,6 +245,29 @@ export class FirmaControparteComponent extends BaseEntityComponent {
 
           ],
         },
+      ]
+    },
+    {
+      wrappers: ['riquadro'],
+      templateOptions: {
+        title: 'Data di stipula'
+      },
+      fieldGroup: [
+        //date di stipula
+        {
+          fieldGroupClassName: 'row',
+          fieldGroup: [
+            {
+              key: 'data_stipula',
+              type: 'datepicker',
+              className: "col-md-6",
+              templateOptions: {
+                required: true,
+                label: 'Data di stipula convenzione',
+              },
+            },          
+          ]
+        }
       ]
     },
     {

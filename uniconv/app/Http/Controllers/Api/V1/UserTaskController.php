@@ -7,6 +7,7 @@ use App\Attachment;
 use App\Http\Controllers\Controller;
 use Validator;
 use App\Convenzione;
+use App\Scadenza;
 use App\UserTask;
 use App\User;
 use App\Personale;
@@ -55,10 +56,10 @@ class UserTaskController extends Controller
     {        
         //Auth::user()->id      
         $id = $request->id;               
-        $user=User::find($id);
-        $pers = Personale::find($user->v_ie_ru_personale_id_ab);       
+        $user=User::find($id);        
+        $uos = $user->codiciUnitaorganizzative();
         return UserTask::with(['tasktype','user','closingUser','assignments.personale', 'modelwith'])
-            ->where('unitaorganizzativa_uo',$pers->aff_org)
+            ->whereIn('unitaorganizzativa_uo',$uos)
             ->orderBy('updated_at','desc')->paginate();           
     }
 
@@ -84,7 +85,7 @@ class UserTaskController extends Controller
 
         $task = UserTask::with(['tasktype', 'assignments' => function($query){
             return $query->whereNotIn('cd_tipo_posizorg',['RESP_UFF', 'COOR_PRO_D'])->orWhereNull('cd_tipo_posizorg');
-        }])->with(['model','unitaOrganizzativa:descr'])->find($id);
+        }])->with(['model'])->find($id);
 
         if ($task){
             WorkflowUserTaskResource::withoutWrapping();
@@ -94,6 +95,44 @@ class UserTaskController extends Controller
         return $task;
     }
 
+    private function filtriPermessiRicercaUserTask($parameters)
+    {
+        //se l'utente non è super-admin 
+        if (!Auth::user()->hasRole('super-admin')){
+            //aggiungere filtro per unitaorganizzativa_uo
+            //voglio tutte gli usertask che afferiscono al plesso o ai dipartimenti ... 
+
+            $uo = Auth::user()->unitaorganizzativa();
+            if ($uo->isDipartimento()){
+                //ad un afferente al dipartimento filtro per dipartimento                
+                array_push($parameters['rules'],[
+                    "operator" => "=",
+                    "field" => "unitaorganizzativa_uo",                
+                    "value" => $uo->uo
+                ]);
+            }else if ($uo->isPlesso()){
+                //filtro per unitaorganizzativa dell'utente di inserimento (plesso)
+                $uos = $uo->dipartimenti_uo();
+                array_push($uos,$uo->uo);
+                array_push($parameters['rules'],[
+                    "operator" => "In",
+                    "field" => "unitaorganizzativa_uo",                
+                    "value" => $uos
+                ]);
+            }else{
+                //filtro per unitaorganizzativa dell'utente di inserimento (ufficio)
+                //se l'utente è responsabile di più uffici, filtro per unitaorganizzativa di ogni ufficio
+                $uos = Auth::user()->codiciUnitaorganizzative();
+                array_push($parameters['rules'],[
+                    "operator" => "In",
+                    "field" => "unitaorganizzativa_uo",                
+                    "value" => $uos
+                ]);
+            }                                            
+        }        
+
+        return $parameters;
+    }
 
     public function query(Request $request){       
 
@@ -101,9 +140,17 @@ class UserTaskController extends Controller
             abort(403, trans('global.utente_non_autorizzato'));
         }       
 
+      
         $app = $request->json();
         $parameters = $request->json()->all();
-        $parameters['includes'] = 'tasktype';
+        $parameters['includes'] = 'tasktype,modelwith';
+
+        //usertask hanno una afferenza organizzativa 
+        //poi sono anche collegati ad una convenzione o scadenza ...         
+        //se sono un super-admin vedo tutto 
+        
+        $parameters = $this->filtriPermessiRicercaUserTask($parameters);
+
         $findparam =new \App\FindParameter($parameters);   
 
         $queryBuilder = new QueryBuilder(new UserTask, $request, $findparam);
@@ -197,9 +244,17 @@ class UserTaskController extends Controller
             'state' => 'aperto',
         ]);            
 
+        $entity = null;
+        if ($request->model_type == 'App\Scadenza'){           
+            $entity = Scadenza::find($request->model_id);
+            $task->workflow_place = $entity->state;   
+        }else{
+            $entity = Convenzione::find($request->model_id);      
+            $task->workflow_place = $entity->current_place;      
+        }
         //dato che è un api serve per il controllo
-        $conv = Convenzione::find($request->model_id);
-        $task->model()->associate($conv);            
+        
+        $task->model()->associate($entity);            
         $task->save();   
         
         //$task->assignments()->create(['v_ie_ru_personale_id_ab' => $task->respons_v_ie_ru_personale_id_ab, 'cd_tipo_posizorg' => 'RESP_UFF']);        

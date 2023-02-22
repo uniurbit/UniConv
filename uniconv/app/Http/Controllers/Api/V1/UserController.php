@@ -192,4 +192,11 @@ class UserController extends Controller
         return \App\Permission::where('guard_name','api')->get(['id','name', 'guard_name']);
     }
 
+    //ritorna la lista di unitaorganizzative associate ad un utente
+    public function personaleAfferenzeOrganizzative($id){
+        $user = User::findOrFail($id);
+        $list = $user->personaleAfferenzeOrganizzative();        
+        return $list;        
+    }
+
 }

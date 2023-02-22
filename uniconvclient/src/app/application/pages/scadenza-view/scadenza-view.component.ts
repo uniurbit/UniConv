@@ -34,7 +34,8 @@ export class ScadenzaViewComponent implements OnInit {
         this.service.getById(params['id']).subscribe((data) => {
           this.scad = data;          
           this.isLoading = false;         
-        });
+        },
+        (error)=>this.isLoading=false);
       }
     });
   }

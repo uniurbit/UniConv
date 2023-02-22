@@ -97,7 +97,15 @@ export const ROUTES: RouteInfo[] = [
     submenu: [],
     permissions: ['ADMIN','SUPER-ADMIN','VIEWER','OP_UFF_BILANCIO'], 
   }, 
-
+  {
+    path: 'bolli',
+    title: 'Bolli',
+    icon: 'icon-File-Search',
+    class: '',
+    extralink: false,
+    submenu: [],
+    permissions: ['ADMIN_AMM','ADMIN','SUPER-ADMIN','OP_UFF_BILANCIO'],
+  },
   // DOCUMENTAZIONE A SUPPORTO
   {
     path: '',

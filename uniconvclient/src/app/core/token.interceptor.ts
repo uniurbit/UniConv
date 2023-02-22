@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, isDevMode } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap, catchError, switchMap, filter, take, flatMap } from 'rxjs/operators';
@@ -8,6 +8,7 @@ import { AppConstants } from '../app-constants';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { throwError } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable()
@@ -28,7 +29,10 @@ export class TokenInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       tap((ev: HttpEvent<any>) => {
         if (ev instanceof HttpResponse) {
-          console.log('processing response', ev);
+          if (isDevMode()){
+            //console.log('processing response', JSON.parse(JSON.stringify(ev)));
+            console.log('processing response', ev);
+          }  
         }
       }),
       catchError(error => {
@@ -113,7 +117,7 @@ export class TokenInterceptor implements HttpInterceptor {
             if (error instanceof HttpErrorResponse) {
               if (error.status == 401) {
                 console.log('error refresh token');
-                window.location.href = AppConstants.baseURL + '/loginSaml';
+                window.location.href = environment.API_URL + 'api/loginSaml';
               }
             }
             return throwError(error);

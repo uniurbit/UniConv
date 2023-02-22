@@ -55,3 +55,10 @@ Route::group([
     //Route::post('me', 'AuthController@me');         
 });
 
+Route::group([
+    'middleware' => ['cors','auth:api','log','role:super-admin'],
+    'prefix' => 'auth',
+    'namespace'=>'Api'
+], function ($router) {
+    Route::post('cambiautente', 'AuthController@cambiautente'); 
+});

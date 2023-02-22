@@ -18,14 +18,14 @@
                             <h6 *ngIf="!task.namelist" class="font-medium">...</h6>   
                             <h6 *ngIf="task.namelist" class="font-medium">{{task.namelist | titlecase}}</h6>                         
                         </td>
-                        <td style="width: 70%;" class="text-right">
+                        <td style="width: 70%;" class="text-right pr-0">
                             <ng-container *ngIf="task.model_type == 'App\\\Convenzione'">                                             
-                                <span style="max-height: 100px;" title="{{ task?.modelwith?.descrizione_titolo }}">Convenzione  n. {{task.model_id}}</span> <br>
-                                <span class="text-muted">Azienda: {{ task?.modelwith?.list_azienda_denominazione }}</span>
+                                <div class="text-task" title="{{ task?.modelwith?.descrizione_titolo }}">Convenzione n. {{task.model_id}} {{task?.modelwith?.descrizione_titolo}}</div>
+                                <span class="text-muted text-task">Azienda: {{ task?.modelwith?.list_azienda_denominazione }}</span>
                             </ng-container>
                             <ng-container *ngIf="task.model_type == 'App\\\Scadenza'">                                             
-                                <span *ngIf="task.model_type == 'App\\\Scadenza'" title="{{ task?.modelwith?.convenzione?.descrizione_titolo }}">Scadenza n. {{task.model_id}} (Convenzione n. {{task?.modelwith?.convenzione_id}})</span> <br> 
-                                <span class="text-muted">Azienda: {{ task?.modelwith?.convenzione?.list_azienda_denominazione }}</span>  
+                                <div class="text-task" *ngIf="task.model_type == 'App\\\Scadenza'" title="{{ task?.modelwith?.convenzione?.descrizione_titolo }}">Scadenza n. {{task.model_id}} (Convenzione n. {{task?.modelwith?.convenzione_id}} {{task?.modelwith?.convenzione?.descrizione_titolo}})</div>
+                                <span class="text-muted text-task">Azienda: {{ task?.modelwith?.convenzione?.list_azienda_denominazione }}</span>  
                             </ng-container>                      
                         </td>
                     </tr>

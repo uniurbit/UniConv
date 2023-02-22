@@ -114,7 +114,8 @@ export class ExternalTypeComponent extends FieldType implements OnInit, OnDestro
         if (!this.initdesc)
           return this.init();
 
-        if (this.formControl.value && !this.nodecode) {          
+        if ((this.field.templateOptions.type =="number" && this.formControl.value != null && !this.nodecode) || 
+          (this.field.templateOptions.type != "number" && this.formControl.value && !this.nodecode)) {          
           setTimeout(() => { this.isLoading = true; }, 0);
           this.service.getById(this.formControl.value).subscribe((data) => {
             setTimeout(() => { this.isLoading = false; }, 0);
@@ -161,6 +162,8 @@ export class ExternalTypeComponent extends FieldType implements OnInit, OnDestro
       } else if (!this.extDescription){
         //far scattare la decodifica 
         setTimeout(() => { this.isLoading = true; }, 0);
+        
+        //this.formControl.value è vuoto non deve ricercare  
         this.service.getById(this.formControl.value).subscribe((data) => {
           setTimeout(() => { this.isLoading = false; }, 0);
           if (data == null) {

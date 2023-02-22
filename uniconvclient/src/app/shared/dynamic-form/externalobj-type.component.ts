@@ -50,7 +50,6 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
     this.service = this.injector.get(servicename) as ServiceQuery;    
 
     this.extDescription = this.field.fieldGroup.find(x=>x.key == this.to.descriptionProp || x.key =='description')
-    this.extDescription.templateOptions.disabled =true;
 
     this.codeField = this.field.fieldGroup.find(x=>x.key == this.to.codeProp || x.key =='id')
     this.codeField.modelOptions.updateOn = 'blur';  
@@ -73,7 +72,7 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
         ...this.field.fieldGroup[0].templateOptions.addonRights,
         {
           class: 'btn btn-outline-secondary oi oi-external-link d-flex align-items-center',    
-          alwaysenabled: true,
+          alwaysenabled: () => this.codeField.formControl.valid,
           text: 'Apri gestione',              
           onClick: (to, fieldType, $event) => { this.openEntity(); },
         }
@@ -96,27 +95,34 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
     this.field.fieldGroup[0].hooks = {                    
         onInit: (field) => {          
           this.codeField.formControl.valueChanges.pipe(            
-            distinctUntilChanged(),
+            //distinctUntilChanged(),
             takeUntil(this.onDestroy$),
             //filter(() => !this.options.formState.isLoading),            
             tap(selectedField => {
               if (!this.isInitValue() && !this.field.templateOptions.hidden){
-                if (field.formControl.value && !this.nodecode) {
+                if (field.formControl.value && !this.nodecode && field.formControl.valid) {
                   this.isLoading = true;
+                  field.formControl.setErrors({ waiting: true });  
                   this.service.getById(field.formControl.value).subscribe((data) => {
                     this.isLoading = false;
                     if (data == null) {
                       this.extDescription.formControl.setValue(null);
                       field.formControl.setErrors({ notfound: true });                    
                       return;
-                    }
+                    } 
                     //NB usare la stessa funzione richiamata dal ritorno della lookup
                     this.init(data);                  
+                  },
+                  (error) => {
+                    this.isLoading = false;
+                    field.formControl.setErrors({ notfound: true });                    
                   });
 
                 } else {
-                  //codizione di empty
-                  this.extDescription.formControl.setValue(null);
+                  //codizione di empty il codice deve essere vuoto oppure se c'è il valore senza errori non valido
+                  if (!field.formControl.value || (field.formControl.value && field.formControl.errors != null))
+                    this.extDescription.formControl.setValue(null);
+
                   this.codeField.formControl.markAsDirty();
                 }
               }
@@ -160,6 +166,7 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
         templateOptions: {
           label: field.templateOptions.label,
           type: 'input',
+          pattern: field.templateOptions.subpattern ? field.templateOptions.subpattern : null,
           placeholder: 'Inserisci codice',     
           required: field.templateOptions.required == undefined ? false : field.templateOptions.required,
           disabled: field.templateOptions.disabled == undefined ? false : field.templateOptions.disabled,                
@@ -169,23 +176,22 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
       {
         key: field.templateOptions.descriptionProp || 'description',
         type: 'input',
-        className: "col-md-8",        
+        className: "col-md-8",                        
         templateOptions: {
-          disabled: true,
+          readonly: true,          
           label: 'Descrizione'
-        },
-        expressionProperties: {
-          'templateOptions.disabled': () => true,
-        },
+        },      
       }
     ];
   }
 
   setDescription(data: any) {  
     if (this.field && typeof this.field.templateOptions.descriptionFunc === 'function'){
+      this.extDescription.formControl.setErrors(null);
       this.extDescription.formControl.setValue(this.field.templateOptions.descriptionFunc(data))
       this.codeField.formControl.markAsDirty();
     } else if (this.field && this.field.templateOptions.descriptionProp in data){                      
+      this.extDescription.formControl.setErrors(null);
       //il parametro decriptionProp contiene il nome della proprità che contiene la descrizione
       this.extDescription.formControl.setValue(data[this.field.templateOptions.descriptionProp]);
       this.codeField.formControl.markAsDirty();
@@ -193,7 +199,9 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
   }
 
   setcode(data: any) {
-    if (this.field && this.field.templateOptions.codeProp in data){
+    if (this.field && this.field.templateOptions.codeProp in data){   
+      this.codeField.formControl.setErrors(null);
+      this.field.formControl.setErrors(null);
       this.codeField.formControl.setValue(data[this.field.templateOptions.codeProp]);
       this.codeField.formControl.markAsDirty();
     }
@@ -202,7 +210,7 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
   init(result){    
     this.nodecode = true  
     this.setcode(result);
-    this.setDescription(result);
+    this.setDescription(result);    
     Object.keys(result).forEach( x=> this.field.model[x] = result[x]);
     this.nodecode = false
   }

@@ -91,6 +91,8 @@ import { RegistrazioneBolloRepertoriazioneComponent } from './pages/registrazion
 import { RepertorioService } from './repertorio.service';
 import { LinkEsterniComponent } from './link-esterni/link-esterni.component';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
+import { BolliComponent } from './components/bolli/bolli.component';
+import { BolloService } from './bollo.service';
 
 registerLocaleData(localeIt);
 @NgModule({
@@ -126,7 +128,8 @@ registerLocaleData(localeIt);
     DocumentiTitulus, ScadenzaComponent, ScadenzeComponent, BolloRepertoriazioneComponent, RichiestaEmissioneComponent, EmissioneComponent, PagamentoComponent, 
     InvioRichiestaPagamentoComponent, ConvenzionedetailsComponent, ApprovazionedetailsComponent, SottoscrizionedetailsComponent, RepertoriazionedetailsComponent, 
     ScadenzedetailsComponent, EsecuzionedetailsComponent, RangedetailsComponent, LogAttivitaComponent, MappingRuoli, MappingRuolo, FaseWrapperComponent, ConvazioniActionsComponent, RegistrazioneSottoscrizioneComponent, ScadenzaViewComponent, ScadenzaEmessaComponent, ScadenzaInpagamentoComponent, ScadenzaAzioniComponent, InsConvAmmComponent, RegistrazioneCompletamentoControparteComponent, RegistrazioneCompletamentoDirettoreComponent, RegistrazioneBolloRepertoriazioneComponent,
-    LinkEsterniComponent
+    LinkEsterniComponent,
+    BolliComponent
 
   ],
   providers: [ 
@@ -144,6 +147,7 @@ registerLocaleData(localeIt);
     RepertorioService,
     ScadenzaService,
     LogAttivitaService,
+    BolloService,
     DatePipe,
   ], 
 })

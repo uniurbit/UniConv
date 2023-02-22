@@ -145,6 +145,7 @@ export class RegistrazioneCompletamentoControparteComponent extends BaseEntityCo
                 label: 'Numero di protocollo',
                 required: true,      
                 type: 'string',
+                subpattern: /^[0-9]+-[a-zA-Z]+-\d{7}$/,
                 entityName: 'documento',
                 entityLabel: 'Documenti',
                 codeProp: 'num_prot',

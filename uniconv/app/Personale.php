@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\QueryBuilder;
 use App\Ruolo;
 use App\UnitaOrganizzativa;
 use App\MappingUfficio;
+use Illuminate\Support\Facades\Cache;
 
 class Personale extends Model
 {    
@@ -32,6 +33,22 @@ class Personale extends Model
         return $this->belongsTo(Ruolo::class,'cd_ruolo','ruolo');
     }
 
+    public function cacheKey()
+    {
+        return sprintf(
+            "%s/%s",
+            $this->getTable(),
+            $this->aff_org
+        );
+    }
+        
+    public function unitaRelation()
+    {
+        return Cache::remember($this->cacheKey() . ':unita', 60 * 24 * 20, function () {
+            return is_null($this->unita()->get()) ? false : $this->unita()->get();
+        });
+    }
+
     public function unita()
     {
         return $this->belongsTo(UnitaOrganizzativa::class,'aff_org','uo');
@@ -45,14 +62,14 @@ class Personale extends Model
 
     public function scopeFindByIdAB($query, $id_ab)
     {        
-        return $query->where('id_ab',$id_ab)->first();
+        return $query->where('id_ab',$id_ab);
     }
 
 
     // restituisce un persona cercandola dalla sua email
     public function scopeFindByEmail($query, $email)
     {        
-        return $query->where('email',$email)->first();
+        return $query->where('email',$email);
     }
 
     public function isDocente()
@@ -68,5 +85,10 @@ class Personale extends Model
     public function scopeFindByAfferenzaOrganizzativa($query, $uo)
     {        
         return $query->where('aff_org',$uo);
+    }
+    
+    /** restituisce il nome utente ricercabile su titulus */
+    public function getUtenteNomepersonaAttribute(){
+        return strtolower($this->attributes['cognome']).' '.strtolower($this->attributes['nome']);
     }
 }

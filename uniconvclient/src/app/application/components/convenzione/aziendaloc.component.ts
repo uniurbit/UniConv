@@ -6,6 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BaseEntityComponent } from 'src/app/shared/base-component/base-entity.component';
 import { AziendaLocService } from '../../aziendaloc.service';
 import {Location} from '@angular/common';
+import { AppConstants } from 'src/app/app-constants';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-aziendaloc', 
@@ -45,10 +47,11 @@ export class AziendaLocComponent extends BaseEntityComponent {
         type: 'external',          
         templateOptions: {
           label: 'Riferimento azienda',
-          type: 'string',
+          type: 'number',
           entityName: 'azienda',
           entityLabel: 'Aziende sistema gestionale di ateneo',
-          codeProp: 'id_esterno',        
+          enableNew: false,
+          codeProp: 'id_ab',        
           descriptionFunc: (data) => {
             if (data && data.denominazione){            
               this.updateAzienda(data);
@@ -145,12 +148,16 @@ export class AziendaLocComponent extends BaseEntityComponent {
             fieldGroup: [
               {
                 key: 'provincia',
-                type: 'provincia',
+                type: 'select',
                 className: 'col-md-3',              
-                templateOptions: {                              
-                  maxLength: 2,
-                  required: true,                  
+                templateOptions: {
+                  options: of(AppConstants.LISTA_PROVINCE.map(prov => { return { value: prov.sigla, label: prov.sigla + " " + prov.nome } })),
+                  attributes: {
+                    autocomplete: 'azienda-provincia',
+                  },
+                  translate: true,
                   label: 'Provincia',
+                  required: true,
                   description: "Inserire EE per residenze all'estero"
                 },
               },              
@@ -240,6 +247,26 @@ export class AziendaLocComponent extends BaseEntityComponent {
       this.form.get('nome').setValue(data.rappresentante_legale.split(' ').slice(0, -1).join(' '));
       this.form.get('cognome').setValue(data.rappresentante_legale.split(' ').slice(-1).join(' '));
     }
+
+    const indirizzi = data.indirizzi;
+    if (Array.isArray(indirizzi) && indirizzi.length > 0){
+      const indirizzo = data.indirizzi[0];
+      if (indirizzo.cd_sigla_prov)
+        this.form.get('provincia').setValue(indirizzo.cd_sigla_prov);
+      if (indirizzo.ds_comune)
+        this.form.get('comune').setValue(indirizzo.ds_comune);
+      if (indirizzo.indirizzo)
+        this.form.get('indirizzo1').setValue(indirizzo.indirizzo);
+      if (indirizzo.cd_cap)
+        this.form.get('cap').setValue(indirizzo.cd_cap);
+    }
+//     cd_cap: "00185"
+// cd_catasto_comune: "H501"
+// cd_sigla_prov: "RM"
+// dt_fine_val: "2222-02-02 00:00:00"
+// id_ab: 58446
+// indirizzo: "Via Parigi"
+// num_civico: "11"
 
   }
 

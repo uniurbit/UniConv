@@ -18,7 +18,7 @@ import { template } from '@angular/core/src/render3';
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{ 'btn_salva' | translate }}</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -33,7 +33,7 @@ import { template } from '@angular/core/src/render3';
       </formly-form>
   </form>
   
-  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()">Salva</button>
+  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()">{{ 'btn_salva' | translate }}</button>
   </div>
   `,
   styles: []
@@ -163,7 +163,7 @@ export class ConvvalidationComponent extends BaseEntityComponent {
                 label: 'Scegli documento',
                 type: 'input',              
                 placeholder: 'Scegli file documento',
-                accept: 'application/pdf,.p7m', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,
+                accept: 'application/pdf', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,
                 required: false,
                 onSelected: (selFile, field) => { this.onSelectCurrentFile(selFile, field); }
               },

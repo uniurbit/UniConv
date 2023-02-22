@@ -8,6 +8,7 @@ import { Location } from '@angular/common';
 import ControlUtils from 'src/app/shared/dynamic-form/control-utils';
 import { PDFJSStatic } from "pdfjs-dist";
 import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/confirmation-dialog.service';
+import { GlobalConstants } from '../global-constants';
 
 const PDFJS: PDFJSStatic = require('pdfjs-dist');
 
@@ -20,7 +21,7 @@ const PDFJS: PDFJSStatic = require('pdfjs-dist');
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{ 'btn_salva' | translate }} e repertoria</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -34,7 +35,7 @@ const PDFJS: PDFJSStatic = require('pdfjs-dist');
       <formly-form [model]="model" [fields]="fields" [form]="form" [options]="options">
       </formly-form>
   </form>
-  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">Salva e repertoria</button>
+  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">{{ 'btn_salva' | translate }} e repertoria</button>
   </div>
   `,
   styles: []
@@ -118,96 +119,146 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
   };
 
   static sceltaBolli = (that) => {
-    return {
-      fieldGroupClassName: 'row',
+    return {      
       fieldGroup: [
+        //bollo contratto atti e provv.
         {
-          key: 'bolli',
-          type: 'repeat',
-          className: 'col-md-8',
-          templateOptions: {
-            min: 1,
-          },
-          fieldArray: {
-            fieldGroupClassName: 'row',
-            fieldGroup: [{
-              key: 'num_bolli',
-              type: 'number',
+          key: 'bollo_atti',                    
+          fieldGroupClassName: 'row',
+          fieldGroup: [
+            {
+              key: 'num_righe',
+              type: 'numfix',
               className: 'col-md-4',
-              templateOptions: {
+              templateOptions: {    
+                translate: true,              
+                min: 1,
                 required: true,
-                label: 'Numero bolli',
-                description: 'Calcolare un bollo ogni 100 righe di convenzione',
+                label: 'num_righe_bolli_atti',
               },
-              expressionProperties: {
-                'templateOptions.description': (model: any, formState: any) => {
-                  return (model.tipobolli_codice == 'BOLLO_ATTI') ? 'Calcolare un bollo ogni 100 righe di convenzione' : '';
-                },
-              }
             },
             {
               key: 'tipobolli_codice',
               type: 'select',
-              className: "col-md-6",
+              className: "col-md-4",
               defaultValue: 'BOLLO_ATTI',
               templateOptions: {
-                options: [
-                  { label: 'Atti e provvedimenti', value: 'BOLLO_ATTI' },
-                  { label: 'Allegati tecnici', value: 'BOLLO_TEC_ALLEGATO' },
-                ],
-                label: 'Applicazione',
+                translate: true,    
+                options: GlobalConstants.tariffa_bolli['BOLLO_ATTI'],    
+                label: 'tariffa_bolli_atti',
                 required: true,
               },
             },
-
-            ],
-          },
+            {
+              key: 'num_bolli',
+              type: 'numfix',
+              className: 'col-md-4',
+              templateOptions: {
+                translate: true,
+                min: 1,
+                required: true,
+                label: 'num_bolli_atti',
+              },
+            },
+          ],         
           hideExpression: (model, formstate) => {
             return (formstate.model.bollo_virtuale == false);
           },
-          validators: {
-            unique: {
-              expression: (c) => {
-                if (c.value) {
-                  var valueArr = c.value.map(function (item) { return item.tipobolli_codice }).filter(x => x != null);
-                  var isDuplicate = valueArr.some(function (item, idx) {
-                    return valueArr.indexOf(item) != idx
-                  });
-                  return !isDuplicate;
-                }
-                return true;
-              },
-              message: (error, field: FormlyFieldConfig) => `Tipo bollo ripetuto`,
-            },
-            atleasttype: {
-              expression: (c) => {
-                const f = c.value.find(x => x.tipobolli_codice == 'BOLLO_ATTI');
-                if (f) {
-                  return true;
-                }
-                return false;
-              },
-              message: (error, field: FormlyFieldConfig) => `Richiesto il bollo 'Atti e provvedimenti'`,
-            }
-          },
+
         },
+        //bollo allegato  
         {
-          type: 'template',
-          className: 'col-md-4 mt-4 pt-3',
-          templateOptions: {
-            template: '',
-          },
+          key: 'bollo_allegati',                    
+          fieldGroupClassName: 'row',
+          fieldGroup: [
+            {
+              key: 'num_righe',
+              type: 'numfix',
+              className: 'col-md-4',
+              templateOptions: {
+                translate: true,
+                min: 1,
+                label: 'num_righe_bolli_allegati',
+              },
+              expressionProperties: {
+                'templateOptions.required': (model: any, formState: any, field: FormlyFieldConfig) => {
+                  return (model.num_bolli != null && model.num_bolli > 0);
+                },
+              },
+            },
+            {
+              key: 'tipobolli_codice',
+              type: 'select',
+              className: "col-md-4",
+              defaultValue: 'BOLLO_ALLEGATI',
+              templateOptions: {
+                translate: true,
+                options: GlobalConstants.tariffa_bolli['BOLLO_ALLEGATI'],    
+                label: 'tariffa_bolli_allegati',
+              },
+            },
+            {
+              key: 'num_bolli',
+              type: 'numfix',
+              className: 'col-md-4',
+              templateOptions: {
+                translate: true,
+                min: 1,
+                label: 'num_bolli_allegati',
+              },
+              expressionProperties: {
+                'templateOptions.required': (model: any, formState: any, field: FormlyFieldConfig) => {
+                  return (model.num_righe != null && model.num_righe > 0);
+                },
+              },
+            },
+          ],         
           hideExpression: (model, formstate) => {
-            return !(that.model.bollo_virtuale && that.numPages != null && that.numPages != undefined);
+            return (formstate.model.bollo_virtuale == false);
           },
-          expressionProperties: {
-            'templateOptions.template': () => `           
-          <h6 class="panel-title">
-           Numero di pagine ${that.numPages} e numero righe calcolate ${that.numLines}
-          </h6>
-        `
-          }
+
         },
+        //bollo allegato tecnico 
+        // {
+        //   key: 'bollo_allegato_tecnico',                    
+        //   fieldGroupClassName: 'row',
+        //   fieldGroup: [
+        //     {
+        //       key: 'num_righe',
+        //       type: 'numfix',
+        //       className: 'col-md-2',
+        //       templateOptions: {
+        //         min: 1,                
+        //         label: 'Numero righe allegato tecnico',
+        //       },                
+        //     },
+        //     {
+        //       key: 'tipobolli_codice',
+        //       type: 'select',
+        //       className: "col-md-2",
+        //       defaultValue: 'BOLLO_ALLEGATO_TECNICO',
+        //       templateOptions: {
+        //         options: [
+        //           { label: '2 €', value: 'BOLLO_ALLEGATO_TECNICO' },                    
+        //         ],
+        //         label: 'Tariffa',
+        //         required: true,
+        //       },
+        //     },
+        //     {
+        //       key: 'num_bolli',
+        //       type: 'numfix',
+        //       className: 'col-md-2',
+        //       templateOptions: {
+        //         min: 1,                
+        //         label: 'Numero bolli allegato tecnico',                
+        //       },               
+        //     },                  
+        //     ],          
+        //     hideExpression: (model, formstate) => {
+        //       return (formstate.model.bollo_virtuale == false);
+        //     },
+        // },
       ]
     }
   }
@@ -225,8 +276,7 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
         BolloRepertoriazioneComponent.comboStipulaFormat,
         //bollo virtuale
         BolloRepertoriazioneComponent.comboBolloVirtuale,
-        //bolli 
-        BolloRepertoriazioneComponent.sceltaBolli(this),
+       
         //allegato 1 per repertoriare        
         {
           key: 'attachment1',
@@ -253,14 +303,27 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
                 {
                   key: 'filename',
                   type: 'fileinput',
-                  className: "col-md-7",
+                  className: "col-md-7",          
                   templateOptions: {
                     required: true,
                     label: 'Scegli il documento',
                     type: 'input',
+                    readonly: true,
+                    maxLength: 255,
                     placeholder: 'Scegli file documento',
-                    accept: 'application/pdf,application/pkcs7-mime', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,                
+                    accept: 'application/pdf,.p7m,application/pkcs7-mime', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,                
                     onSelected: (selFile, field) => { this.onSelectCurrentFile(selFile, field); }
+                  },
+                  validators: {
+                    maxsize: {
+                      expression: (c,f) => (f.model._filesize && f.model._filesize > 5242880) ? false : true,
+                      message: (error, field) => `La dimensione del file eccede la dimensione massima consentita `,
+                    },
+                    // filetype: {
+                    //   expression: (c,f) => (c.value ? (c.value.endsWith('.pdf') ? true : false) :true),
+                    //   message: (error, field) => `Il formato file richiesto è PDF`,
+                    // }
+
                   },
                 },
               ],
@@ -349,6 +412,19 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
         }
       ]
     },
+    {
+      wrappers: ['riquadro'],
+      templateOptions: {
+        title: 'Bollo virtuale'
+      },
+      fieldGroup: [
+         //bolli 
+         BolloRepertoriazioneComponent.sceltaBolli(this),
+      ],
+      hideExpression: (model, formstate) => {
+        return (formstate.model.bollo_virtuale == false);
+      },
+    }
   ];
 
   onSelectOptionalCurrentFile(currentSelFile, field: FormlyFieldConfig) {
@@ -391,10 +467,21 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
     let currentAttachment = field.parent.model; //.formControl.parent.value;
     if (currentSelFile == null) {
       //caso di cancellazione
+      currentAttachment._filesize = null;
       currentAttachment.filevalue = null;
       return;
     }
 
+    if (field.validation)
+      field.validation.show = true;
+    else 
+      field.validation = {
+        show: true
+      }
+
+    currentAttachment._filesize = currentSelFile.size;
+    field.formControl.updateValueAndValidity();
+    
     this.isLoading = true;
     currentAttachment.model_type = 'convenzione';
 
@@ -404,12 +491,12 @@ export class BolloRepertoriazioneComponent extends BaseEntityComponent {
       this.isLoading = true;
       currentAttachment.filevalue = encode(e.target.result);
 
-      if (currentAttachment.filename.endsWith('.pdf')) {
-        this.numLines = await this.lineNumber(e.target.result);
-      } else {
-        this.numLines = null;
-        this.numPages = null;
-      }     
+      // if (currentAttachment.filename.endsWith('.pdf')) {
+      //   this.numLines = await this.lineNumber(e.target.result);
+      // } else {
+      //   this.numLines = null;
+      //   this.numPages = null;
+      // }     
 
       if (!currentAttachment.filevalue) {
         this.isLoading = false;

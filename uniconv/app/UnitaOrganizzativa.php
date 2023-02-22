@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use App\Http\Controllers\Api\V1\QueryBuilder;
 use App\Dipartimento;
 use App\Service\RoleService;
+use Illuminate\Support\Facades\Cache;
 class UnitaOrganizzativa extends Model
 {
     protected $connection = 'oracle';    
@@ -25,7 +26,9 @@ class UnitaOrganizzativa extends Model
      public function dipartimento()
      {
         if ($this->isDipartimento()){
-            return $this->belongsTo(Dipartimento::class,'id_ab','dip_id')->get();        
+            return Cache::remember($this->cacheKey() . ':dipartimento', 60 * 24 * 20, function () {
+                return is_null($this->belongsTo(Dipartimento::class,'id_ab','dip_id')->get()) ? false : $this->belongsTo(Dipartimento::class,'id_ab','dip_id')->get();
+            });            
         }                
      }
 
@@ -61,22 +64,58 @@ class UnitaOrganizzativa extends Model
         }
     }
 
-     public function dipartimenti(){
+
+    public function cacheKey()
+    {
+        return sprintf(
+            "%s/%s",
+            $this->getTable(),
+            $this->id_ab
+        );
+    }
+             
+    public function dipartimenti(){
         if ($this->isPlesso()){
             //Plesso Economico - Umanistico (DESP-DISTUM)
             if ($this->id_ab == 26618){
-                return Dipartimento::whereIn('dip_id',[26121,4504])->get(); 
+                return Cache::remember($this->cacheKey() . ':dipartimenti', 60 * 24 * 20, function () {
+                    return Dipartimento::whereIn('dip_id',[26121,4504])->get(); 
+                });                
             }
-            //Plesso Giuridico-Umanistico (DIGIUR-DISCUI)
+            //Plesso Giuridico-Umanistico (DIGIUR-DISCUI) //26124
             if ($this->id_ab == 26616){
-                return Dipartimento::whereIn('dip_id',[26124,4499,49025])->get(); 
+                return Cache::remember($this->cacheKey() . ':dipartimenti', 60 * 24 * 20, function () {
+                    return Dipartimento::whereIn('dip_id',[4499,49025])->get(); 
+                });                
             }
             //Plesso Scientifico (DiSPeA-DiSB)
             if ($this->id_ab == 32718){
-                return Dipartimento::whereIn('dip_id',[26080,27605])->get(); 
+                return Cache::remember($this->cacheKey() . ':dipartimenti', 60 * 24 * 20, function () {
+                    return Dipartimento::whereIn('dip_id',[26080,27605])->get(); 
+                });                
             }           
         }
-     }
+    }
+
+    public function dipartimenti_uo(){
+        if ($this->isPlesso()){
+            //Plesso Economico - Umanistico (DESP-DISTUM)
+            if ($this->id_ab == 26618){
+                return ['004424','004939'];
+            }
+            //Plesso Giuridico-Umanistico (DIGIUR-DISCUI)
+            if ($this->id_ab == 26616){
+                return ['004419','004940','005579'];
+            }
+            //Plesso Scientifico (DiSPeA-DiSB)
+            if ($this->id_ab == 32718){
+                return ['004919','005019'];
+            }           
+        } else {
+            return [$this->uo];
+        }
+    }
+
 
 
      public function isUnitaSuperAdmin(){
@@ -112,7 +151,11 @@ class UnitaOrganizzativa extends Model
      }
 
     public function scopeUfficiRuoli($query){
-        return $query->whereIn('uo', array_merge(array_merge(config('unidem.unitaAdmin'), config('unidem.ufficiPerValidazione')),config('unidem.uffFiscale')));
+        $uoByRoleList = MappingRuolo::whereHas('role', function($q){
+            $q->whereIn('name',['admin','admin_amm','op_contabilita','op_approvazione']);
+        })->get()->pluck('unitaorganizzativa_uo')->toArray();
+        return $query->whereIn('uo', $uoByRoleList); 
+        //array_merge(array_merge(config('unidem.unitaAdmin'), config('unidem.ufficiPerValidazione')),config('unidem.uffFiscale')));
     }
 
     public function scopeUfficiValidazione($query){

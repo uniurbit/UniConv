@@ -28,10 +28,12 @@ class InPagamentoTask extends BaseTask
     }     
    
     public function assignments($user_id){
-        //cercare utente nella tabella ... v_ie_ru_pers_respons_org    
-        $user = User::find($user_id)->personaleRespons()->first();                            
+        //cercare utente nella tabella ... v_ie_ru_pers_respons_org restituisce il 
+        //cd_csa dell'utente corrente e il cd_tipo_posizorg
+        //e l'id_ab_resp del resposabile di struttura
+        $user = User::find($user_id)->findPersonaleRespons();                            
         $this->unitaorganizzativa_uo = $user->cd_csa;
-        $this->respons_v_ie_ru_personale_id_ab = $user->id_ab_resp;
+        $this->respons_v_ie_ru_personale_id_ab = $user->responsabileUfficio(); //$user->id_ab_resp;
         array_push($this->assignments, ['v_ie_ru_personale_id_ab' => $user->id_ab, 'cd_tipo_posizorg' => $user->cd_tipo_posizorg]);
     }
 

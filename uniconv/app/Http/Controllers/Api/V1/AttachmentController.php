@@ -65,8 +65,7 @@ class AttachmentController extends Controller
         if ($attachment){
             //file caricato con successo
             //ritornare id del file 
-            $attachment->attachmenttype()->get();       
-            return $attachment;
+            return Attachment::with('attachmenttype')->find($attachment->id);                             
         }                
         return response()->json('Il documento '.$request->get('filename').' non è stato memorizzato', 404);
     }
@@ -79,7 +78,11 @@ class AttachmentController extends Controller
             if ($attachment->nrecord && $attachment->num_prot && $attachment->createLink($attachment->num_prot)){
                 $attachment->save();
             } else{
-                throw new Exception("Error file ".$data['filename']." not saved", 1);                
+                if ($attachment->createEmptyFile()){
+                    $attachment->save();
+                }else{
+                    throw new Exception("Error file ".$valore['filename']." not saved", 1);                
+                }                
             }
         }   
         return $attachment;          
@@ -103,24 +106,9 @@ class AttachmentController extends Controller
         
         $attach = Attachment::find($id);
         if ($attach->num_prot){
-            $app = TitulusHelper::downloadAttachment($attach->num_prot);
+            $app = TitulusHelper::downloadAttachment($attach->num_prot,$attach->filename);
             if ($app){
-                if ($attach->attachmenttype_codice=="FATTURA_ELETTRONICA" &&  $app->mimeType == "application/xml"){
-                    $pdf = TitulusHelper::createFatturaPA($app->content);
-                    $attach['filevalue'] = base64_encode($pdf->output());
-                    if ($attach->filetype == 'link'){
-                        $attach['filename'] = $app->title.'.pdf';
-                    }
-                }else{
-                    $attach['filevalue'] =  base64_encode($app->content);                                                    
-                    if ($attach->filetype == 'link'){                     
-                        if ($this->mime2ext($app->mimeType)){
-                            $attach['filename'] = $app->title.'.'.$this->mime2ext($app->mimeType);
-                        }else{
-                            $attach['filename'] = $app->title;
-                        }                            
-                    }                                            
-                }
+                $attach = $this->getAttachmentContent($attach, $app);
             }
         }else{
             if ($attach['type'] != 'empty' && $attach['filepath']){                        
@@ -128,6 +116,33 @@ class AttachmentController extends Controller
             }
         }        
         return $attach;        
+    }
+
+    public function getAttachmentContent($attach, $app)
+    {
+        //se application/xml oppure application/octet-stream e file id termina con .xml
+        if ($attach->attachmenttype_codice=="FATTURA_ELETTRONICA" && 
+                ($app->mimeType == "application/xml" || 
+                    ($app->mimeType == "application/octet-stream" && Str::endsWith(strtolower($app->id),'.xml')))
+            ){
+        
+                $pdf = TitulusHelper::createFatturaPA($app->content);
+                $attach['filevalue'] = base64_encode($pdf->output());
+                if ($attach->filetype == 'link'){
+                    $attach['filename'] = $app->title.'.pdf';
+                }
+        }else{
+            $attach['filevalue'] =  base64_encode($app->content);                                                    
+            if ($attach->filetype == 'link'){                     
+                if ($this->mime2ext($app->mimeType)){
+                    $attach['filename'] = $app->title.'.'.$this->mime2ext($app->mimeType);
+                }else{
+                    $attach['filename'] = $app->title;
+                }                            
+            }                                            
+        }
+
+        return $attach;
     }
 
     public function getTitulusDocumentURL($id){

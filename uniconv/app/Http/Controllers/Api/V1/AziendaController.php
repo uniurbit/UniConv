@@ -66,7 +66,8 @@ class AziendaController extends Controller
 
         $app = $request->json();
         $parameters = $request->json()->all();
-        $parameters['order_by'] = 'id_esterno,desc';
+        $parameters['includes'] = 'indirizzi';
+        $parameters['order_by'] = 'id_ab,desc';
         $findparam =new \App\FindParameter($parameters);      
 
         $queryBuilder = new QueryBuilderForceInsensitive(new Azienda, $request, $findparam);

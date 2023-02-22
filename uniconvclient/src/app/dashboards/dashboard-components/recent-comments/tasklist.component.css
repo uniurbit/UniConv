@@ -1,3 +1,16 @@
  .comment-widgets {
  	height:560px;
  }
+
+ .text-task {		
+	padding-right: 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	/* autoprefixer: off */
+	-webkit-box-orient: vertical;
+	/* autoprefixer: on */	
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	word-break: break-word;
+ }
+

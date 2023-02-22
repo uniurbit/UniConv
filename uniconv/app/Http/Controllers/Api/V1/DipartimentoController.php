@@ -96,8 +96,8 @@ class DipartimentoController extends Controller
 
     public function getUserDepartments(){
            //se non ha il permesso viene filtrato per utente
-           $pers = Auth::user()->personale()->first();
-           $uo = $pers->unita()->first();
+           $pers = Auth::user()->personaleRelation()->first();
+           $uo = $pers->unitaRelation()->first();
            if ($uo->isDipartimento()){
                return $uo->dipartimento();
            }

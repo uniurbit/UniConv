@@ -10,14 +10,14 @@
             </button> 
             <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()"  *ngxPermissionsOnly="['ADMIN_AMM','ADMIN','SUPER-ADMIN']">
                 <span class="oi oi-arrow-top"></span>
-                <span class="ml-2">Aggiorna</span>
+                <span class="ml-2">Salva</span>
             </button>
             <button class="btn btn-outline-primary rounded-lg ml-1" (click)="onValidate()" >              
                 <span class="oi oi-flash"></span>  
                 <span class="ml-2">Valida</span>              
             </button>   
             <button *ngIf="isReloadable" class="btn btn-outline-primary rounded-lg ml-1" (click)="onReload()" [disabled]="!form.dirty">
-                <span class="oi oi-reload iconic" title="reload" aria-hidden="true"></span>
+                <span class="oi oi-reload" title="reload" aria-hidden="true"></span>
                 <span class="ml-2">Ricarica</span>
             </button>
             <button *ngIf="researchPath" class="btn btn-outline-primary rounded-lg ml-1" (click)="onResearch()">
@@ -47,4 +47,13 @@
 
         </formly-form>
     </form>
+
 </div>
+
+<ng-template #stateattivita ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column" >
+    <span [ngSwitch]="value">                        
+      <span *ngSwitchCase="'aperto'" class="label label-rounded label-primary">{{value}}</span>                        
+      <span *ngSwitchCase="'annullato'" class="label label-rounded label-danger">{{value}}</span>     
+      <span *ngSwitchCase="'completato'" class="label label-rounded label-success">{{value}}</span>     
+    </span>
+</ng-template>  

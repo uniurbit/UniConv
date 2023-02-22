@@ -14,7 +14,7 @@ class Ruolo extends Model
     public $primaryKey = 'RUOLO';
 
     const DOCENTITYPE = array(9,1,11);
-    const PTATYPE = array(3);
+    const PTATYPE = array(3,13);
 
      // Allow for camelCased attribute access
      public function getAttribute($key)

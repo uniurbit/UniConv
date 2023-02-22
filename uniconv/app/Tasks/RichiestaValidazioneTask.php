@@ -44,9 +44,14 @@ class RichiestaValidazioneTask extends BaseTask
     //dove il task è associato all'utente che compila la convenzione
     public function assignments($user_id){
         //cercare utente nella tabella ... v_ie_ru_pers_respons_org    
-        $user = User::find($user_id)->personaleRespons()->first();                            
-        $this->unitaorganizzativa_uo = $user->cd_csa;
-        $this->respons_v_ie_ru_personale_id_ab = $user->id_ab_resp;
+        $user = User::find($user_id)->findPersonaleRespons();                            
+        if ($this->model->convenzione_from == 'amm'){
+            //per le convenzioni amministrative
+            $this->unitaorganizzativa_uo = $this->model->unitaorganizzativa_uo;
+        } else {                          
+            $this->unitaorganizzativa_uo = $user->cd_csa;
+        }
+        $this->respons_v_ie_ru_personale_id_ab = $user->responsabileUfficio(); //$user->id_ab_resp;
         array_push($this->assignments, ['v_ie_ru_personale_id_ab' => $user->id_ab, 'cd_tipo_posizorg' => $user->cd_tipo_posizorg]);
     }
 }

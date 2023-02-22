@@ -7,13 +7,18 @@ use Illuminate\Support\Facades\Auth;
 use App\Convenzione;
 use App\Attachment;
 use App\Scadenza;
+use App\UserTask;
+use App\Service\ConvenzioneService;
+use App\Tasks\EmissioneTask;
 use App\Tasks\RichiestaEmissioneTask;
+use App\Tasks\InvioRichiestaPagamentoTask;
 use Illuminate\Support\Facades\Log;
 
 use Exception;
 use DB;
 use App\Repositories\Events\RepositoryEntityCreated;
 use Carbon\Carbon;
+use DateTime;
 
 class ConvenzioneRepository extends BaseRepository {
  
@@ -47,14 +52,24 @@ class ConvenzioneRepository extends BaseRepository {
         $convenzione = Convenzione::withTrashed()->with([
             'user:id,name',
             'tipopagamento',            
-            'aziende',       
+            'aziende',
             'attachments', 
             'scadenze',
             'usertasks', 
             'usertasks.assignments.user',
             'logtransitions',       
             'bolli'               
-            ])->where('id', $id)->first();                
+            ])->where('id', $id)->first();               
+
+        if ($convenzione == null){
+            return $convenzione;
+        }
+
+        if ($convenzione->bollo_virtuale != null && $convenzione->bollo_virtuale == true){
+            $convenzione['bollo_atti'] = $convenzione->bolli_atti_prov();
+            $convenzione['bollo_allegati'] = $convenzione->bolli_allegato();
+        }   
+
         return $convenzione;
     }
 
@@ -88,19 +103,24 @@ class ConvenzioneRepository extends BaseRepository {
             $model->update($data);
                                
             if (array_key_exists('aziende',$data)){
-                $new_array = array_reduce($data['aziende'], function ($result, $item) {                    
-                    $result[] = (int)$item['id'];
+                $index=1;
+                $new_array = array_reduce($data['aziende'], function ($result, $item) use (&$index) {                    
+                    $result[(int)$item['id']] = ['ordine' => $index];
+                    $index++;
                     return $result;
                 }, array());
                 $model->aziende()->sync($new_array);
             }
             
-            if ($model->bollo_virtuale){
-                if (array_key_exists('bolli', $data))
+            if ($model->bollo_virtuale){               
+                if (array_key_exists('bollo_atti', $data))
                 {               
                     $model->bolli()->delete();
-                    $model->bolli()->createMany($data['bolli']);               
-                }                              
+                    if ($data['bollo_allegati'] == null){
+                        $data['bollo_allegati'] = ['tipobolli_codice' => 'BOLLO_ALLEGATI'];
+                    }
+                    $model->bolli()->createMany([$data['bollo_atti'], $data['bollo_allegati']]);               
+                }                     
             }else{
                 $model->bolli()->delete();
             }
@@ -134,16 +154,22 @@ class ConvenzioneRepository extends BaseRepository {
 
             if (array_key_exists('aziende', $data))
             {
+                $index=1;
                 foreach ($data['aziende'] as $key => $value) {
-                    $conv->aziende()->attach((int)$value['id']);
+                    $conv->aziende()->attach((int)$value['id'],['ordine'=>$index]);
+                    $index++;
                 }
             }
 
             if ($conv->bollo_virtuale){
-                if (array_key_exists('bolli', $data))
+                if (array_key_exists('bollo_atti', $data))
                 {               
-                    $conv->bolli()->createMany($data['bolli']);               
-                }
+                    $conv->bolli()->delete();
+                    if ($data['bollo_allegati'] == null){
+                        $data['bollo_allegati'] = ['tipobolli_codice' => 'BOLLO_ALLEGATI'];
+                    }
+                    $conv->bolli()->createMany([$data['bollo_atti'], $data['bollo_allegati']]);               
+                }     
             }
            
             $conv->current_place = 'start';
@@ -155,8 +181,14 @@ class ConvenzioneRepository extends BaseRepository {
             if (array_key_exists('attachments',$data)){
                $this->saveAttachments($data['attachments'], $conv);
             }
-            event(new RepositoryEntityCreated($this, $conv));
+           
+            $service = new ConvenzioneService($this);
+            $data = $service->createFascicolo($data);
+            $conv->nrecord = $data['nrecord'];
+            $conv->numero = $data['numero']; 
+            $conv->save();
             
+            event(new RepositoryEntityCreated($this, $conv));
         }
         catch(\Exception $e)
         {
@@ -279,6 +311,11 @@ class ConvenzioneRepository extends BaseRepository {
 
             $model->data_inizio_conv = $data['data_inizio_conv'];
             $model->data_fine_conv = $data['data_fine_conv'];
+            if (array_key_exists('data_stipula',$data)){
+                $model->data_stipula = $data['data_stipula'];
+            }else{
+                $model->data_stipula = $model->data_sottoscrizione;
+            }
 
             if (array_key_exists('num_rep',$data)&& $data['num_rep'])
                 $model->num_rep = $data['num_rep'];
@@ -315,10 +352,10 @@ class ConvenzioneRepository extends BaseRepository {
             if (array_key_exists('bollo_virtuale',$data)){
                 $model->bollo_virtuale = $data['bollo_virtuale'];
                 if ($model->bollo_virtuale){
-                    if (array_key_exists('bolli', $data))
+                    if (array_key_exists('bollo_atti', $data))
                     {               
                         $model->bolli()->delete();
-                        $model->bolli()->createMany($data['bolli']);               
+                        $model->bolli()->createMany([$data['bollo_atti'], $data['bollo_allegati']]);               
                     }                    
                     
                 }
@@ -403,11 +440,22 @@ class ConvenzioneRepository extends BaseRepository {
             $scad = Scadenza::find($data['id']);
             $scad->data_emisrichiesta =  Carbon::now()->format(config('unidem.date_format'));            
             $scad->tipo_emissione = $data['tipo_emissione'];
+            //da attivo a inemissione
             $scad->workflow_apply('richiestaemissione', $scad->getWorkflowName());        
             $scad->save();
 
+            //task che registra la richiesta di emissione della scadenza             
+            $task = new RichiestaEmissioneTask($scad);                
+            $usertask = $task->save();
+
+            $usertask->workflow_apply(UserTask::STORE_ESEGUITO,'usertask');
+            $now = new DateTime();
+            $usertask->description = $task->description.' Completato da '.Auth::user()->name.' in data '.$now->format('d-m-Y');
+            $usertask->closing_user_id = Auth::user()->id;
+            $usertask->save();
+
             //creare e salvare un usertask 
-            $task = new RichiestaEmissioneTask($scad);
+            $task = new EmissioneTask($scad);
             $task->owner(Auth::user()->id)
                 ->setAssignments($data['assignments'])
                 ->respons($data['respons_v_ie_ru_personale_id_ab'])
@@ -437,6 +485,17 @@ class ConvenzioneRepository extends BaseRepository {
 
             $scad->workflow_apply('richiestapagamento', $scad->getWorkflowName());        
             $scad->save();
+
+
+             //task che registra la richiesta di emissione della scadenza             
+             $task = new InvioRichiestaPagamentoTask($scad);                
+             $usertask = $task->save();
+ 
+             $usertask->workflow_apply(UserTask::STORE_ESEGUITO,'usertask');
+             $now = new DateTime();
+             $usertask->description = $task->description.' Completato da '.Auth::user()->name.' in data '.$now->format('d-m-Y');
+             $usertask->closing_user_id = Auth::user()->id;
+             $usertask->save();
 
             //salvare allegati ...             
             if (array_key_exists('attachments',$data)){              

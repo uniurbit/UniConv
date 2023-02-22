@@ -47,6 +47,11 @@ class ScadenzaTest extends TestCase
         $this->assertEquals($data['data_tranche'], $result['data_tranche']);    
         $this->assertEquals($data['dovuto_tranche'], $result['dovuto_tranche']);      
 
+        $entity->delete();
+        $repo = new ConvenzioneRepository($this->app);     
+        $entity->usertasks()->delete();
+        $entity->convenzione->usertasks()->delete();
+        $repo->delete($entity->convenzione_id);
         //$az->delete();
     }
 
@@ -95,6 +100,11 @@ class ScadenzaTest extends TestCase
         $this->assertNotNull($data);      
         $this->assertGreaterThan(0,  $data->count());
 
+        $entity->delete();
+        $repo = new ConvenzioneRepository($this->app);     
+        $entity->usertasks()->delete();
+        $entity->convenzione->usertasks()->delete();
+        $repo->delete($entity->convenzione_id);
     }
 
       //./vendor/bin/phpunit  --testsuite Unit --filter testRichiestaEmissioneScandenza
@@ -105,7 +115,7 @@ class ScadenzaTest extends TestCase
 
         $entity = new Scadenza;                
                 
-        $user = User::where('email','test.admin@uniurb.it')->first();      
+        $user = User::where('email','enrico.oliva@uniurb.it')->first();      
         $this->actingAs($user);
 
         $data = ScadenzaTest::getArrayScadenza();
@@ -122,7 +132,7 @@ class ScadenzaTest extends TestCase
         //     "state":"attivo",
         //     "transitions":[{"label":"Attiva","value":"self_transition","transitions":{}},{"label":"Richiesta emissione","value":"richiestaemissione","transitions":{}}],
         //     "convenzione":{"id":12,"descrizione_titolo":"convenzione di esempio"},
-        //     "assignments":[{"v_ie_ru_personale_id_ab":"39842"}],"unitaorganizzativa_uo":"005400","respons_v_ie_ru_personale_id_ab":"5266",
+        //     "assignments":[{"v_ie_ru_personale_id_ab":"39842"}],"unitaorganizzativa_uo":"005680","respons_v_ie_ru_personale_id_ab":"5266",
         //     "description":"richiesta emissione ..."}'
         // ;
 
@@ -131,7 +141,7 @@ class ScadenzaTest extends TestCase
         $data['assignments'] = [
             ["v_ie_ru_personale_id_ab"=>"39842"]
         ];
-        $data['unitaorganizzativa_uo'] = "005400";
+        $data['unitaorganizzativa_uo'] = "005680";
         $data["respons_v_ie_ru_personale_id_ab"] = "5266";
         $data['tipo_emissione'] = 'FATTURA_ELETTRONICA';
         $data['description'] = "richiesta emissione ...";
@@ -147,6 +157,10 @@ class ScadenzaTest extends TestCase
         $this->assertNotNull($scad);    
         $this->assertEquals('inemissione', $scad->state);    
 
+        $scad->delete();
+        $scad->usertasks()->delete();       
+        $scad->convenzione->usertasks()->delete(); 
+        $repo->delete($scad->convenzione_id);
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testEmissionePagamento
@@ -218,6 +232,11 @@ class ScadenzaTest extends TestCase
                 ->where('workflow_place','inpagamento')->first();
 
         $this->assertNotNull($task); 
+
+        $scad->delete();
+        $scad->usertasks()->delete();
+        $scad->convenzione->usertasks()->delete();
+        $repo->delete($scad->convenzione_id);
     }
 
     //./vendor/bin/phpunit  --testsuite Unit --filter testReadNotifications

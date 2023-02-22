@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class ScadenzaWithConvenzione extends Scadenza {
     public $table = 'scadenze';
-    protected $with = ['aziende','convenzione:id,descrizione_titolo'];
+    protected $with = ['aziende','convenzione:id,descrizione_titolo,dipartimemto_cd_dip'];
 
-    protected $appends = ['list_azienda_denominazione'];
+    protected $appends = ['list_azienda_denominazione','descrizione'];
 
     public function convenzione()
     {
@@ -32,5 +32,13 @@ class ScadenzaWithConvenzione extends Scadenza {
             return $this->aziende->implode('denominazione', ', ');     
         }
         return null;
+    }
+
+    
+    public function getDescrizioneAttribute(){
+        if ($this->convenzione){
+            return "Scadenza n. ".$this->id." (".$this->convenzione->descrizione.")";                
+        }
+        return "Scadenza n. ".$this->id;
     }
 }

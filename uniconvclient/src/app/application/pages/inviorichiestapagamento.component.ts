@@ -21,7 +21,7 @@ import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/co
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg"  [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{ 'btn_salva' | translate }} e invia</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -35,7 +35,7 @@ import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/co
       <formly-form [model]="model" [fields]="fields" [form]="form" [options]="options">
       </formly-form>
   </form>
-  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">Salva e invia</button>
+  <button class="btn btn-primary mt-3" type="button" [disabled]="!form.valid" (click)="onSubmit()">{{ 'btn_salva' | translate }} e invia</button>
   </div>
   `,
   styles: []

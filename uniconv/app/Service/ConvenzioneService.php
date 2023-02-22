@@ -11,6 +11,7 @@ use App\Personale;
 use App\Repositories\ConvenzioneRepository;
 use DateTime;
 use Auth;
+use App;
 use App\Http\Resources\WorkflowConvenzione;
 use App\Http\Resources\WorkflowConvenzioneSchemaTipoResource;
 use Workflow;
@@ -23,7 +24,7 @@ use App\Notifications\RichiestaValidazione;
 
 use App\Tasks\SottoscrizioneTask;
 use App\Tasks\GenericTask;
-use App\Tasks\RichiestaEmissioneTask;
+use App\Tasks\EmissioneTask;
 use App\Tasks\InPagamentoTask;
 use App\Tasks\RichiestaValidazioneTask;
 
@@ -68,8 +69,17 @@ class ConvenzioneService implements ApplicationService
     public function createConvenzione($request){
 
         if ($request->convenzione_from == 'dip'){
+            $request->validate([
+                'resp_scientifico'=>'required',
+            ]);
             return $this->create($request->all());
         }else if ($request->convenzione_from == 'amm'){
+
+            //se utente è superadmin oppure afferenza organizzativa
+            //compatibile con unita organizzativa della convenzione
+            $request->validate([
+                'unitaorganizzativa_uo'=>'required',
+            ]);
             return $this->create_amministrativa($request->all());
         }
 
@@ -88,11 +98,20 @@ class ConvenzioneService implements ApplicationService
             $dip_unitaorganizzativa = $dip->unitaOrganizzativa()->first();
             $dip_unitaorganizzativa_uo = $dip_unitaorganizzativa->uo;
             TitulusHelper::addRPA_Titulus($fasc, $dip_unitaorganizzativa_uo);
+        }else if ($data['unitaorganizzativa_uo']){
+            //caso convenzione amministrativa
+            $aff_org = $data['unitaorganizzativa_uo'];                        
+            TitulusHelper::addRPA_Titulus($fasc,$aff_org);        
         }else{
             //...altrimenti l'unità oranizzativa della persona che esegue la convenzione
-            TitulusHelper::addRPA($fasc,$data['user']['id']);        
+            $aff_org = Auth::user()->personale->aff_org;            
+            TitulusHelper::addRPA_Titulus($fasc,$aff_org);        
         }
-                                                           
+
+        if (App::environment(['local','preprod'])) {         
+            $fasc->addCC("Attività sistemistiche e software Gestionali e Documentali", "Oliva Enrico");
+        }
+
         $response = $sc->newFascicolo($fasc->toXml());                
 
         $obj = simplexml_load_string($response);
@@ -118,10 +137,9 @@ class ConvenzioneService implements ApplicationService
      */
     public function create_amministrativa($data){
 
-        //unità organizzativa a cui è associata la convenzione
-        $user = User::find($data['user']['id'])->personaleRespons()->first();                            
-        $data['unitaorganizzativa_uo'] = $user->cd_csa;
-        
+        //unità organizzativa a cui è associata la convenzione è quella dell'utente che sta inserendo la convenzione
+        //se è un utente che ha responsabilità su più uffici amministrativi, viene selezionato il principale
+        $user = User::find($data['user']['id']);                             
         $data = $this->createFascicolo($data);        
 
         //crea nuovo         
@@ -145,12 +163,10 @@ class ConvenzioneService implements ApplicationService
 
     public function create($data){
 
-        //unità organizzativa a cui è associata la convenzione
-        $user = User::find($data['user']['id'])->personaleRespons()->first();                            
+        // unità organizzativa a cui è associata la convenzione quella dell'utente che sta inserendo la convenzione
+        $user = User::find($data['user']['id'])->findPersonaleRespons();                            
         $data['unitaorganizzativa_uo'] = $user->cd_csa;
         
-        $data = $this->createFascicolo($data);
-
         //crea nuovo         
         $conv = $this->convenzioneRepository->create($data);   
         if ($conv->schematipotipo == 'schematipo'){
@@ -194,6 +210,7 @@ class ConvenzioneService implements ApplicationService
             }
 
         }
+
         return $conv;
     }
 
@@ -340,9 +357,22 @@ class ConvenzioneService implements ApplicationService
 
         //per la registraizone si usa la stessa funzione dell'updateSottoscrizione
         $conv = $this->convenzioneRepository->updateSottoscrizioneStep($data);   
-
+        
         //chiudere i task associati ... di tipo sottoscrizione
-        $tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->whereNull('workflow_transition')->get();
+        //$tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->whereNull('workflow_transition')->get();      
+        $tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->get();
+
+        if ($conv->stipula_type == 'controparte'){
+            $transition = 'firma_da_controparte1';
+        }else{
+            $transition = 'firma_da_direttore1';
+        }
+
+        //registro nel task la transizione eseguita
+        foreach ($tasks as $task) {
+            $task->workflow_transition = $transition; 
+        }
+
         $this->closeTasks($tasks);
         
         $this->openTaskCompletamentoSottoscrizione($conv);
@@ -363,7 +393,8 @@ class ConvenzioneService implements ApplicationService
 
         $conv = $this->convenzioneRepository->updateSottoscrizioneStep($data);   
          //chiudere i task associati ... di tipo sottoscrizione
-        $tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->whereNull('workflow_transition')->get();
+        //$tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->whereNull('workflow_transition')->get();
+        $tasks = $conv->usertasks()->where('workflow_place',Convenzione::APPROVATO)->get();
         $this->closeTasks($tasks);
       
         $this->openTaskCompletamentoSottoscrizione($conv);
@@ -534,7 +565,7 @@ class ConvenzioneService implements ApplicationService
 
     public function addUser($id_ab){
         //registro l'utente                                    
-        $pers = Personale::FindByIdAB($id_ab);                         
+        $pers = Personale::FindByIdAB($id_ab)->first();                         
         $data = LoginService::roleAndData($pers); 
 
         if ($data){                                                            

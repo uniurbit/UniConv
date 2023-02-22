@@ -15,7 +15,7 @@ import { isString } from 'util';
             | 'symbol-narrow'
             | string
             | boolean = 'symbol',
-        digitsInfo: string = '3.2-2',
+        digitsInfo: string = '1.2-2',
         locale: string = 'it-IT',
     ): string | null {
         if (isString(value) && (value as string).indexOf('€')>0)

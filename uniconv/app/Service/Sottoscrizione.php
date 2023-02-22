@@ -102,9 +102,9 @@ class Sottoscrizione
 
                 $doc = $objdata->attachment1['doc'];
 
-                $attch['nrecord'] = $doc['nrecord'];
-                $attch['num_prot'] = $doc['num_prot'];
-                $attch['emission_date'] =  $doc['data_prot']; 
+                $attch['nrecord'] = array_key_exists('nrecord', $doc) ? $doc['nrecord'] : null;
+                $attch['num_prot'] = array_key_exists('num_prot', $doc) ? $doc['num_prot']: null;
+                $attch['emission_date'] = array_key_exists('data_prot',$doc) ? $doc['data_prot'] : null; 
 
                 $data['attachments'] = array($attch);
                 if ($objdata->attachment2['filename'])

@@ -13,6 +13,8 @@
         "TITLE_MIE_ATTIVITA": "Attività assegnate a te"
     },
     
+    "btn_salva": "Salva",
+
     "TO": "Titolo oneroso",
     "TG": "Titolo gratuito",
 
@@ -28,6 +30,13 @@
     "firmato": "Firmata",  
     "repertoriato": "Repertoriata",   
     "start": "Inizio",
+    "registrazionepagamento": "Registrazione pagamento",
+    "richiestaemissione": "Richiesta di emissione documento di debito",
+    "emissione": "Emissione documento di debito",
+
+    "usertasks_apri": "Apre esecuzione dell'attività",
+    "convenzioni_apri": "Apre convenzione",
+    "scadenze_apri": "Apre scadenza",
 
     "dip": "Dipartimentale",
     "amm": "Amministrativa",
@@ -74,7 +83,15 @@
     "firma_da_controparte2" : "Firmato controparte",            
     "repertorio" : "Repertoriato",
     "cancella_sottoscrizione_uniurb" : "Annulla sottoscrizione",
-    "cancella_sottoscrizione_contr" : "Annulla sottoscrizione"
+    "cancella_sottoscrizione_contr" : "Annulla sottoscrizione",
+
+    "tariffa_bolli_atti" : "Tariffa bolli contratto",
+    "num_righe_bolli_atti" : "Numero righe contratto",
+    "num_bolli_atti" : "Numero bolli contratto",
+
+    "tariffa_bolli_allegati" : "Tariffa bolli allegato",
+    "num_righe_bolli_allegati" : "Numero righe allegato",
+    "num_bolli_allegati" : "Numero bolli allegato"
 
 }
   

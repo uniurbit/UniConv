@@ -48,23 +48,23 @@
             <table class="table table-sm table-hover">
                 <tbody>
                     <tr class="d-flex">
-                        <td class="col-md-3">Ambito</td>
-                        <td class="col-md-9"> {{conv?.ambito | translate}} </td>
-                    </tr>
+                        <td class="col-md-3">Titolo</td>
+                        <td class="col-md-9">{{conv?.descrizione_titolo}}</td>
+                    </tr>                
                     <tr class="d-flex">
                         <td class="col-md-3">Azienda o Ente</td>
                         <td class="col-md-9">{{ denominazione }} </td>
-                    </tr>
+                    </tr>                   
                     <tr class="d-flex">
-                        <td class="col-md-3">Titolo</td>
-                        <td class="col-md-9">{{conv?.descrizione_titolo}} </td>
+                        <td class="col-md-3">Ambito</td>
+                        <td class="col-md-9"> {{conv?.ambito | translate}} </td>
                     </tr>
-                    <tr class="d-flex">
+                    <tr class="d-flex" *ngIf="conv?.resp_scientifico">
                         <td class="col-md-3">Resp. Scientifico</td>
                         <td class="col-md-9">{{conv?.resp_scientifico}}</td>
                     </tr>
-                    <tr class="d-flex">
-                        <td class="col-md-3">Importo</td>
+                    <tr class="d-flex" *ngIf="conv?.convenzione_type == 'TO'">
+                        <td class="col-md-3" >Importo</td>
                         <td class="col-md-9">{{conv?.corrispettivo | mycurrency }} </td>
                     </tr>
                     <tr class="d-flex">

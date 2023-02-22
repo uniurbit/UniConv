@@ -109,5 +109,8 @@ return [
     "firma_da_controparte2" =>"Firmato controparte",            
     "repertorio" =>"Repertoriato",
     "cancella_sottoscrizione_uniurb" =>"Annulla sottoscrizione",
-    "cancella_sottoscrizione_contr" =>"Annulla sottoscrizione"
+    "cancella_sottoscrizione_contr" =>"Annulla sottoscrizione",
+
+    "DCD"=>"Delibera Consiglio di Dipartimento",
+    "DDD"=>"Decreto del direttore di dipartimento"
 ];

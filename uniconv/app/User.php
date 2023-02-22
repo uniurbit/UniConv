@@ -9,6 +9,7 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Observers\UserActionsObserver;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 use App;
 class User extends Authenticatable implements JWTSubject
@@ -125,9 +126,31 @@ class User extends Authenticatable implements JWTSubject
         return $this->email;
     }
 
-    public function personaleRespons()
+    //nei casi ad interim NON è un hasOne ma un hasMany aggiungo filtro di afferenza organizzativa
+    public function personaleRespons()    
     {
-        return $this->hasOne(PersonaleResponsOrg::class, 'id_ab', 'v_ie_ru_personale_id_ab');
+        return $this->hasMany(PersonaleResponsOrg::class, 'id_ab', 'v_ie_ru_personale_id_ab');
+    }
+
+    public function myselfPersonaleRespons()
+    {
+        return $this->hasOne(PersonaleResponsOrg::class, 'id_ab_resp', 'v_ie_ru_personale_id_ab');
+    }
+        
+    public function cacheKey()
+    {
+        return sprintf(
+            "%s/%s",
+            $this->getTable(),
+            $this->v_ie_ru_personale_id_ab
+        );
+    }
+        
+    public function personaleRelation()
+    {
+        return Cache::remember($this->cacheKey() . ':personale', 60 * 24 * 20, function () {
+            return is_null($this->personale()->get()) ? false : $this->personale()->get();
+        });
     }
 
     public function personale()
@@ -135,23 +158,51 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(Personale::class, 'id_ab', 'v_ie_ru_personale_id_ab');
     }
 
+    //non corretto
     public function codice_unitaorganizzativa()
     {
-        return $this->personaleRespons()->first()->cd_csa;                                    
+        return $this->findPersonaleRespons()->cd_csa;                                    
     }
 
     public function unitaOrganizzativa()
     {
-        return $this->personale()->first()->unita()->first();                
+        return $this->personaleRelation()->first()->unitaRelation()->first();                
     }
-  
+      
+
+
+    public function personaleAfferenzeOrganizzative()
+    {
+        $uos = $this->personaleRespons()->get();
+        if ($uos->count() > 0) {
+            return $uos;
+        }
+        $myself = $this->myselfPersonaleRespons()->first();
+        if ($myself->cd_tipo_posizorg_resp==PersonaleResponsOrg::RESP_PLESSO){
+            $myself = $this->copyRespInfo($myself);
+            return collect([$myself]);
+        }
+        return collect([]);
+    }    
+
+    /**
+     * codiciUnitaorganizzative 
+     *
+     * @return Array di codici unitaorganizzative
+     */
+    public function codiciUnitaorganizzative() : Array
+    {
+        $uos = $this->personaleAfferenzeOrganizzative()->pluck('cd_csa')->toArray();
+        return $uos;                
+    }    
+
     /**
      * responsabile: Funzione che restituisce il l'oggetto "Personale" del responsabile
      *
      * @return PersonaleResponsOrg
      */
     public function responsabile(){
-        $pers =  $this->personaleRespons()->first(); 
+        $pers =  $this->findPersonaleRespons(); 
         if ($pers)
             return $pers->responsabile()->first();        
     }
@@ -164,4 +215,35 @@ class User extends Authenticatable implements JWTSubject
             return $this->roles->implode('name',', ');            
         }        
     }
+    
+    /**
+     * findPersonaleRespons è il record che restituisce la tabella PersonaleResponsOrg con id_ab = v_ie_ru_personale_id_ab 
+     * con indicato il ruolo del "Personale" e il suo responsabile
+     *
+     * @return PersonaleResponsOrg 
+     */
+    public function findPersonaleRespons(): PersonaleResponsOrg {
+        if ($this->personaleRespons()->first()){
+            $aff_org = $this->personaleRelation()->first()->aff_org;
+            return $this->personaleRespons()->where('cd_csa',$aff_org)->first();
+        }else{
+            $myself = $this->myselfPersonaleRespons()->first();
+            if ($myself->cd_tipo_posizorg_resp==PersonaleResponsOrg::RESP_PLESSO){
+                $myself = $this->copyRespInfo($myself);
+                return $myself;
+            }
+            return null;
+        }
+    }
+
+    private function copyRespInfo($myself)
+    {
+        $myself->nome = $myself->nome_resp;
+        $myself->cognome = $myself->cognome_resp;
+        $myself->id_ab = $myself->id_ab_resp;
+        $myself->cd_tipo_posizorg = $myself->cd_tipo_posizorg_resp;
+        $myself->cd_csa = $myself->cd_csa_resp;
+        return $myself;
+    }
 }
+

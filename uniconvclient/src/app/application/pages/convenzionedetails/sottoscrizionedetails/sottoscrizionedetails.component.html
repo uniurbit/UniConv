@@ -17,7 +17,7 @@
                   </tr>                    
                   <tr class="d-flex">                                           
                       <td class="col-md-3"> Spedita alla controparte </td>
-                      <td class="col-md-9"><app-rangedetails [labeln]="'prot.'" [numero]="sottr.speditaDitta?.numero" [data]="sottr.speditaDitta?.data"></app-rangedetails></td>                       
+                      <td class="col-md-9"><app-rangedetails [labeln]="'prot.'" [numero]="sottr.speditaDitta?.numero" [data]="sottr.speditaDitta?.data" [id]="sottr.speditaDitta?.id"></app-rangedetails></td>                       
                   </tr>
                   <tr class="d-flex" *ngIf="sottr.restituita">                                           
                       <td class="col-md-3"> Restituita  </td>                      
@@ -45,12 +45,13 @@
                     </tr>         
                     <tr class="d-flex">                                           
                         <td class="col-md-3"> Arrivata  </td>        
-                        <td class="col-md-9"><app-rangedetails [labeln]="'prot.'" [numero]="sottr.arrivata?.numero" [data]="sottr.arrivata?.data"></app-rangedetails></td>                
+                        <td class="col-md-9"><app-rangedetails [labeln]="'prot.'" [numero]="sottr.arrivata?.numero" [data]="sottr.arrivata?.data" [id]="sottr.arrivata?.id"></app-rangedetails></td>                
                         <!-- <td class="col-md-3">prot. {{sottr.arrivata.numero}} del {{sottr.arrivata.data}}</td> -->
                     </tr>
                     <tr class="d-flex" *ngIf="sottr.rispedita">                                           
                         <td class="col-md-3"> Rispedita  </td>
-                        <td class="col-md-9">prot. {{sottr.rispedita.numero}} del {{sottr.rispedita.data}}</td>
+                        <td class="col-md-9"><app-rangedetails [labeln]="'prot.'" [numero]="sottr.rispedita?.numero" [data]="sottr.rispedita?.data" [id]="sottr.rispedita?.id"></app-rangedetails></td>
+                        <!--prot. {{sottr.rispedita.numero}} del {{sottr.rispedita.data}}-->
                     </tr>          
                 </tbody>
             </table>

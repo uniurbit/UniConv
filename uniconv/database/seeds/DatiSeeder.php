@@ -36,8 +36,7 @@ class DatiSeeder extends Seeder
     }
 
     public function insertUsers_Plesso(){
-        $adminUsers = [];
-
+        $adminUsers = ['emanuela.rebucci@uniurb.it','maria.gargano@uniurb.it','mara.mancini@uniurb.it','erika.pigliapoco@uniurb.it','ester.carloni@uniurb.it','anna.buchi@uniurb.it'];
         $persColl = Personale::where('aff_org','005199')->get();
         $this->insertUser($persColl, $adminUsers);
 
@@ -105,14 +104,42 @@ class DatiSeeder extends Seeder
 
     public function mappingtable(){
         
-
         DB::table('mappinguffici')->insert([                          
-            'unitaorganizzativa_uo' => 'XXXXX',
-            'descrizione_uo' => 'Attività Sistemistiche  e Software Gestionali e Documentali - S.S.I.A.',                     
-            'strutturainterna_cod_uff' => 'YYYYY',
-            'descrizione_uff' => 'Attività sistemistiche e software Gestionali e Documentali',                     
+            'unitaorganizzativa_uo' => '005199',
+            'descrizione_uo' => 'Plesso Scientifico (DiSPeA-DiSB)',                     
+            'strutturainterna_cod_uff' => 'SI000083',
+            'descrizione_uff' => 'Plesso Scientifico (DISPeA e DISB)',                     
         ]);
 
+        DB::table('mappinguffici')->insert([                          
+            'unitaorganizzativa_uo' => '005361',
+            'descrizione_uo' => 'Ufficio Ricerca e Relazioni Internazionali - Sett. Ric. e Terza miss.',                     
+            'strutturainterna_cod_uff' => 'SI000048',
+            'descrizione_uff' => 'Ufficio Ricerca e Relazioni Internazionali',                     
+        ]);
+
+        if (App::environment('local') || App::environment('preprod')) {
+            DB::table('mappinguffici')->insert([                          
+                'unitaorganizzativa_uo' => '005680',
+                'descrizione_uo' => 'Servizi Sistemi e Software Gestionali e Documentali - Settore ICT',                     
+                'strutturainterna_cod_uff' => 'Uf1_51',
+                'descrizione_uff' => 'Ufficio Protocollo e Archivio',                     
+            ]);
+        }else{
+            DB::table('mappinguffici')->insert([                          
+                'unitaorganizzativa_uo' => '005680',
+                'descrizione_uo' => 'Servizi Sistemi e Software Gestionali e Documentali - Settore ICT',                     
+                'strutturainterna_cod_uff' => 'SI000099',
+                'descrizione_uff' => 'Attività sistemistiche e software Gestionali e Documentali',                     
+            ]);
+        }
+
+        DB::table('mappinguffici')->insert([                          
+            'unitaorganizzativa_uo' => '005479',
+            'descrizione_uo' => 'Rete Dati e Voce, Servizi Telematici e Assistenza Informatica - S.S.I.A.',                     
+            'strutturainterna_cod_uff' => 'SI000100',
+            'descrizione_uff' => 'Rete Dati e Voce, Servizi Telematici e Assistenza Informatica',                     
+        ]);
 
     }
 

@@ -31,9 +31,9 @@ class ConvenzioneData
     public static function getNONSchemaTipo($user){
         $data = ConvenzioneData::getArrayConvenzione();
         $data['schematipotipo'] = 'daapprovare';
-        $data['unitaorganizzativa_uo'] = '005400';
+        $data['unitaorganizzativa_uo'] = '005680';
         //unità organizzativa affidataria della validazione
-        $data['unitaorganizzativa_affidatario'] = '005400';
+        $data['unitaorganizzativa_affidatario'] = '005680';
         //$data['owner_user_id '] = $user->id;
         $data['subject'] = 'Validazione';
         $data['respons_v_ie_ru_personale_id_ab'] = 5266;
@@ -60,6 +60,7 @@ class ConvenzioneData
         $data['schematipotipo'] = 'daapprovare';
         $data['convenzione_from'] = 'amm';
         $data['description'] = 'convenzione amministrativa';
+        $data['unitaorganizzativa_uo'] = '005680';
         $data['dipartimemto_cd_dip'] = null;
         return $data;
     }
@@ -195,6 +196,7 @@ class ConvenzioneData
         $data['stipula_type'] = 'controparte';
         $data['data_fine_conv'] = '31-12-2019';
         $data['data_inizio_conv'] = '04-06-2019';
+        $data['data_stipula'] = '03-06-2019';
         $data['attachment1'] = [            
                 'filename' => 'nomefile2.pdf', 
                 'filevalue' =>  base64_encode(Storage::get('convenzione.pdf')), 

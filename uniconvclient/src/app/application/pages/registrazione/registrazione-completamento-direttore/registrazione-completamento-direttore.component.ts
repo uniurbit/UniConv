@@ -132,6 +132,7 @@ export class RegistrazioneCompletamentoDirettoreComponent extends BaseEntityComp
               templateOptions: {
                 label: 'Numero di protocollo',
                 required: true,      
+                subpattern: /^[0-9]+-[a-zA-Z]+-\d{7}$/,
                 type: 'string',
                 entityName: 'documento',
                 entityLabel: 'Documenti',

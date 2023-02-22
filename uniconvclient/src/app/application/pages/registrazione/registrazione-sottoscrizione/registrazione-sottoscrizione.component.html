@@ -4,7 +4,7 @@
     <div class="btn-group btn-group">        
       <button class="btn btn-outline-primary rounded-lg"  [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
         <span class="oi oi-arrow-top"></span>  
-        <span class="ml-2">Aggiorna</span>              
+        <span class="ml-2">{{labelButton}}</span>              
       </button> 
       <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onValidate()" >              
       <span class="oi oi-flash"></span>  

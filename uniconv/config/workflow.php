@@ -109,7 +109,7 @@ return [
             'arguments' => ['state']
         ],
         'supports'      => ['App\Scadenza'],
-        'places'        => ['attivo', 'inemissione', 'emesso', 'inpagamento', 'pagato'],
+        'places'        => ['attivo', 'inemissione', 'emesso', 'inpagamento', 'pagato', 'cancellato'],
         'transitions'   => [        
             'richiestaemissione' => [
                 'from' => 'attivo',
@@ -130,7 +130,11 @@ return [
             'registrazionepagamento' => [
                 'from' => 'inpagamento',
                 'to'   => 'pagato',
-            ],           
+            ],               
+            'delete' => [
+                'from' => ['attivo','inemissione'],
+                'to' => 'cancellato'
+            ]        
         ]
     ],
 ];

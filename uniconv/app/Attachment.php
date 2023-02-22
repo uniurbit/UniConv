@@ -13,6 +13,7 @@ use Emadadly\LaravelUuid\Uuids;
 use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Convenzione;
+use App\Observers\UserActionsObserver;
 
 class Attachment extends Model
 
@@ -314,7 +315,9 @@ class Attachment extends Model
 
     protected function deleteFile()
     {
-        Storage::delete($this->filepath);
+        if ($this->filetype!='empty'){
+            Storage::delete($this->filepath);
+        }
         //$this->deleteEmptyDirectory($this->path);
     }
 
@@ -326,7 +329,8 @@ class Attachment extends Model
     protected static function boot()
     {
         parent::boot();
-        
+        Attachment::observe(new UserActionsObserver());
+
         static::deleting(function ($attachment) {
             /** @var Attachment $attachment */
             $attachment->deleteFile();

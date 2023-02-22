@@ -29,8 +29,10 @@ Route::group(['middleware' => ['cors','auth:api','log','role:super-admin','check
 
     Route::get('users/roles','UserController@roles');
     Route::get('users/permissions','UserController@permissions');
-    Route::resource('users', 'UserController');
-    Route::post('users/query', 'UserController@query'); 
+    Route::post('users', 'UserController@store');
+    Route::put('users/{id}', 'UserController@update');
+    Route::delete('users/{id}', 'UserController@delete');
+    
 
     Route::get('roles', 'RoleController@index');
     Route::get('roles/{id}', 'RoleController@show');
@@ -50,6 +52,11 @@ Route::group(['middleware' => ['cors','auth:api','log','role:super-admin','check
 
 
 Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'Api\V1'],function(){
+    //users
+    Route::get('users/{id}', 'UserController@show');
+    Route::post('users/query', 'UserController@query'); 
+    Route::get('users/personaleafferenzeorganizzative/{id}', 'UserController@personaleAfferenzeOrganizzative');
+
     //convenzioni
     Route::get('convenzioni/generapdf/{id}','ConvenzioneController@generatePDF');
     Route::post('convenzioni/generapdf','ConvenzioneController@generatePostPDF');
@@ -94,6 +101,11 @@ Route::group(['middleware' => ['cors','auth:api','log','check'], 'namespace'=>'A
 
     Route::get('attachments/download/{id}','AttachmentController@download');
     
+    //bolli
+    Route::post('bolli/query','BolloController@query');
+    Route::post('bolli/export','BolloController@export');
+    Route::post('bolli/exportxls','BolloController@exportxls'); 
+
     //notifiche 
     Route::get('notifications','NotificationController@index');    
     Route::get('notifications/{id}','NotificationController@show');    

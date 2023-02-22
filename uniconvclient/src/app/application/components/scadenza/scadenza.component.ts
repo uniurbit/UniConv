@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { PermissionService } from '../../permission.service';
@@ -12,6 +12,9 @@ import { of, Observable, Subject } from 'rxjs';
 import { map, first } from 'rxjs/operators';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { AuthService } from 'src/app/core';
+import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
+import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
+import { TranslateService } from '@ngx-translate/core';
 @Component({
   selector: 'app-scadenza',
   templateUrl: '../../../shared/base-component/base-entity.component.html',
@@ -21,9 +24,49 @@ import { AuthService } from 'src/app/core';
 
 export class ScadenzaComponent extends BaseEntityComponent {
 
+  @ViewChild('stateattivita') stateattivita: TemplateRef<any>;
+  
+  translate: MyTranslatePipe = null;
+  flatten = new MyFlattenPipe('nome_utente');
+  
   taskemission = new Subject<any>();
 
   isLoading = true;
+
+  fieldsusertask: FormlyFieldConfig[] =  [       
+    {
+      key: 'usertasks',
+      type: 'datatable',     
+      templateOptions: {
+        btnHidden: true,
+        label: 'Attività associate',
+        hidetoolbar: true,
+        limit: "20",
+        footerHeight: 0,
+        onDblclickRow: (event) => {
+          if (event.row.id) {
+            this.router.navigate(['home/tasks/', event.row.id]);
+          }
+        },
+        columns: [
+          { name: 'Oggetto', prop: 'subject', wrapper: 'value' },
+          { name: 'Stato', prop: 'state', wrapper: 'value' },
+          { name: 'Ufficio assegnatario', prop: 'unitaorganizzativa_uo', wrapper: 'value', pipe: this.translate },
+          { name: 'Assegnatari', prop: 'assignments', wrapper: 'value', pipe: this.flatten },
+          { name: 'Note', prop: 'description', wrapper: 'value' },
+          { name: 'Data e ora', prop: 'updated_at', wrapper: 'value' }
+        ]
+      },
+      fieldArray: {
+        fieldGroup: []
+      }
+    },
+    {
+      template: '<div class="mb-1"></div>',
+    }
+
+  ];
+
   fields: FormlyFieldConfig[] = [
     {
       fieldGroupClassName: 'display-flex',
@@ -311,6 +354,13 @@ export class ScadenzaComponent extends BaseEntityComponent {
     {
       wrappers: ['riquadro'],
       templateOptions: {
+        title: 'Attività'
+      },
+      fieldGroup: this.fieldsusertask
+    },
+    {
+      wrappers: ['riquadro'],
+      templateOptions: {
         title: 'Documenti'
       },
       fieldGroup: [
@@ -438,21 +488,28 @@ export class ScadenzaComponent extends BaseEntityComponent {
   ];
 
 
+
   canActivate(){
     return this.authService._roles.some((r) => ['ADMIN_AMM','ADMIN','SUPER-ADMIN'].includes(r));
   }
 
-  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected authService: AuthService, protected route: ActivatedRoute, protected router: Router, protected location: Location) {
+  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected authService: AuthService, protected route: ActivatedRoute, protected router: Router, protected location: Location, private translateService: TranslateService) {
     super(route, router, location);
     this.activeNew = true;
     this.isRemovable = true;
     this.researchPath = 'home/scadenze';
     this.newPath = this.researchPath + '/new';
     this.vistaPath = 'home/scadenzeview';
+
+    this.translate = new MyTranslatePipe(translateService);    
   }
 
+
   protected postGetById() {
-    if (this.model.usertasks) {
+    if (this.model.usertasks) {      
+      const cols= this.fieldsusertask.find(x => x.key == "usertasks").templateOptions.columns;
+      cols.find(x => x.prop == 'state').cellTemplate = this.stateattivita;
+
       const task = (this.model.usertasks as Array<any>).filter(x => x.workflow_place == 'inemissione' && (x.state == 'aperto' || x.state == 'completato'))[0];
       if (task)
         this.taskemission.next(task);

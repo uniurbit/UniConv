@@ -10,14 +10,15 @@ class WorkflowScadenzaResource extends Resource
     private $names = array(        
         "richiestaemissione" => "Richiesta emissione",
         "inemissione" => "In emissione documento di pagamento",
-        "emissione" => "Emesso documento di pagamento",
+        "emissione" => "Emettere documento di pagamento",
         "attivo" => "Attiva",
         "emesso" => "Emesso documento di pagamento",        
         "inpagamento" => "In attesa del pagamento della ditta",
         "registrazionepagamento" => "In attesa del pagamento della ditta",
         "registrazionerendiconto" => "Rendicontata",
         "pagato" => "Rendicontata",      
-        "richiestapagamento" => "Richiesta pagamento" 
+        "richiestapagamento" => "Richiesta pagamento", 
+        "delete" => "Cancellazione"      
     );
 
     /**

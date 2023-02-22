@@ -372,7 +372,7 @@ class ConvenzioneController extends Controller
         }
 
         $this->validate($request, [
-            'id' => 'required',          
+            'id' => 'required'  
             ]
         );
 
@@ -450,12 +450,56 @@ class ConvenzioneController extends Controller
             abort(403, trans('global.utente_non_autorizzato'));
         }
 
+        //se è un docente solo quelle di afferenza 
+        //se è op_contabile può vedere solo quelle a titolo oneroso ... per cui è stata richiesta una emissione ... 
+        //se viewer solo quelle di afferenza organizzativa        
+
         $conv = $this->convenzioneRepo->findById($id);
-        
+       
         if ($conv==null){
             return response()->json(['error'=>"Non trovato"], 404);
         }
+
+        $this->autorizzazioneShowConvenzione($conv);
+  
         return $conv;
+    }
+
+    private function autorizzazioneShowConvenzione($conv)
+    {
+        //se l'utente non ha il peremesso 'search all convenzioni' va filtrato 
+        if (!Auth::user()->hasPermissionTo('search all convenzioni')){
+            //aggiungere controllo per unitaorganizzativa_uo dell'utente che esegue la richiesta ...
+            $uo = Auth::user()->unitaorganizzativa();
+            if ($uo->isDipartimento()){    
+                //caso docenti che va ulteriormente filtrato ... 
+                //ad un afferente al dipartimento filtro per dipartimento       
+                $dip = $uo->dipartimento()->first();    
+                if (!in_array($conv->dipartimemto_cd_dip,[$dip->cd_dip])){
+                    abort(403, trans('global.utente_non_autorizzato')); 
+                }   
+            }else if ($uo->isPlesso()){                 
+                if (!in_array($conv->dipartimemto_cd_dip, $uo->dipartimenti_cd_dip())){
+                    abort(403, trans('global.utente_non_autorizzato')); 
+                }  
+            }else if (Auth::user()->hasRole('op_contabilita')){                                
+                if (!in_array($uo->uo, $conv->scadenzeusertasks()->pluck('unitaorganizzativa_uo')->toArray())){
+                    abort(403, trans('global.utente_non_autorizzato')); 
+                } 
+            }else if (Auth::user()->hasRole('op_approvazione')){
+                //op_approvazione                
+                if (!in_array($uo->uo, $conv->usertasks()->pluck('unitaorganizzativa_uo')->toArray())){
+                    abort(403, trans('global.utente_non_autorizzato')); 
+                } 
+            }else{
+                //filtro per unitaorganizzativa dell'utente di inserimento (ufficio)
+                //se l'utente è responsabile di più uffici, filtro per unitaorganizzativa di ogni ufficio
+                $uos = Auth::user()->codiciUnitaorganizzative();
+                if (!in_array($conv->unitaorganizzativa_uo, $uos)){
+                    abort(403, trans('global.utente_non_autorizzato')); 
+                }  
+            }          
+        }
     }
 
     public function nextPossibleActions($id){
@@ -481,9 +525,40 @@ class ConvenzioneController extends Controller
         if ($validator->fails()) { 
             return response()->json($validator->errors(), 401);
         }
+
+        $conv = $this->convenzioneRepo->findById($id);
+        if ($conv==null){
+            return response()->json(['error'=>"Non trovato"], 404);
+        }
+
+        if (!Auth::user()->hasRole('super-admin')){
+            if ($request->convenzione_from == 'dip'){                       
+                //se è una convenzione dipartimentale, controllo che l'utente afferisca al dipartimento o al plesso
+                $uo = Auth::user()->unitaorganizzativa();
+                if ($uo->isDipartimento()){
+                    $dip = $uo->dipartimento()->first();
+                    if ($dip->cd_dip != $conv->dipartimemto_cd_dip){
+                        abort(403, trans('global.utente_non_autorizzato').' [unità organizzativa non consistente]');
+                    }  
+                }else if ($uo->isPlesso()){
+                    if (!in_array($conv->dipartimemto_cd_dip, $uo->dipartimenti_cd_dip())){
+                        abort(403, trans('global.utente_non_autorizzato').' [unità organizzativa non consistente]');
+                    }
+                }else{
+                    abort(403, trans('global.utente_non_autorizzato'));
+                }
+            } else {
+                //se è una convenzione amministrativa, controllo che l'utente afferisca alla convenzione
+                $uos = Auth::user()->codiciUnitaorganizzative();
+                if (!in_array($conv->unitaorganizzativa_uo, $uos)){
+                    abort(403, trans('global.utente_non_autorizzato').' [unità organizzativa non consistente]');
+                }                
+            }
+        }
                       
         $conv = $this->convenzioneRepo->update($request->all(), $id);        
         $conv = $this->convenzioneRepo->findById($id);
+
        
         return response()->json($conv, 200);
     }
@@ -552,6 +627,7 @@ class ConvenzioneController extends Controller
             'data_sottoscrizione',
             'data_inizio_conv',
             'data_fine_conv',
+            'data_stipula',
             'aziende.id',
             'aziende.denominazione',
             'tipopagamento.codice',
@@ -560,9 +636,17 @@ class ConvenzioneController extends Controller
             'bollo_virtuale',       
             'bolli.convenzioni_id',
             'bolli.tipobolli_codice',
-            'bolli.num_bolli'
+            'bolli.num_bolli',
+            'bolli.num_righe'
         ]);
 
+        $parameters = $this->filtriPermessiRicercaConvenzioni($parameters);
+    
+        return new \App\FindParameter($parameters);
+    }
+
+    private function filtriPermessiRicercaConvenzioni($parameters)
+    {
         //se l'utente non ha il peremesso 'search all convenzioni' va filtrato 
         if (!Auth::user()->hasPermissionTo('search all convenzioni')){
             //aggiungere filtro per unitaorganizzativa_uo
@@ -583,17 +667,18 @@ class ConvenzioneController extends Controller
                     "value" => $uo->dipartimenti_cd_dip()
                 ]);
             }else{
-                //filtro per unitaorganizzativa dell'utente di inserimento (servizio o un plesso)
+                //filtro per unitaorganizzativa dell'utente di inserimento (ufficio)
+                //se l'utente è responsabile di più uffici, filtro per unitaorganizzativa di ogni ufficio
+                $uos = Auth::user()->codiciUnitaorganizzative();
                 array_push($parameters['rules'],[
-                    "operator" => "=",
+                    "operator" => "In",
                     "field" => "unitaorganizzativa_uo",                
-                    "value" => $uo->uo
+                    "value" => $uos
                 ]);
             }                                            
         }        
 
-    
-        return new \App\FindParameter($parameters);
+        return $parameters;
     }
 
     public function query(Request $request){
@@ -653,15 +738,15 @@ class ConvenzioneController extends Controller
     public function personaleUfficio($id)
     {
         PersonaleResource::withoutWrapping();
-        return PersonaleResource::collection(\App\PersonaleResponsOrg::FindByAfferenzaOrganizzativa($id)->get());
+        return PersonaleResource::collection(\App\PersonaleResponsOrg::FindByAfferenzaOrganizzativa($id));
     }    
 
 
-    public function validationResponsabileUfficio($id)
-    {
-        PersonaleResource::withoutWrapping();
-        return PersonaleResource::collection(\App\PersonaleResponsOrg::FindByAfferenzaOrganizzativa($id)->Respons()->get());
-    }    
+    // public function validationResponsabileUfficio($id)
+    // {
+    //     PersonaleResource::withoutWrapping();
+    //     return PersonaleResource::collection(\App\PersonaleResponsOrg::FindByAfferenzaOrganizzativa($id)->Respons()->get());
+    // }    
 
 
     private function pdfFromView($dataarray){
@@ -709,10 +794,10 @@ class ConvenzioneController extends Controller
         //todo istanziare il controller attachment
         $attach = Attachment::find($id);
         if ($attach->num_prot){
-            $app = TitulusHelper::downloadAttachment($attach->num_prot);
+            $app = TitulusHelper::downloadAttachment($attach->num_prot,$attach->filename);
             if ($app){
 
-                if ($attach->attachmenttype_codice=="FATTURA_ELETTRONICA" &&  $app->mimeType == "application/xml"){
+                if ($attach->attachmenttype_codice=="FATTURA_ELETTRONICA" && ($app->mimeType == "application/xml" || $app->mimeType == "application/octet-stream")){
                     $pdf = TitulusHelper::createFatturaPA($app->content);
                     $attach['filevalue'] = base64_encode($pdf->output());
                     if ($attach->filetype == 'link'){

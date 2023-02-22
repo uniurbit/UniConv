@@ -60,20 +60,24 @@ export class BaseService extends CoreSevice implements ServiceQuery, ServiceEnti
   }
 
   @Cacheable({
-    cacheBusterObserver: cacheBusterNotifier
-  })  
+    cacheBusterObserver: cacheBusterNotifier    
+  })
+  protected getByIdInternal(id: any, basePath: string): Observable<any>{
+    return this.http
+    .get(this._baseURL +  `/${basePath}/` + id.toString(), httpOptions).pipe(
+      tap(sub => {
+        if (sub) {
+          this.messageService.info('Lettura permesso effettuata con successo');
+        } else {
+          this.messageService.info('Permesso non trovato');
+        }
+      }),
+      catchError(this.handleError('getById',null,true))
+    );
+  }
 
   getById(id: any): Observable<any> {
-    return this.http
-    .get(this._baseURL +  `/${this.basePath}/` + id.toString(), httpOptions).pipe(
-      tap(sub => {
-        if (sub)
-          this.messageService.info('Lettura effettuata con successo')
-        else
-          this.messageService.info('Entità non trovata')
-      }),
-      catchError(this.handleError('getById', null, true))
-    );
+    return this.getByIdInternal(id,this.basePath);
   }
 
   constructor(protected http: HttpClient, public messageService: MessageService, public confirmationDialogService: ConfirmationDialogService) {

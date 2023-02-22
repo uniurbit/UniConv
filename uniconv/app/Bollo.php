@@ -17,7 +17,9 @@ class Bollo extends Model
         'id',
         'convenzioni_id',
         'tipobolli_codice',
-        'num_bolli'
+        'num_bolli',
+        'num_righe',
+        'num_pagine'
     ];
 
 
@@ -33,4 +35,8 @@ class Bollo extends Model
         return $this->belongsTo('App\Convenzione','convenzioni_id','id');
     }
 
+    public function totale()
+    {
+        return $this->tipobollo()->first()->importo * $this->num_bolli;
+    }   
 }

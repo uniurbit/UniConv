@@ -1,16 +1,13 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Convenzione } from 'src/app/application/convenzione';
+import { IDoc } from '../approvazionedetails/approvazionedetails.component';
 import { ConvenzionedetailsComponent } from '../convenzionedetails.component';
+
 
 interface IInfoRepertorio {  
   repertorio: IDoc;  
   bolli?: any[];
 };
-
-interface IDoc{  
-  numero: string;
-  data: string;   
-}
 
 
 @Component({
@@ -41,9 +38,10 @@ export class RepertoriazionedetailsComponent implements OnInit {
 
     const file = this.conv.attachments.find(x => x.attachmenttype_codice == 'DOC_BOLLATO_FIRMATO')
     if (file) {
-      let repertorio = {       
+      let repertorio: IDoc = {       
         data: file.emission_date.toString(),
-        numero: file.num_rep        
+        numero: file.num_rep,  
+        id: file.id              
       }
       this.rep.repertorio = repertorio;                      
     }

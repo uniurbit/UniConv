@@ -1,18 +1,21 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { id } from '@swimlane/ngx-datatable';
 import { Convenzione } from 'src/app/application/convenzione';
 import { ConvenzionedetailsComponent } from '../convenzionedetails.component';
 
+export interface IDoc{
+  descrDocumento?: string;
+  numero: string;
+  data: string;
+  id?: number;
+}
 interface IInfoApprovazione {
   richiestaname: string;
   docAppr: IDoc;
   docApprOrgani: IDoc;
 };
 
-interface IDoc{
-  descrDocumento: string;
-  numero: string;
-  data: string;
-}
+
 
 
 @Component({
@@ -36,10 +39,11 @@ export class ApprovazionedetailsComponent implements OnInit {
     //se convenzione schema tipo e lo stato è maggiore o uguale ad approvato ... allora    
     const file = this.conv.attachments.find(x => x.attachmenttype_codice == 'DCD' || x.attachmenttype_codice == 'DDD')
     if (file) {
-      let docAppr = {
+      let docAppr: IDoc = {
         descrDocumento: file.attachmenttype.descrizione,
         data: file.emission_date.toString(),
-        numero: file.docnumber        
+        numero: file.docnumber,
+        id: file.id        
       }
       this.appr.docAppr = docAppr;                      
     }
@@ -54,9 +58,10 @@ export class ApprovazionedetailsComponent implements OnInit {
             let docApprOrgani = {
               descrDocumento: file.attachmenttype.descrizione,
               data: file.emission_date.toString(),
-              numero: file.docnumber        
+              numero: file.docnumber,    
+              id: file.filetype !== 'empty' ?  file.id : null           
             }
-            this.appr.docApprOrgani = docApprOrgani;
+            this.appr.docApprOrgani = docApprOrgani;            
         }
 
         const task = this.conv.usertasks.find(x => x.workflow_place='inapprovazione' && x.state!='annulato');

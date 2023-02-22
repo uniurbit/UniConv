@@ -175,7 +175,7 @@ export class TableLookupTypeComponent extends FieldArrayType {
               const da = this.adapter.fromModel(valuea);
               const db = this.adapter.fromModel(valueb);
               return (<any>new Date(da.year,da.month-1,da.day) - <any>new Date(db.year,db.month-1,db.day)) * (sort.dir === 'desc' ? -1 : 1);
-            } else if (event.column.pipe.constructor.name == 'MyFlattenPipe'){
+            } else if (event.column.pipe && event.column.pipe.constructor.name == 'MyFlattenPipe'){
               const fa = event.column.pipe.transform(valuea);
               const fb = event.column.pipe.transform(valueb);
               return (fa.localeCompare(fb) * (sort.dir === 'desc' ? -1 : 1));  

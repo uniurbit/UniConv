@@ -53,6 +53,7 @@ export interface Convenzione extends BaseEntity {
     scadenze?: any[]
     data_inizio_conv?: any,
     data_fine_conv?: any,
+    data_stipula?: any,
     unitaorganizzativa_affidatario?: string,    
     convenzione_from: convenzioneFrom,
     rinnovo_type: rinnovoType,
@@ -88,4 +89,5 @@ export interface FileAttachment {
     num_prot?: string,
     num_rep?: string,
     nrecord?: string,
+    _filesize?: number,
 }

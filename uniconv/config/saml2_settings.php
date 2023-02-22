@@ -134,7 +134,36 @@ return $settings = array(
             'url' => $idp_host . 'idp/profile/Logout',
         ),
         // Public x509 certificate of the IdP
-        'x509cert' => env('SAML2_IDP_x509', ''),
+        'x509cert' => env('SAML2_IDP_x509', 'MIIFhTCCA22gAwIBAgIJANN/ysx6nt9TMA0GCSqGSIb3DQEBCwUAMFgxCzAJBgNV
+        BAYTAklUMQswCQYDVQQIDAJQVTEPMA0GA1UEBwwGVXJiaW5vMQ8wDQYDVQQKDAZV
+        bml1cmIxGjAYBgNVBAMMEWlkcHRlc3QudW5pdXJiLml0MCAXDTE3MDMwOTE0NDgw
+        NloYDzIxMTcwMjEzMTQ0ODA2WjBYMQswCQYDVQQGEwJJVDELMAkGA1UECAwCUFUx
+        DzANBgNVBAcMBlVyYmlubzEPMA0GA1UECgwGVW5pdXJiMRowGAYDVQQDDBFpZHB0
+        ZXN0LnVuaXVyYi5pdDCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAMA+
+        BQsFgWbk4eUg9NtHi6p2f4NiufdMfw0g4AR1fsLw8KXbEsndheEhwzCHlIFJeg8L
+        0xvz4yn42xx6/ICyyUJBgsNv8v0dCL/gft04Jms1F7SaEfU2BNYHdZF1i08oDm96
+        YXjS5M/P7X3mxPxDV0pzuseZ3ykgdIQcuG4q3L3lbmXOwoJh5u7LrxKmS3qwBcDC
+        pQSf2OjfEZVCILANN7SXUAbW9celzD6QaM7TOL/UYHL+0dB35Q/HdNp5mxdNTEh7
+        l79qljmRXWlVFS5KeTk3M0P3C2Ni3kHj5wP9mOPEAVS5efcWlV+vd2sHQnSoMfvK
+        tiwAR9aKJ/ebfjcIHP1cLaeedJLFzcgkvgXm5bR+leOqGMLedndKjtKt8LjHqlgr
+        GjJ8ICg86rlkhSRPbH1gq61LunzYhGn4AuQYNJYRnqTXu9U4kf2djYIQmezdVGMp
+        lXBzzBeZcFcq7RjgSE0JLaRiW3lSD4DveAHlzrOvoTbO1T7vd/S3lYrad4d3pSFj
+        a9RIpevF9MWOyPiwF4MD7tk4dHh//Cu/soSFDJX3c3xICSW09ukZQU3AfNVOa7Lv
+        E6qF25SEaxz5MqSMTUXfafg4CsO0wPEuYnf6Xv6ffh8IWlUTMgvJi9Vmn34OqdJq
+        msTN+g1UgdoVz2B8zAQzAbRaIxgddhkVVW7EqyxRAgMBAAGjUDBOMB0GA1UdDgQW
+        BBQvjS4SHIKbxyolWYlFv6em4rJ3TjAfBgNVHSMEGDAWgBQvjS4SHIKbxyolWYlF
+        v6em4rJ3TjAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4ICAQBpiWMKZHa8
+        TW6GZ0BEO5POBPOWSUua8gYlBnlDLP9wUiRC0vOvmQa/EH7SNrCwYxtPOy9EL3Jo
+        igH9gcRGRrQFgvuTV7pE9Bvw0NhcTllnHNGzHld/y93eZSakg+7M4B5Elx0RdRBc
+        e09QvR0P0HGZkVrpdT9P1q6+AAUfbelpSQOBDgUwaZHXWmz3fb2iZ/oCQz13QxKi
+        wdwQueK7090An4y4U9pjVII2b+E7rxQksZXGCRWbeZrEAXkqnuJoBoQQbIYgE2Lo
+        0e9gNR8pvdLy76m9KNYq7v5Agqemwn+5rfYoknd4WePbD4zdndZxDEbdYLpn9eXB
+        oSXiiX1BFgTgeVo+25EI0KRfoaeZvT4TD+04RdKr6XJDH02bs1fqcwv0cpsiAfIR
+        hjmhu8Zcj3kVOo14II2LQblb4FL3ojFZNv9WXe+XPMJx2B6btV6FWXQ/s2yXkfsJ
+        bjMITcD1H6kiZ8oWEMruXxtQPMrnn9p/nuAZpzl970q8oXe03y4sA7EPRodICtAt
+        RDWRi9LvX2vpNkiMrTgm0WA2cTHCfa0JPd2DHlvFQSGNEpV0F3/OAZSp4/aPICnr
+        76XZb0N5TnPYY+fA6mw9ftDHkdiVxCaaPD6mxlj/JUouFJkq+KlquVzA6LNr2rdF
+        9PARtscKmMRcsOLB0ZoSokGbWS0qAazRIA=='),
         /*
          *  Instead of use the whole x509cert you can use a fingerprint
          *  (openssl x509 -noout -fingerprint -in "idp.crt" to generate it)

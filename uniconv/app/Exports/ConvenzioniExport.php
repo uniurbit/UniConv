@@ -62,10 +62,13 @@ class ConvenzioniExport implements FromCollection, WithMapping, WithHeadings
             $conv->data_inizio_conv,
             $conv->data_fine_conv,
             $conv->listAziendaDenominazione(),
-            is_null($conv->bollo_virtuale) ? '' : $conv->bollo_virtuale == true ? 'si' : 'no',
+            is_null($conv->bollo_virtuale) ? '' : ($conv->bollo_virtuale == true ? 'si' : 'no'),
             $conv->bolli ? ($conv->bolli_atti_prov() ? $conv->bolli_atti_prov()->num_bolli : '') : '',
             $conv->bolli ? ($conv->bolli_allegato() ? $conv->bolli_allegato()->num_bolli : '') : '',
-            //$conv->convenzione_from,            
+            //$conv->convenzione_from,      
+            $conv->tipo_documento_approvazione(),
+            $conv->numero_documento_approvazione(),      
+            $conv->data_documento_approvazione(),
             
         ];
     }
@@ -107,7 +110,12 @@ class ConvenzioniExport implements FromCollection, WithMapping, WithHeadings
 
             'Bollo virtuale',
             'Numero bolli virt. atti e provvedimenti',
-            'Numero bolli virt. allegati tecnici'
+            'Numero bolli virt. allegati tecnici',
+
+            'Tipo atto',
+            'Numero atto',
+            'Data atto'
+
 
         ];
     }

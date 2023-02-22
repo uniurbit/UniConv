@@ -17,7 +17,7 @@ interface LoginResponse {
 const httpOptions = {
   headers: new HttpHeaders({
     //'observe': 'response',    
-    'Content-Type': 'text'
+    'Content-Type': 'application/json'
     //'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token, Authorization, X-Requested-With'
     //'Access-Control-Allow-Origin': '*'
   })
@@ -54,6 +54,21 @@ export class AuthService {
     localStorage.setItem(AuthService.TOKEN,token);
     this.loggedIn.next(this.isAuthenticated());
     this.reload()    
+  }
+
+  cambiaUtente(id){
+    return this.http.post<any>(`${this.authUrl}api/auth/cambiautente`, {id: id}, httpOptions).pipe(tap((data) => {
+        localStorage.removeItem(AuthService.TOKEN);
+        localStorage.clear();
+        sessionStorage.clear();
+        this.permissionsService.flushPermissions();
+        this.resetFields();
+        this.loggedIn.next(false);
+        
+        this.loginWithToken(data.token);
+      })).subscribe(res => {
+        console.log(res);
+    });
   }
 
   refreshToken() {

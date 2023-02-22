@@ -11,7 +11,7 @@
                     </tr>
                     <tr class="d-flex" *ngIf="appr.docAppr">
                         <td class="col-md-3">{{appr.docAppr.descrDocumento}}</td>
-                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data"></app-rangedetails></td>
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data" [id]="appr.docAppr.id" ></app-rangedetails></td>
                     </tr>                                      
                 </tbody>
             </table>
@@ -41,11 +41,11 @@
                     </tr> 
                     <tr class="d-flex" *ngIf="appr.docAppr">
                         <td class="col-md-3">{{appr.docAppr.descrDocumento}}</td>                                            
-                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data"></app-rangedetails></td>
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docAppr.numero" [data]="appr.docAppr.data" [id]="appr.docAppr?.id"></app-rangedetails></td>
                     </tr> 
                     <tr class="d-flex" *ngIf="appr.docApprOrgani">
                         <td class="col-md-3">{{appr.docApprOrgani.descrDocumento}}</td>
-                        <td class="col-md-9"><app-rangedetails [numero]="appr.docApprOrgani.numero" [data]="appr.docApprOrgani.data"></app-rangedetails></td>                                            
+                        <td class="col-md-9"><app-rangedetails [numero]="appr.docApprOrgani.numero" [data]="appr.docApprOrgani.data" [id]="appr.docApprOrgani?.id"></app-rangedetails></td>                                            
                     </tr> 
                 </tbody>
             </table>

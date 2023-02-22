@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use JWTAuth;
+use App\User;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class AuthController extends Controller
 {
@@ -71,6 +72,19 @@ class AuthController extends Controller
         return response()->json(['message' => 'Successfully logged out']);
     }
 
+    public function cambiautente(Request $request)
+    {   
+        if (!Auth::user()->hasRole('super-admin')){
+            abort(403, trans('global.utente_non_autorizzato'));
+        }
+
+        $user = User::find($request->id);
+        if ($user) {
+            Auth::login($user);
+            $token = JWTAuth::fromUser($user);
+            return response()->json(compact('token'));
+        }
+    }
     /**
      * Refresh a token.
      *

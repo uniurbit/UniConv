@@ -17,16 +17,17 @@ class IndirizzoAzienda extends Model
 {
     protected $connection = 'oracle';    
 
-    public $table = 'IE01_ANAGRAFICHE_INDIRIZZI';
-    public $primaryKey = 'ID_ESTERNO';
+    public $table = 'V_IE_AC_SC_BASE';
+    public $primaryKey = 'id_ab';
 
-    protected $fillable = ['id_esterno', 'cd_tipo_ind' ,'dt_fine_val','indirizzo', 'cd_cap','cd_catasto_comune'];
+    protected $fillable = ['id_ab','dt_fine_val','indirizzo', 'cd_cap','cd_catasto_comune','ds_comune','num_civico','cd_sigla_prov'];
 
     public static function boot()
     {
         parent::boot();
         static::addGlobalScope('Fetch', function ($builder) {
-            $builder->select(['id_esterno', 'cd_tipo_ind' ,'dt_fine_val','indirizzo', 'cd_cap','cd_catasto_comune']);
+            //'id_ab','dt_fine_val','indirizzo', 'cd_cap','cd_catasto_comune','ds_comune','num_civico','cd_cap',
+            $builder->select(['id_ab','dt_fine_val','indirizzo','cd_cap','cd_catasto_comune','ds_comune','num_civico','cd_sigla_prov']);
         });
     }
 
@@ -39,14 +40,14 @@ class IndirizzoAzienda extends Model
         return $query->where('dt_fine_val', '>=',  Carbon::now());
     }
 
-    public function scopeResidenza($query)
-    {
-        return $query->with('comune')->where('cd_tipo_ind', 'RES');
-    }
+    // public function scopeResidenza($query)
+    // {
+    //     return $query->with('comune')->where('cd_tipo_ind', 'RES');
+    // }
 
     public function getIndirizzoAttribute($value)
     {
-        return  ucwords(strtolower($value));
+        return  ucwords(mb_strtolower($value));
     }
 
 }

@@ -1,6 +1,9 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Convenzione } from 'src/app/application/convenzione';
+import { IDoc } from '../approvazionedetails/approvazionedetails.component';
 import { ConvenzionedetailsComponent } from '../convenzionedetails.component';
+
+
 
 interface IInfoSottoscrizione {  
   speditaDitta: IDoc;
@@ -9,10 +12,6 @@ interface IInfoSottoscrizione {
   rispedita:IDoc;
 };
 
-interface IDoc{  
-  numero: string;
-  data: string;
-}
 
 @Component({
   selector: 'app-sottoscrizionedetails',
@@ -35,13 +34,14 @@ export class SottoscrizionedetailsComponent implements OnInit {
       if (this.conv.stipula_type=='uniurb'){      
         const file = this.conv.attachments.find(x => x.attachmenttype_codice == 'LTU_FIRM_UNIURB' || x.attachmenttype_codice == 'LTU_FIRM_UNIURB_PROT' )
         if (file) {
-          const speditaDitta = {       
+          const speditaDitta: IDoc = {       
             data: file.emission_date.toString(),
-            numero: file.num_prot        
+            numero: file.num_prot,   
+            id: file.id     
           }                       
           this.sottr.speditaDitta = speditaDitta;       
         }else{
-          const speditaDitta = {       
+          const speditaDitta: IDoc = {       
             data: this.conv.data_sottoscrizione.toString(),
             numero: null
           }
@@ -52,9 +52,10 @@ export class SottoscrizionedetailsComponent implements OnInit {
           //LTE_FIRM_ENTRAMBI_PROT LTE_FIRM_ENTRAMBI
           const filerest = this.conv.attachments.find(x => x.attachmenttype_codice == 'LTE_FIRM_ENTRAMBI_PROT' ||  x.attachmenttype_codice == 'LTE_FIRM_ENTRAMBI')
           if (filerest) {
-            let restituita = {        
+            let restituita: IDoc = {        
               data: filerest.emission_date.toString(),
-              numero: filerest.num_prot        
+              numero: filerest.num_prot,        
+              id: filerest.id
             }
             this.sottr.restituita = restituita;                      
           }else{
@@ -72,9 +73,10 @@ export class SottoscrizionedetailsComponent implements OnInit {
       if (this.conv.stipula_type=='controparte'){
         const file = this.conv.attachments.find(x => x.attachmenttype_codice == 'LTE_FIRM_CONTR' || x.attachmenttype_codice == 'LTE_FIRM_CONTR_PROT')
         if (file) {
-          const arrivata = {       
+          const arrivata: IDoc = {       
             data: file.emission_date.toString(),
-            numero: file.num_prot        
+            numero: file.num_prot,  
+            id: file.id              
           }
           this.sottr.arrivata = arrivata;                      
         }else{
@@ -87,9 +89,10 @@ export class SottoscrizionedetailsComponent implements OnInit {
         //LTE_FIRM_ENTRAMBI_PROT LTE_FIRM_ENTRAMBI
         const filerest = this.conv.attachments.find(x => x.attachmenttype_codice == 'LTU_FIRM_ENTRAMBI_PROT' ||  x.attachmenttype_codice == 'LTU_FIRM_ENTRAMBI')
         if (filerest) {
-          const rispedita = {        
+          const rispedita: IDoc = {        
             data: filerest.emission_date.toString(),
-            numero: filerest.num_prot        
+            numero: filerest.num_prot,        
+            id: filerest.id
           }
           this.sottr.rispedita = rispedita;                      
         }

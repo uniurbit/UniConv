@@ -41,20 +41,21 @@ export class UploadfileComponent implements OnInit {
   model_id: number;
   
   form = new FormGroup({});
-  modelfile: { filename: '', attachmenttype_codice: ''};
+  modelfile = { filename: '', attachmenttype_codice: ''};
   currentSelFile: File;
   nrecord: string;
   emission_date: Date;
   isLoading: boolean;
 
 
-  public static codeWithDateNumber: Array<string> = ['DDD', 'DCD', 'DR', 'DRU', 'DSA', 'DCA'];
+  public static codeWithDateNumber: Array<string> = ['DDD', 'DCD', 'DR', 'DRU', 'DSA', 'DCA','ALLEGATO_BOLLI'];
   public static withProtocol: Array<string> = ['LTE_FIRM_CONTR_PROT', 'LTU_FIRM_ENTRAMBI_PROT', 'LTE_FIRM_ENTRAMBI_PROT'];
 
 
-  public static fileToBeUploaded = UploadfileComponent.codeWithDateNumber.concat(UploadfileComponent.withProtocol);
+  public static fileToBeUploaded = UploadfileComponent.codeWithDateNumber.concat(UploadfileComponent.withProtocol).concat(['PR','DA']);
 
-  fields: FormlyFieldConfig[] = [
+  fields: FormlyFieldConfig[] = [{
+    fieldGroup: [
         {
           key: 'attachmenttype_codice',
           type: 'select',          
@@ -77,15 +78,22 @@ export class UploadfileComponent implements OnInit {
             label: 'Scegli documento',
             type: 'input',
             placeholder: 'Scegli file documento',
-            accept: '.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.p7m',
+            accept: '.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,.p7m,application/pkcs7-mime,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             required: true,
             onSelected: (selFile) => { this.onSelectCurrentFile(selFile) }
           },
-          hideExpression: (model, formState) => {
+          hideExpression: (model, formState, field) => {
             if (model)
               return UploadfileComponent.withProtocol.includes(model.attachmenttype_codice); 
             return true;
           },
+          expressionProperties: {
+            'templateOptions.required': (model, formState, field) => {
+              if (model)
+                return !['DSA', 'DCA'].includes(model.attachmenttype_codice); 
+              return true;
+            }
+          }
         },
         {
           key: 'num_prot',
@@ -144,8 +152,8 @@ export class UploadfileComponent implements OnInit {
          },           
         },
       
-   
-  ];
+      ]
+  }];
 
 
   constructor(public activeModal: NgbActiveModal, private service: ApplicationService) {  
@@ -165,27 +173,29 @@ export class UploadfileComponent implements OnInit {
   
   addfile() {
     this.isLoading = true;
-    let currentAttachment: FileAttachment = {
+    const currentAttachment: FileAttachment = {
       model_id: this.model_id,
       model_type: 'App\\Convenzione',
       filename: this.currentSelFile ? this.currentSelFile.name : null,      
-      attachmenttype_codice: this.form.get('attachmenttype_codice').value,
+      attachmenttype_codice: this.form.get('attachmenttype_codice').value,      
     }
-    currentAttachment = {...currentAttachment, ...this.form.value } 
-
-    //carica il file se non c'è numero di protocollo
-    if (!currentAttachment.num_prot){
+    const mergeCurrentAttachment = {...currentAttachment, ...this.form.value }; 
+    console.log(mergeCurrentAttachment);
+    //carica il file se non c'è numero di protocollo ed esiste il filename
+    if (!mergeCurrentAttachment.num_prot && mergeCurrentAttachment.filename) {
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        currentAttachment.filevalue = encode(e.target.result);
-        this.callUpdate(currentAttachment);
+        mergeCurrentAttachment.filevalue = encode(e.target.result);
+        this.callUpdate(mergeCurrentAttachment);
       }
       reader.readAsArrayBuffer(this.currentSelFile);       
     }else{
-      currentAttachment.filename = null;
-      currentAttachment.nrecord = this.nrecord;
-      currentAttachment.emission_date = this.emission_date
-      this.callUpdate(currentAttachment);
+      mergeCurrentAttachment.filename = null;      
+      if (mergeCurrentAttachment.num_prot){
+        mergeCurrentAttachment.nrecord = this.nrecord;
+        mergeCurrentAttachment.emission_date = this.emission_date;
+      }
+      this.callUpdate(mergeCurrentAttachment);
     }
   }
 

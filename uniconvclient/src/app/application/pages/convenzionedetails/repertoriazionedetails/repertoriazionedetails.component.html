@@ -8,17 +8,20 @@
                         <td class="col-md-3">Bollo virtuale</td>
                         <td class="col-md-9">
                             <div *ngFor="let bollo of rep?.bolli">
+                                <div *ngIf="bollo.num_bolli && bollo.num_bolli > 0">    
                                 <span [ngSwitch]="bollo.codice">                        
-                                    <span *ngSwitchCase="'BOLLO_TEC_ALLEGATO'">Tecnici n. </span>   
-                                    <span *ngSwitchDefault>n. </span>                                                                       
+                                    <span *ngSwitchCase="'BOLLO_ATTI'">{{ 'num_bolli_atti' | translate | lowercase }}: </span>   
+                                    <span *ngSwitchCase="'BOLLO_ALLEGATI'">{{ 'num_bolli_allegati' | translate | lowercase }}: </span>   
+                                    <span *ngSwitchDefault>n.</span>                                                                       
                                 </span> 
                                 <span>{{ bollo.num_bolli }}</span>
+                                </div>
                             </div>
                         </td>
                     </tr>                        
                     <tr class="d-flex">                                           
                         <td class="col-md-3">Repertoriato</td>
-                        <td class="col-md-9"><app-rangedetails [numero]="rep.repertorio.numero" [data]="rep.repertorio.data"></app-rangedetails></td>                 
+                        <td class="col-md-9"><app-rangedetails [numero]="rep.repertorio.numero" [data]="rep.repertorio.data" [id]="rep.repertorio.id"></app-rangedetails></td>                 
                     </tr>           
                 </tbody>
             </table>

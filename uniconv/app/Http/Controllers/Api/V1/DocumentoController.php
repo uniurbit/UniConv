@@ -88,8 +88,9 @@ class DocumentoController extends Controller
         $this->sc = new SoapControllerTitulus(new SoapWrapper);
 
         //chiamata a titulus che impersona il chiamante 
-
-        $pers =  Auth::user()->personaleRespons()->first(); 
+        //findPersonaleRespons() può essere sostituito con personale()
+        //$pers =  Auth::user()->findPersonaleRespons(); 
+        $pers =  Auth::user()->personaleRelation()->first(); 
         $ctrPers = new PersonaInternaController();
         $persint = $ctrPers->getminimalByName($pers->utenteNomepersona);        
         $result = $this->sc->setWSUser($persint->loginName,$persint->matricola);

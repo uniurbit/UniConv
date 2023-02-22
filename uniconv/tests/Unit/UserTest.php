@@ -154,6 +154,46 @@ class UserTest extends TestCase
 
         $this->assertNotNull($claim['roles']); 
         $this->assertNotNull($claim['permissions']); 
-     }
+    }
+
+    //./vendor/bin/phpunit  --testsuite Unit --filter personaleAfferenzeOrganizzative
+    public function testpersonaleAfferenzeOrganizzative(){        
+        $user = new User([
+            'v_ie_ru_personale_id_ab' => 1804,
+            'name' => 'Manola Cascella',
+            'email' => 'manola.cascella@uniurb.it',
+            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret            
+        ]);
+
+        $afferenze = $user->personaleAfferenzeOrganizzative();
+        $this->assertNotNull($afferenze); 
+        $this->assertGreaterThan(0, $afferenze->count());  
+
+        $user = new User([
+            'v_ie_ru_personale_id_ab' => 1586,
+            'name' => 'Joseph Gino Fontana',
+            'email' => 'joseph.fontana@uniurb.it',
+            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret            
+        ]);
+
+        $afferenze = $user->personaleAfferenzeOrganizzative();
+        $this->assertNotNull($afferenze); 
+        $this->assertGreaterThan(0, $afferenze->count());  
+    }
+
+    //./vendor/bin/phpunit  --testsuite Unit --filter testcodiciUnitaorganizzative
+    public function testcodiciUnitaorganizzative(){        
+        $user = new User([
+            'v_ie_ru_personale_id_ab' => 1804,
+            'name' => 'Manola Cascella',
+            'email' => 'manola.cascella@uniurb.it',
+            'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret            
+        ]);
+
+        $codici = $user->codiciUnitaorganizzative();
+        $this->assertNotNull($codici); 
+        $this->assertGreaterThan(0, count($codici));
+    }
+
 
 }

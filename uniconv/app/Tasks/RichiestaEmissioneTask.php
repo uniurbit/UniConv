@@ -20,12 +20,23 @@ class RichiestaEmissioneTask extends BaseTask
     public function __construct($scad)
     {
         $this->model = $scad;
-        $this->workflow_place =  Scadenza::INEMISSIONE; 
-        $this->workflow_transition = Scadenza::EMISSIONE;
-        $this->subject = 'Emissione';                
-        $this->state = 'aperto';                              
+        $this->workflow_place =  Scadenza::ATTIVO; 
+        $this->workflow_transition = 'richiestaemissione';
+        $this->subject = 'Richiesta di emissione'; 
+        //chi fa la richiesta di emissione     
+        $this->owner_user_id = Auth::user()->id;
+        $this->assignments($this->owner_user_id);
     }     
    
+    public function assignments($user_id){
+        //cercare utente nella tabella ... v_ie_ru_pers_respons_org    
+        $user = User::find($user_id)->findPersonaleRespons();                            
+        $this->unitaorganizzativa_uo = $user->cd_csa;
+        $this->respons_v_ie_ru_personale_id_ab = $user->responsabileUfficio(); //$user->id_ab_resp;
+        array_push($this->assignments, ['v_ie_ru_personale_id_ab' => $user->id_ab, 'cd_tipo_posizorg' => $user->cd_tipo_posizorg]);
+    }
+
+
     public function toUserTask(){
         $usertask = new  UserTask();
         $usertask->model()->associate($this->model);
@@ -38,5 +49,6 @@ class RichiestaEmissioneTask extends BaseTask
         $usertask = $this->toUserTask();
         $usertask->save();        
         $usertask->assignments()->createMany($this->assignments);
+        return $usertask;
     }
 }

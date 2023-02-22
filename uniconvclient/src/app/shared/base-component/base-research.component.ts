@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild, TemplateRef } from '@angular/core';
 import { FormlyFieldConfig, FormlyTemplateOptions } from '@ngx-formly/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,6 +18,9 @@ export class BaseResearchComponent implements OnInit {
   public isLoading = false;
   public fieldsRow: FormlyFieldConfig[] = [];
 
+  @ViewChild('apri') apri: TemplateRef<any>;
+  @ViewChild('comandi') comandi: TemplateRef<any>;
+  
   builderoptions: FormlyTemplateOptions;
 
   form = new FormGroup({});
@@ -230,10 +233,6 @@ export class BaseResearchComponent implements OnInit {
     }
   }
 
-  rowSelection(value) {
-
-  }
-
   onExportXLS(){
     // richiamare export dal service
     if (this.model.data.length > 0) {
@@ -249,4 +248,24 @@ export class BaseResearchComponent implements OnInit {
      );
    }
  }
+
+  rowSelection(row) {
+    this.setStorageResult();      
+    if (row.id) {
+      this.router.navigate([this.routeAbsolutePath, row.id]);
+    }
+  }
+
+  downloadSelection(value) {
+
+  }
+
+  downloadDisabled(value) {
+    return false;
+  }
+
+  isDisabledApri(value) {
+    return false;
+  }
+  
 }

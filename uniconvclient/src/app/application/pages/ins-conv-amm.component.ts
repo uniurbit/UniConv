@@ -16,6 +16,7 @@ import ControlUtils from 'src/app/shared/dynamic-form/control-utils';
 })
 export class InsConvAmmComponent implements OnInit {
 
+  private prefix = 'insconvamm';
 
   onDestroy$ = new Subject<void>();
   fields: FormlyFieldConfig[];
@@ -84,6 +85,16 @@ export class InsConvAmmComponent implements OnInit {
           },  
         ]
       }];
+
+      if (this.getStorageModel()){
+        let app = JSON.parse(this.getStorageModel());
+        this.checkHistory(app);                  
+        this.model = app;       
+        this.setStorageModel();
+      }else{
+        if (this.checkHistory(this.model))
+          this.setStorageModel();
+      }
   }
 
   ngOnInit() {
@@ -98,6 +109,7 @@ export class InsConvAmmComponent implements OnInit {
       this.service.createSchemaTipo(tosubmit, true).subscribe(
         result => {
           this.isLoading = false;
+          sessionStorage.removeItem(this.prefix+'_model');
           this.router.navigate(['home/dashboard/dashboard1']);  
         },
         error => {
@@ -117,5 +129,51 @@ export class InsConvAmmComponent implements OnInit {
     ControlUtils.validate(this.fields[0]);
   }
   
+  getStorageModel(){
+    if (this.prefix){
+      return sessionStorage.getItem(this.prefix+'_model');
+    }     
+    return null;
+  }
+
+  setStorageModel(){
+    if (this.prefix){
+      sessionStorage.setItem(this.prefix+'_model',JSON.stringify(this.model));
+    } 
+  }
+
+  
+  checkHistory(model){
+    const entity = history.state ? history.state.entity : null;
+    if (entity){
+      if (model.aziende.length > 0)
+      {
+        model.aziende = model.aziende.filter(x=>x !== (undefined || null || '') && x.id);
+      }
+      this.pushToArray(model.aziende,entity);  
+      return true;
+    }   
+    return false;
+  }
+
+  pushToArray(arr, obj) {
+    const index = arr.findIndex((e) => e.id === obj.id);
+
+    if (index === -1) {
+        arr.push(obj);
+    } else {
+        arr[index] = obj;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.onDestroy$.next();
+    this.onDestroy$.complete();
+    if (this.form.touched){
+      this.setStorageModel();
+    }
+  
+  }
+
  
 }

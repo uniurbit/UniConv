@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -50,14 +51,28 @@ class RichiestaValidazione extends Notification
     {
         $this->data['urlInfo'] = url(Auth::user()->getIntendedUrl().'/home/convdetails/'.$this->conv->id);
         $this->data['urlChiusura'] = url(Auth::user()->getIntendedUrl().'/home/validazione/'.$this->conv->id);
+        $this->data['conv'] = $this->conv;
 
         $emailresp = $notifiable->responsabile()->email;       
 
-        return (new MailMessage)
-            ->cc([$emailresp, Auth::user()->email]) 
-            ->bcc(config('unidem.administrator_email'))
-            ->subject('Richiesta approvazione')    
-            ->markdown('mail.richiesta.validazione',$this->data);
+        if (App::environment(['local','preprod'])) { 
+            
+            return (new MailMessage)            
+                ->cc(config('unidem.administrator_email'))
+                ->subject('Richiesta approvazione')    
+                ->markdown('mail.richiesta.validazione',$this->data);
+
+        } else{
+
+            return (new MailMessage)
+                ->cc([$emailresp, Auth::user()->email]) 
+                ->bcc(config('unidem.administrator_email'))
+                ->subject('Richiesta approvazione')    
+                ->markdown('mail.richiesta.validazione',$this->data);
+        }
+
+
+       
     }
 
 

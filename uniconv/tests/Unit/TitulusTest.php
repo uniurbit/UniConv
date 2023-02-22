@@ -30,6 +30,8 @@ use Auth;
 use App\User;
 use PDF;
 use App\Service\TitulusHelper;
+use App\Http\Controllers\Api\V1\AttachmentController;
+use App\Attachment;
 class TitulusTest extends TestCase
 {
 
@@ -774,7 +776,7 @@ class TitulusTest extends TestCase
 
         $sc = new SoapControllerTitulus(new SoapWrapper); 
 
-        $pers =  Auth::user()->personaleRespons()->first(); 
+        $pers =  Auth::user()->findPersonaleRespons(); 
         $ctrPers = new PersonaInternaController();
         $persint = $ctrPers->getminimalByName($pers->utenteNomepersona);
 
@@ -878,6 +880,33 @@ class TitulusTest extends TestCase
         $this->assertTrue($exists);
 
     }
-    
+
+    //./vendor/bin/phpunit  --testsuite Unit --filter testDownloadCreateFatturaPA
+    // public function testDownloadCreateFatturaPA(){
+    //     $app = TitulusHelper::downloadAttachment("2020-UNURCLE-0008544","Fattura");        
+    //     $pdf = TitulusHelper::createFatturaPA($app->content);
+    //     Storage::disk('local')->delete('testfattura.pdf');
+     
+    //     Storage::disk('local')->put('testfattura.pdf', $pdf->output());      
+    //     $exists = Storage::disk('local')->exists('testfattura.pdf');        
+
+    //     $this->assertTrue($exists);
+    // }
+ 
+    //./vendor/bin/phpunit  --testsuite Unit --filter testDownloadAttachment
+    // public function testDownloadAttachment(){
+    //     $attahmentController = new AttachmentController();     
+    //     $attach = new Attachment();
+    //     $attach->attachmenttype_codice = "FATTURA_ELETTRONICA";
+    //     //$attach->num_prot = "2022-UNURCLE-0082182"; //pdf 
+    //     $attach->num_prot = "2022-UNURCLE-0110100"; //xml        
+    //     $attach->filename = "Fattura elettronica";
+    //     $app = TitulusHelper::downloadAttachment($attach->num_prot,$attach->filename);       
+    //     $attach = $attahmentController->getAttachmentContent($attach, $app);
+
+    //     $this->assertNotNull($attach);    
+    //     $this->assertNotNull($attach->filevalue);     
+    // }
+
 }
 

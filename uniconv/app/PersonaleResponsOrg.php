@@ -15,7 +15,7 @@ class PersonaleResponsOrg extends Model
     const PERS_C = 'PERS_C';
     const RESP_UFF = 'RESP_UFF';
     const COOR_PRO_D = 'COOR_PRO_D';
-    const RESP_PLESSO = 'RESP_PLESSO';    
+    const RESP_PLESSO = 'RESP_PLESS';    
 
     protected $connection = 'oracle';    
 
@@ -26,7 +26,7 @@ class PersonaleResponsOrg extends Model
     {
         parent::boot();
         static::addGlobalScope('Fetch', function ($builder) {
-            $builder->select(['nome','cognome', 'id_ab', 'cd_tipo_posizorg', 'cd_csa', 'id_ab_resp', 'cd_tipo_posizorg_resp','nome_resp', 'cognome_resp']);
+            $builder->select(['nome','cognome', 'id_ab', 'cd_tipo_posizorg', 'cd_csa', 'id_ab_resp', 'cd_tipo_posizorg_resp','nome_resp', 'cognome_resp','cd_csa_resp','nome_uo']);
         });
     }
   
@@ -50,17 +50,33 @@ class PersonaleResponsOrg extends Model
 
     public function scopeFindByAfferenzaOrganizzativa($query, $uo)
     {        
-        return $query->where('cd_csa',$uo);
+        $result = $query->where('cd_csa',$uo)->get();
+
+        $entity = $result->first();
+        if ($entity->cd_tipo_posizorg_resp==PersonaleResponsOrg::RESP_PLESSO){
+            $resp = new PersonaleResponsOrg();
+            $resp->nome = $entity->nome_resp;
+            $resp->cognome = $entity->cognome_resp;
+            $resp->id_ab = $entity->id_ab_resp;
+            $resp->cd_tipo_posizorg = $entity->cd_tipo_posizorg_resp;
+            $resp->cd_csa = $entity->cd_csa_resp;
+           
+            $result->add($resp);
+        }
+
+        return $result;
     }
 
     public function scopeRespons($query)
     {        
         return $query->whereIn('cd_tipo_posizorg', array(PersonaleResponsOrg::RESP_UFF, PersonaleResponsOrg::COOR_PRO_D, PersonaleResponsOrg::RESP_PLESSO));
     }
-
-
-
-    /** restituisce il nome del responsabile ricercabile su titulus */
+    
+    /**
+     * getNomepersonaAttribute
+     *
+     * @return String cognome_resp e nome_resp del responsabile
+     */
     public function getNomepersonaAttribute(){
         return strtolower($this->attributes['cognome_resp']).' '.strtolower($this->attributes['nome_resp']);
     }
@@ -68,5 +84,12 @@ class PersonaleResponsOrg extends Model
     /** restituisce il nome utente ricercabile su titulus */
     public function getUtenteNomepersonaAttribute(){
         return strtolower($this->attributes['cognome']).' '.strtolower($this->attributes['nome']);
+    }
+
+    public function responsabileUfficio(){
+        if ($this->cd_tipo_posizorg==PersonaleResponsOrg::RESP_UFF || $this->cd_tipo_posizorg==PersonaleResponsOrg::COOR_PRO_D || $this->cd_tipo_posizorg==PersonaleResponsOrg::RESP_PLESSO){
+            return $this->id_ab;
+        }
+        return $this->id_ab_resp;
     }
 }

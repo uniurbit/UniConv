@@ -12,7 +12,6 @@ import { FieldType, FormlyFieldConfig, FormlyConfig } from '@ngx-formly/core';
     </div>
     <input #fileInput type="file" accept="{{to.accept}}" (change)="onFileChanged($event)" style="display: none">    
   `,
-
   styles: []
 })
 export class InputFileComponent extends FieldType implements OnInit{
@@ -27,6 +26,7 @@ export class InputFileComponent extends FieldType implements OnInit{
 
   ngOnInit() {        
       if (!this.to.accept) {
+        console.log('InputFileComponent: accept is not defined');
         this.to.accept = 'application/pdf';
       }
          
@@ -46,9 +46,8 @@ export class InputFileComponent extends FieldType implements OnInit{
   onFileChanged(event) {
     let selFile = event.target.files[0] as File;
     if (selFile){
-      this.inputField.formControl.setValue(selFile.name);        
+      this.inputField.formControl.setValue(selFile.name);           
       this.to.onSelected(...[selFile, this.field])
-
     }
   }
 
@@ -74,7 +73,7 @@ export class InputFileComponent extends FieldType implements OnInit{
       field.templateOptions.accept = 'application/pdf';
     }
 
-    field.wrappers= ['form-field','addons']; //.concat(this.field.wrappers),    
+    field.wrappers= ['form-field','addons'];   
     field.templateOptions.addonRight = {
       class: 'btn btn-outline-secondary oi oi-delete d-flex align-items-center',
       onClick: (to, fieldType, $event) => this.reset(),      
@@ -83,6 +82,7 @@ export class InputFileComponent extends FieldType implements OnInit{
     field.templateOptions.addonLeft= {
       class: 'btn btn-outline-secondary oi oi-folder d-flex align-items-center',
       onClick: (to, fieldType, $event) => { 
+        this.openDialogSelectFile();
       }
     };      
 

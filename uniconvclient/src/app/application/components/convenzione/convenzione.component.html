@@ -2,24 +2,24 @@
 
 <div class="btn-toolbar mb-4" role="toolbar">
   <div class="btn-group" *ngxPermissionsOnly="['ADMIN_AMM','ADMIN','SUPER-ADMIN']">    
-    <button  class="btn btn-outline-primary rounded-lg" [disabled]="isDeleted()" (click)="onNew()" >              
+    <!-- <button  class="btn btn-outline-primary rounded-lg" [disabled]="isDeleted()" (click)="onNew()" >              
         <span class="oi oi-document"></span>
         <span class="ml-2">Nuovo</span>
-    </button>    
-    <button class="btn btn-outline-primary rounded-lg ml-1"  [disabled]="!form.valid || !form.dirty || isDeleted()" (click)="onSubmit()" >              
+    </button>     -->
+    <button class="btn btn-outline-primary rounded-lg ml-1"  [disabled]="!form.valid || !form.dirty || isDeleted()" (click)="onSubmit()" title="Salva convenzione">              
         <span class="oi oi-arrow-top"></span>  
-        <span class="ml-2">Aggiorna</span>        
+        <span class="ml-2">{{ 'btn_salva' | translate }}</span>        
     </button>
-    <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onReload()"  [disabled]="isNew || !form.dirty || isDeleted()">
-        <span class="oi oi-reload iconic" title="reload" aria-hidden="true" ></span>
+    <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onReload()"  [disabled]="isNew || !form.dirty || isDeleted()" title="Ricarica convenzione">
+        <span class="oi oi-reload" title="reload" aria-hidden="true" ></span>
         <span class="ml-2">Ricarica</span>
     </button>   
-    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()"  (click)="onValidate()" >              
+    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()"  (click)="onValidate()" title="Valida convenzione">              
       <span class="oi oi-flash"></span>  
       <span class="ml-2">Valida</span>              
     </button> 
-    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()" (click)="onDelete()" >              
-      <span class="oi oi-ban iconic"></span>  
+    <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="isDeleted()" (click)="onDelete()" title="Cancella convenzione" >              
+      <span class="oi oi-ban"></span>  
       <span class="ml-2">Cancella</span>        
     </button>
     <!-- <button class="btn btn-outline-primary rounded-lg ml-1" >
@@ -125,6 +125,16 @@
   </span>
 </ng-template>  
 
+<ng-template #apri ngx-datatable-cell-template let-row="row" let-rowIndex="rowIndex" let-value="value" >
+  <button type="button" class="btn btn-sm btn-outline-secondary oi oi-external-link d-flex align-items-center" title="{{ prefix ? (prefix+'_apri' | translate) : 'Apri' }}" (click)="rowSelection(row)"></button>  
+</ng-template>   
+
+<ng-template #comandi ngx-datatable-cell-template let-row="row" let-rowIndex="rowIndex" let-value="value">
+  <div class="btn-group" data-toggle="button" > 
+    <button type="button" class="btn btn-sm btn-outline-secondary oi oi-external-link" title="{{ prefix ? (prefix+'_apri' | translate) : 'Apri' }}" (click)="rowSelection(row)"></button>  
+    <button type="button" class="btn btn-sm btn-outline-secondary shadow-none oi oi-trash ml-1" title="{{ prefix ? (prefix+'_remove' | translate) : 'Rimuovi' }}" (click)="removeSelection(row)" [disabled]="removeDisabled(row)"></button>  
+  </div>
+</ng-template>
 
 <!-- [pdfFile]="model.convenzione_pdf" -->
 <!-- <section id="viewer">

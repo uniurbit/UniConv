@@ -1,5 +1,5 @@
 
-import { Component, OnInit, OnDestroy, Input, TemplateRef, ViewChild, Sanitizer } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, TemplateRef, ViewChild, Sanitizer, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
 import { FormGroup, FormControl, FormArray, NgForm, Validators, Form } from '@angular/forms';
 import { ApplicationService } from '../../application.service';
 import { FormlyFormOptions, FormlyFieldConfig } from '@ngx-formly/core';
@@ -21,6 +21,7 @@ import { AuthService } from 'src/app/core';
 import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
 import { TranslateService } from '@ngx-translate/core';
 import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
+import { ScadenzaService } from '../../scadenza.service';
 
 
 @Component({
@@ -28,10 +29,13 @@ import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
   templateUrl: './convenzione.component.html',
 })
 
-export class ConvenzioneComponent implements OnInit, OnDestroy {
+export class ConvenzioneComponent implements OnInit, OnDestroy, AfterContentChecked {
 
   @ViewChild('statetemplate') statetemplate: TemplateRef<any>;
   @ViewChild('stateattivita') stateattivita: TemplateRef<any>;
+  //bottoni
+  @ViewChild('apri') apri: TemplateRef<any>;
+  @ViewChild('comandi') comandi: TemplateRef<any>;
 
   @ViewChild('tabs')
   private tabs: NgbTabset;
@@ -342,6 +346,7 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
         summaryPosition:'bottom',
         groupHeaderTitle: (group) => this.groupHeaderTitle(group),
         columns: [
+          { name: '', prop: 'id',  with: 90, maxWidth: 90 },
           { name: '#', prop: 'id', summaryFunc:  null, width: 60, maxWidth:100 },
           { name: 'Tranche prevista', prop: 'data_tranche',summaryFunc:  null, },
           { name: 'Stato', prop: 'state', summaryFunc: null },
@@ -361,16 +366,7 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
         },
       },
       fieldArray: {
-        fieldGroup: [
-          {
-            type: 'button',
-            key: 'action_button',
-            templateOptions: {
-              btnType: 'primary oi oi-data-transfer-download',
-              onClick: ($event) => this.open()
-            },
-          },
-        ]
+        fieldGroup: []
       }
     }
 
@@ -402,7 +398,9 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
     return this.authService._roles.some((r) => ['ADMIN_AMM','ADMIN','SUPER-ADMIN'].includes(r));
   }
 
-  constructor(public confirmationDialogService: ConfirmationDialogService, 
+  constructor(
+    protected scadenzaService: ScadenzaService, 
+    public confirmationDialogService: ConfirmationDialogService, 
     private service: ApplicationService, 
     protected authService: AuthService,
     private route: ActivatedRoute, 
@@ -410,7 +408,8 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
     private modalService: NgbModal, 
     public activeModal: NgbActiveModal,        
     protected location: Location,
-    private translateService: TranslateService) 
+    private translateService: TranslateService,
+    private ref: ChangeDetectorRef) 
   {
     this.translate = new MyTranslatePipe(translateService);
     //modello vuoto
@@ -493,7 +492,7 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
   
     // ];
 
-    this.fields = this.fields.concat(service.getInformazioniDescrittiveFields(this.model)); 
+    this.fields = this.fields.concat(service.getInformazioniDescrittiveFields(this.model,0)); 
   }
 
   get isNew(): boolean {
@@ -503,7 +502,8 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     let cols: (Array<any>) = this.fieldscadenze.find(x => x.key == "scadenze").templateOptions.columns;
-    cols.find(x => x.prop == 'state').cellTemplate = this.statetemplate;
+    cols.find(x => x.prop == 'state').cellTemplate = this.statetemplate; 
+    cols.find(x => x.prop == 'id' && x.name=='').cellTemplate = this.comandi;
 
     cols= this.fieldsusertask.find(x => x.key == "usertasks").templateOptions.columns;
     cols.find(x => x.prop == 'state').cellTemplate = this.stateattivita;
@@ -544,6 +544,10 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.onDestroy$.next();
     this.onDestroy$.complete();
+  }
+
+  ngAfterContentChecked() {
+    this.ref.detectChanges();
   }
 
   onNew() {
@@ -688,12 +692,12 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
   }
 
   public onValidate() {    
-    this.fields.forEach(f => ControlUtils.validate(f));    
+    this.fields.forEach(f => ControlUtils.validate(f));        
   }
 
   public onDelete() {
   
-    this.confirmationDialogService.inputConfirm('Conferma', 'Procedere con l\'operazione di cancellazione?')
+    this.confirmationDialogService.inputConfirm('Conferma', 'Vuoi procedere con l\'operazione di cancellazione della convenzione?')
     .then((confirmed) => {
       if (confirmed.result) {
         const data = {
@@ -723,4 +727,60 @@ export class ConvenzioneComponent implements OnInit, OnDestroy {
     return !!this.model.deleted_at;
   }
 
+  isValid(field: FormlyFieldConfig) {
+    if (field.key) {
+      if (!field.templateOptions.disabled)
+        return field.formControl.valid;
+      else
+        return true;
+    }
+
+    return field.fieldGroup.every(f => this.isValid(f));
+  }
+
+  rowSelection(row) {     
+    if (row.id) {
+      this.router.navigate(['home/scadenze', row.id], {
+        queryParams: {
+          returnUrl: this.router.url,
+        }
+      });
+    }
+  }
+
+  removeSelection(row){
+
+      //console.log('User dismissed the dialog (e.g., by using ESC, clicking the cross icon, or clicking outside the dialog)')
+      this.service.confirmationDialogService.confirm('Conferma', "Vuoi procedere con l'operazione di elminazione della scandenza?" )
+        .then((confirmed) => {
+          if (confirmed){
+            if (!row.id)
+              return;
+            this.isLoading = true;
+            this.scadenzaService.remove(row.id).subscribe(
+              prop => {
+                this.isLoading = false; 
+                this.onReload();
+              },
+              error => { // error path        
+                console.log(error);
+                this.isLoading = false; 
+              }
+            );
+            
+
+
+          }
+          //console.log(confirmed);        
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
+      
+    
+  }
+
+  removeDisabled(row){
+    return row.state ==null || row.state != "attivo";
+  }
 }

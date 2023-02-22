@@ -58,6 +58,7 @@ import { RegistrazioneCompletamentoDirettoreComponent } from '../application/pag
 import { RegistrazioneCompletamentoControparteComponent } from '../application/pages/registrazione/registrazione-completamento-controparte/registrazione-completamento-controparte.component';
 import { RegistrazioneBolloRepertoriazioneComponent } from '../application/pages/registrazione/registrazione-bollo-repertoriazione/registrazione-bollo-repertoriazione.component';
 import { LinkEsterniComponent } from '../application/link-esterni/link-esterni.component';
+import { BolliComponent } from '../application/components/bolli/bolli.component';
 
 const externalLoginUrlProvider = new InjectionToken('externalUrlRedirectResolver');
 
@@ -698,6 +699,17 @@ const routes: Routes = [
         }
       },
 
+       //bolli
+       { 
+        path: 'bolli',  component: BolliComponent,  canActivate:[AuthGuard], 
+        data: {
+          title: 'Report bolli virtuali',
+          urls: [
+            { title: 'Home', url: '/home' },
+            { title: 'Report bolli virtuali' }
+          ]
+        }
+      }, 
         // LINK AI DOCUMENTI
         {
           path: 'lineeguida/:val',

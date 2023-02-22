@@ -93,6 +93,7 @@ import { MyDiffdatePipe } from './pipe/custom.diffdatepipe';
 import { ViewListComponent } from './view-list/view-list.component';
 import { ListItemComponent } from './view-list/list-item/list-item.component';
 import { DEFAULT_FLATTENPIPE, MyFlattenPipe } from './pipe/custom.flattenpipe';
+import { ExternalobjAsyncTypeComponent } from './dynamic-form/externalobjasync-type.component';
 
 
 
@@ -133,6 +134,21 @@ export function provinciaValidationMessage(err, field) {
   return "Formato non valido: richiesti due caratteri maiuscoli";
 }
 
+export function checkNumeric(field,event){
+  if (event.shiftKey){
+    event.preventDefault();     // Prevent character input
+  }
+  
+  if( !(event.keyCode == 9  //Tab!!
+    || event.keyCode == 8    // backspace
+    || event.keyCode == 46      // delete
+    || (event.keyCode >= 35 && event.keyCode <= 40)     // arrow keys/home/end
+    || (event.keyCode >= 48 && event.keyCode <= 57)     // numbers on keyboard
+    || (event.keyCode >= 96 && event.keyCode <= 105))   // number on keypad
+    ) {      
+        event.preventDefault();     // Prevent character input
+  }       
+}
 
 export const customCurrencyMaskConfig = {
   align: 'left',
@@ -180,11 +196,19 @@ export const customCurrencyMaskConfig = {
       { name: 'template', component: FormlyFieldTemplate },
       { name: 'pdfviewerinput', component: PdfTypeInputComponent, wrappers: ['form-field']},
       { name: 'pdfviewer', component: PdfTypeComponent, wrappers: ['form-field']},
-      { name: 'fileinput', component: InputFileComponent },
+      { name: 'fileinput', component: InputFileComponent,
+        wrappers: ['form-field'], 
+        defaultOptions: {
+          templateOptions: {
+            readonly: true,
+          },
+        },
+      },
       { name: 'generic', component: GenericTypeComponent, wrappers: ['form-field'] },
       { name: 'external', component: ExternalTypeComponent },
       { name: 'externalquery', component: ExternalqueryComponent },
       { name: 'externalobject', component: ExternalobjTypeComponent },
+      { name: 'externalobjectasync', component: ExternalobjAsyncTypeComponent },
       { name: 'selectinfra', component: SelectTypeComponent },
       { name: 'tabinfra', component: TabTypeComponent },
       { name: 'string', extends: 'input' },
@@ -294,6 +318,39 @@ export const customCurrencyMaskConfig = {
           },
         },
       },
+      {
+        name: 'numore',
+        extends: 'input',       
+        defaultOptions: {            
+          templateOptions: {
+            required: false,
+            type: 'number',
+            min: 0,
+            max: 3000,   
+            //per diverso comportamento firefox
+            keydown: checkNumeric,
+            attributes: {
+              onpaste: 'return false;',
+            },                           
+          },        
+        },
+      },      
+      { 
+        name: 'numfix', 
+        extends: 'input', 
+        defaultOptions: {            
+          templateOptions: {
+            required: false,
+            type: 'number',
+            min: 0,            
+            //per diverso comportamento firefox
+            keydown: checkNumeric,
+            attributes: {
+              onpaste: 'return false;',
+            },                           
+          },        
+        },
+      }
       ],
       wrappers: [
         { name: 'panel', component: PanelWrapperComponent },
@@ -307,6 +364,7 @@ export const customCurrencyMaskConfig = {
       validationMessages: [
         { name: 'required', message: 'Campo richiesto' },
         { name: 'notfound', message: 'Non trovato' },
+        { name: 'waiting', message: 'Attesa di risposta ...' },
         { name: 'filevalidation', message: 'Documento non valido' },
         { name: 'pattern', message: 'Formato non valido' },
         { name: 'minlength', message: minlengthValidationMessage },
@@ -342,6 +400,7 @@ export const customCurrencyMaskConfig = {
     ExternalqueryComponent,
     TableLookupTypeComponent,
     ExternalobjTypeComponent,
+    ExternalobjAsyncTypeComponent,
     SelectTypeComponent,
     NavstepperWrapperComponent,
     TabTypeComponent,
@@ -389,7 +448,7 @@ export const customCurrencyMaskConfig = {
     DynamicFormComponent, MessageComponent, ControlGenericListComponent, DynamicTableComponent,
     DatepickerTypeComponent, RepeatTypeComponent, PanelWrapperComponent, AccordionWrapperComponent,
     QueryBuilderComponent, GenericTypeComponent, ExternalTypeComponent, LookupComponent, ExternalqueryComponent,
-    TableLookupTypeComponent, ExternalobjTypeComponent, SelectTypeComponent, NavstepperWrapperComponent, TabTypeComponent,
+    TableLookupTypeComponent, ExternalobjTypeComponent, ExternalobjAsyncTypeComponent, SelectTypeComponent, NavstepperWrapperComponent, TabTypeComponent,
     TableTypeComponent,
     FormInfraComponent,
     InputFileComponent,

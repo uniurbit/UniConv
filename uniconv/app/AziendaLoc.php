@@ -42,7 +42,7 @@ class AziendaLoc extends Model
 
     public function azienda()
     {
-        return $this->hasOne('App\Azienda','id_esterno','azienda_id_esterno');
+        return $this->hasOne('App\Azienda','id_ab','azienda_id_esterno');
     }
 
       

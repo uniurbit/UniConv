@@ -66,7 +66,7 @@ class AziendaLocTest extends TestCase
         $this->assertEquals($data['denominazione'], $result['denominazione']);    
         $this->assertEquals($data['cod_fisc'], $result['cod_fisc']);    
 
-        //$az->delete();
+        $az->delete();
     }
 
      //./vendor/bin/phpunit  --testsuite Unit --filter testApiAziendaLoc

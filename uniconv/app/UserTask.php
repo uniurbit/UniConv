@@ -39,6 +39,8 @@ class UserTask extends Model
         'updated_at' => 'datetime:d-m-Y H:m',
     ];    
 
+    protected $with = ['closingUser:id,name'];
+
     protected $appends = ['readable_created_at'];
 
     public function model()
@@ -114,6 +116,7 @@ class UserTask extends Model
 
     public function unitaOrganizzativa()
     {
+        //va verso oracle
         return $this->belongsTo(UnitaOrganizzativa::class, 'unitaorganizzativa_uo',  'uo');         
     }
 

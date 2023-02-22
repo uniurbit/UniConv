@@ -23,7 +23,7 @@ export class AziendaService implements ServiceQuery {
   getMetadata():FormlyFieldConfig[] {
     return  [
       {
-        key: 'id_esterno',
+        key: 'id_ab',
         type: 'string',
         hideExpression: false,
         templateOptions: {

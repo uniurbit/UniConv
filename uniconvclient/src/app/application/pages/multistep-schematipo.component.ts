@@ -29,7 +29,7 @@ const PDFJS: PDFJSStatic = require('pdfjs-dist');
              
       <button class="btn btn-outline-primary rounded-lg ml-1"  [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
         <span class="oi oi-arrow-top"></span>  
-        <span class="ml-2">Aggiorna</span>              
+        <span class="ml-2">{{ 'btn_salva' | translate }}</span>              
       </button> 
       <button type="button" class="btn btn-outline-primary rounded-lg ml-1"  (click)="onValidate()" >              
         <span class="oi oi-flash"></span>  
@@ -103,10 +103,9 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
     };
 
     if (this.getStorageModel()){
-      
       let app = JSON.parse(this.getStorageModel());
-      this.checkHistory(app);
-      this.model = app; 
+      this.checkHistory(app);                  
+      this.model = app;       
       this.setStorageModel();
     }else{
       if (this.checkHistory(this.model))
@@ -161,7 +160,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                 }],
               },
             ].concat(
-              this.service.getInformazioniDescrittiveFields(this.model).map(x => {
+              this.service.getInformazioniDescrittiveFields(this.model, this.getAziendeMin(this.model)).map(x => {
                 if (x.key == 'user') {                  
                   setTimeout(()=> {
                     x.templateOptions.disabled = true;
@@ -201,16 +200,19 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                   {
                     key: 'file_CD',
                     type: 'fileinput',
-                    className: "col-md-6",                    
+                    className: "col-md-6",                                                
+                    validation: {
+                      show: true,
+                    },
                     templateOptions: {
                       label: 'Documento di approvazione (formato pdf)',
-                      description: 'Allegare in formato pdf la versione della delibera o della disposizione',                      
+                      description: 'Allegare in formato pdf la versione della delibera o della disposizione. Dimensione massima 2MB.',                      
                       type: 'input',
                       placeholder: 'Scegli documento',
                       accept: 'application/pdf',                      
                       required: true,                                                                  
-                      onSelected: (selFile) => {
-                        this.onSelectCurrentFile(selFile, this.model['file_CD_type']);
+                      onSelected: (selFile, field) => {
+                        this.onSelectCurrentFile(selFile, this.model['file_CD_type'], field);
                       },                                            
                     },
                     validators: {                        
@@ -219,7 +221,13 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                          return /.+\.([pP][dD][fF])/.test(c.value);
                         },
                         message: (error, field: FormlyFieldConfig) =>  `Formato non consentito`,
-                      }
+                      },
+                      maxsize: {
+                        expression: (c,f) => (this.mapAttachment.get(this.model['file_CD_type']) && 
+                          this.mapAttachment.get(this.model['file_CD_type'])._filesize && 
+                          this.mapAttachment.get(this.model['file_CD_type'])._filesize > 2097152) ? false : true,
+                        message: (error, field) => `La dimensione del file eccede la dimensione massima consentita `,
+                      },
                     }
                   },
                 ],
@@ -250,17 +258,20 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
               {
                 key: 'file_DA',
                 type: 'fileinput',
+                validation: {
+                  show: true,
+                },
                 templateOptions: {
                   label: 'Documento appoggio (formato word)',
                   type: 'input',
-                  description: 'Versione editabile (file word) della delibera o della disposizione',
+                  description: 'Versione editabile (file word) della delibera o della disposizione. Dimensione massima 2MB.',
                   placeholder: 'Scegli documento',
-                  tooltip: {
-                    content: 'Versione editabile (file word) della delibera o della disposizione'
-                  },
+                  // tooltip: {
+                  //   content: 'Versione editabile (file word) della delibera o della disposizione'
+                  // },
                   accept: '.doc,.docx ,application/msword',
-                  onSelected: (selFile) => {
-                    this.onSelectCurrentFile(selFile, MultistepSchematipoComponent.DOC_APP)
+                  onSelected: (selFile, field) => {
+                    this.onSelectCurrentFile(selFile, MultistepSchematipoComponent.DOC_APP, field)
                   }
                 },                
                 validators: {                        
@@ -269,20 +280,30 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                      return c.value ? /.+\.([dD][oO][cC][xX]?)/.test(c.value) : true;
                     },
                     message: (error, field: FormlyFieldConfig) =>  `Formato non consentito`,
-                  }
+                  },
+                  maxsize: {
+                    expression: (c,f) => (this.mapAttachment.get(MultistepSchematipoComponent.DOC_APP) && 
+                      this.mapAttachment.get(MultistepSchematipoComponent.DOC_APP)._filesize && 
+                      this.mapAttachment.get(MultistepSchematipoComponent.DOC_APP)._filesize > 2097152) ? false : true,
+                    message: (error, field) => `La dimensione del file eccede la dimensione massima consentita `,
+                  },
                 }
               },
               {
                 key: 'file_PR',
                 type: 'fileinput',
                 className: "col-md-5",
+                validation: {
+                  show: true,
+                },
                 templateOptions: {
                   label: 'Prospetto ripartizione costi e proventi',
                   type: 'input',
                   placeholder: 'Scegli documento',
                   accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                  onSelected: (selFile) => {
-                    this.onSelectCurrentFile(selFile, MultistepSchematipoComponent.PROSPETTO)
+                  description: 'Dimensione massima 2MB.',
+                  onSelected: (selFile, field) => {
+                    this.onSelectCurrentFile(selFile, MultistepSchematipoComponent.PROSPETTO, field)
                   }
                 },
                 validators: {                        
@@ -291,7 +312,13 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                      return c.value ? /.+\.([xX][lL][sS][xX])$/.test(c.value) : true;
                     },
                     message: (error, field: FormlyFieldConfig) =>  `Formato non consentito`,
-                  }
+                  },
+                  maxsize: {
+                    expression: (c,f) => (this.mapAttachment.get(MultistepSchematipoComponent.PROSPETTO) && 
+                      this.mapAttachment.get(MultistepSchematipoComponent.PROSPETTO)._filesize && 
+                      this.mapAttachment.get(MultistepSchematipoComponent.PROSPETTO)._filesize > 2097152) ? false : true,
+                    message: (error, field) => `La dimensione del file eccede la dimensione massima consentita `,
+                  },
                 }
               },
             ],
@@ -424,6 +451,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
                 templateOptions: {
                   label: 'Note',                  
                   rows: 5,
+                  description: "Testo inviato all'operatore"
                 },
                 expressionProperties: {
                   'templateOptions.disabled': '!model.respons_v_ie_ru_personale_id_ab',
@@ -437,6 +465,25 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
           }
         ]
       }];
+
+      
+    const tabs = this.fieldtabs.find(f => f.type === 'tabinfra');
+    const tabappr = tabs.fieldGroup[2];
+    if (tabappr && this.model.schematipotipo == 'schematipo') {
+      tabappr.templateOptions.hidden = true;
+    }
+    else {
+      tabappr.templateOptions.hidden = false;
+    }     
+      
+  }
+
+  getAziendeMin(model){
+    if (model.aziende && model.aziende.length > 0)
+    {
+      return 0;
+    }
+    return 1;
   }
 
   checkHistory(model){
@@ -446,7 +493,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
       {
         model.aziende = model.aziende.filter(x=>x !== (undefined || null || '') && x.id);
       }
-      this.pushToArray(model.aziende,entity);
+      this.pushToArray(model.aziende,entity);  
       return true;
     }   
     return false;
@@ -531,7 +578,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSelectCurrentFile(currentSelFile: File, typeattachemnt: string) {
+  onSelectCurrentFile(currentSelFile: File, typeattachemnt: string, field: FormlyFieldConfig) {
 
     if (currentSelFile == null) {
       //caso di cancellazione
@@ -543,18 +590,25 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
     let currentAttachment: FileAttachment = {
       model_type: 'convenzione',
       filename: currentSelFile.name,
-      attachmenttype_codice: typeattachemnt,
+      attachmenttype_codice: typeattachemnt,      
+      _filesize: null
     } 
-    
+      
+    currentAttachment._filesize = currentSelFile.size;
+    this.mapAttachment.set(currentAttachment.attachmenttype_codice, currentAttachment);      
+    field.formControl.markAsDirty();  
+    field.formControl.updateValueAndValidity();
+
     const reader = new FileReader();   
 
     reader.onload = async (e: any) => {
       this.isLoading = true;
-      currentAttachment.filevalue = encode(e.target.result);
+      currentAttachment.filevalue = encode(e.target.result);    
       
       if (currentSelFile.name.search('pdf')>0){
         try {
-          await this.parsePdf(e.target.result);     
+          await this.parsePdf(e.target.result);   
+          field.formControl.markAsDirty();  
         } catch (error) {
           this.isLoading = false;
         }
@@ -565,7 +619,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.mapAttachment.set(currentAttachment.attachmenttype_codice, currentAttachment);
+      this.mapAttachment.set(currentAttachment.attachmenttype_codice, currentAttachment);    
       this.isLoading = false;
     }
     reader.readAsArrayBuffer(currentSelFile);
@@ -654,5 +708,6 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
   onAziendaRicerca(){
     this.router.navigate(['home/aziendeloc']);     
   }
+
 
 }

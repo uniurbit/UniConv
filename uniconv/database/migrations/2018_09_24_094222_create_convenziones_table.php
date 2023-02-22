@@ -53,7 +53,7 @@ class CreateConvenzionesTable extends Migration
             $table->softDeletes();
             $table->date('data_inizio_conv')->nullable();
             $table->date('data_fine_conv')->nullable();
-            $table->date('data_sottoscrizione')->nullable();
+            $table->date('data_sottoscrizione')->nullable(); // la data in cui avviene l'operazione di sottoscrizione (diversa dalla data di firma o stipula presente sul documento)
                         
             //utente ultima modifica            
             $table->unsignedInteger('user_id');  

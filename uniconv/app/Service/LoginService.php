@@ -10,7 +10,7 @@ class LoginService implements ApplicationService
 {
 
     public function isAuthorized($email){
-        $pers = Personale::FindByEmail($email); 
+        $pers = Personale::FindByEmail($email)->first(); 
         return $pers->isDocente() || $pers->isPta();
     }
 
@@ -24,7 +24,7 @@ class LoginService implements ApplicationService
     public function findUserRoleAndData($email)
     {   
         Log::info('findUserRole [ '. $email .']');              
-        $pers = Personale::FindByEmail($email);
+        $pers = Personale::FindByEmail($email)->first();
             
         return LoginService::roleAndData($pers);        
     }
@@ -32,7 +32,7 @@ class LoginService implements ApplicationService
     public function findUserRoleAndDataById($id)
     {   
         Log::info('findUserRole [ '. $id .']');              
-        $pers = Personale::FindByIdAB($value['v_ie_ru_personale_id_ab']);           
+        $pers = Personale::FindByIdAB($value['v_ie_ru_personale_id_ab'])->first();           
 
         return LoginService::roleAndData($pers);     
     }

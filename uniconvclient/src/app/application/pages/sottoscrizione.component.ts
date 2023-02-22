@@ -17,7 +17,7 @@ import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/co
   <div class="btn-group btn-group">        
     <button class="btn btn-outline-primary rounded-lg"  [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
       <span class="oi oi-arrow-top"></span>  
-      <span class="ml-2">Aggiorna</span>              
+      <span class="ml-2">{{labelButton}}</span>              
     </button> 
     <button class="btn btn-outline-primary rounded-lg ml-1"  (click)="onValidate()" >              
     <span class="oi oi-flash"></span>  
@@ -256,7 +256,7 @@ export class SottoscrizioneComponent extends BaseEntityComponent {
                 label: 'Scegli il documento',
                 type: 'input',
                 placeholder: 'Scegli file documento',
-                accept: 'application/pdf,.p7m', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,            
+                accept: 'application/pdf,.p7m,application/pkcs7-mime', //.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,            
                 onSelected: (selFile, field) => { this.onSelectCurrentFile(selFile, field); }
               },
               expressionProperties: {
@@ -407,8 +407,9 @@ export class SottoscrizioneComponent extends BaseEntityComponent {
                   className: "col-md-7",
                   templateOptions: {
                     label: 'Numero di protocollo',
-                    //required: true,      
+                    required: true,      
                     type: 'string',
+                    subpattern: /^[0-9]+-[a-zA-Z]+-\d{7}$/,
                     entityName: 'documento',
                     entityLabel: 'Documenti',
                     codeProp: 'num_prot',

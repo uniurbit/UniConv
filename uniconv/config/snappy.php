@@ -7,7 +7,9 @@ return array(
         'enabled' => true,
         'binary'  => str_replace("'", '"', env('WKTML_WINDOWS','/usr/local/bin/wkhtmltopdf')),  
         'timeout' => false,
-        'options' => array(),        
+        'options' => [
+            'enable-local-file-access' => true,
+        ],        
         'env'     => array(),
     ),
     'image' => array(

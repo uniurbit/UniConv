@@ -18,6 +18,7 @@ import { BolloRepertoriazioneComponent } from '../../pages/bollorepertoriazione.
 import { EmissioneComponent } from '../../pages/emissione.component';
 import { PagamentoComponent } from '../../pages/pagamento.component';
 import { ConvvalidationComponent } from '../../pages/convvalidation.component';
+import { RichiestaEmissioneComponent } from '../../pages/richiestaemissione.component';
 
 
 @Component({
@@ -39,6 +40,10 @@ export class TaskComponent extends BaseEntityComponent {
         return SottoscrizioneComponent.ABSULTE_PATH;
     }
 
+    if (SottoscrizioneComponent.WORKFLOW_ACTIONS.includes(workflow_transition)){
+      return SottoscrizioneComponent.ABSULTE_PATH;
+    }
+
     if (workflow_transition == FirmaControparteComponent.WORKFLOW_ACTION){
         return FirmaControparteComponent.ABSULTE_PATH;
     }
@@ -49,6 +54,10 @@ export class TaskComponent extends BaseEntityComponent {
 
     if (workflow_transition == BolloRepertoriazioneComponent.WORKFLOW_ACTION){
         return BolloRepertoriazioneComponent.ABSULTE_PATH;
+    }
+
+    if (workflow_transition == RichiestaEmissioneComponent.WORKFLOW_ACTION){
+      return RichiestaEmissioneComponent.ABSULTE_PATH;
     }
 
     if (workflow_transition == EmissioneComponent.WORKFLOW_ACTION){
@@ -155,19 +164,28 @@ export class TaskComponent extends BaseEntityComponent {
             },         
           },     
         ],
-    },  
+    }, 
+    {
+      type: 'input',
+      key: 'subject',
+      templateOptions: {
+        label: 'Oggetto',
+        required: true,
+      },
+    },     
     {      
       type: 'select',
       key: 'model_type',    
       defaultValue:  'App\\Convenzione', 
       templateOptions: {
-        label: 'Tipo di entità a cui associare una attività',              
+        label: 'Tipo di entità',              
         options: [
           { codice: 'App\\Convenzione', descrizione: 'Convenzione' },
           { codice: 'App\\Scadenza', descrizione: 'Scandenza' },
         ],        
         valueProp: 'codice',
         labelProp: 'descrizione',
+        description: 'Tipo di entità a cui associare una attività'
       },      
       expressionProperties: {
         'templateOptions.disabled': (model: any, formState: any) => {                        
@@ -289,21 +307,22 @@ export class TaskComponent extends BaseEntityComponent {
     },
     {
       key: 'unitaorganizzativa_uo',
-      type: 'selectinfra',
+      type: 'select',
       templateOptions: {
         label: 'Ufficio affidatario procedura',
         required: true,
-        options: [], //this.service.getValidationOffices(),
+        options: this.service.getOffices('tutti'),
         valueProp: 'uo',
         labelProp: 'descr',
-        inizialization: () => {
-          return this.model['unitaOrganizzativa'];
-        },
-        populateAsync: () => {          
-          return this.service.getOffices('tutti');
-        }
+        // inizialization: () => {
+        //   return this.model['unitaOrganizzativa'];
+        // },
+        // populateAsync: () => {          
+        //   return this.service.getOffices('tutti');
+        // }
       },          
       expressionProperties: {
+        //modificarlo in base al ruolo utente ...                 
         'templateOptions.disabled': (model: any, formState: any) => { return model.id; },
       },
     },
@@ -397,14 +416,6 @@ export class TaskComponent extends BaseEntityComponent {
       },
     },
     {
-      type: 'input',
-      key: 'subject',
-      templateOptions: {
-        label: 'Oggetto',
-        required: true,
-      },
-    },
-    {
       type: 'textarea',
       key: 'description',
       templateOptions: {
@@ -492,8 +503,8 @@ export class TaskComponent extends BaseEntityComponent {
   }
 
   private assignName(list){
-    let result = list.filter(y => y.value != 'self_transition').map(element => {
-      element.label = this.actions[element.value];
+    let result = list.filter(y => y.value != 'self_transition').map(element => {      
+      element.label = element.label ? element.label : this.actions[element.value];
       return element;
     });       
 

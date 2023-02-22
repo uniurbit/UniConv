@@ -264,6 +264,7 @@ export class ConvenzioniComponent extends BaseResearchComponent {
             onDblclickRow: (event) => this.onDblclickRow(event),
             onSetPage: (pageInfo) => this.onSetPageWithInit(pageInfo),               
             columns: [
+              { name: '', prop: 'id',  with: 60, maxWidth: 60, cellTemplate: this.apri },
               { name: '#', prop: 'id', width: 60, maxWidth: 70},
               { name: 'Descrizione Titolo', prop: 'descrizione_titolo', minWidth: 400, maxWidth: 450},
               { name: 'Azienda o ente', prop:'aziende', pipe: this.flatten, minWidth: 300 },

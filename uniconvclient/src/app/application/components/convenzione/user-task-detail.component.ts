@@ -11,7 +11,7 @@ import { UserTaskService } from '../../usertask.service';
   <div class="btn-group">    
     <button class="btn btn-outline-primary rounded-lg" [disabled]="!form.valid || !form.dirty" (click)="onSubmit()" >              
         <span class="oi oi-arrow-top"></span>  
-        <span class="ml-2">Aggiorna</span>        
+        <span class="ml-2">{{ 'btn_salva' | translate }}</span>        
     </button>
     <button class="btn btn-outline-primary rounded-lg ml-1" [disabled]="!form.dirty">
         <span class="oi oi-reload iconic" title="reload" aria-hidden="true" ></span>

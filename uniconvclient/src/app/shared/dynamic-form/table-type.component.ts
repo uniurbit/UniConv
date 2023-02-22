@@ -52,8 +52,8 @@ import { TableColumn } from '@swimlane/ngx-datatable';
 <formly-field [field]="getField(field, column, rowIndex)"></formly-field>
 </ng-template>  
 
-<ng-template #valuecolumn ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column" >
-{{ value }}    
+<ng-template #valuecolumn ngx-datatable-cell-template let-rowIndex="rowIndex" let-value="value" let-row="row" let-column="column">
+<span title="{{ value }}">{{ value }}</span>    
 </ng-template>  
 
 <ng-template #expaderdetailcolumn let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
