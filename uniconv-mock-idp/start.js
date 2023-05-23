@@ -2,7 +2,7 @@ const { create } = require('fake-sso-idp')
 const app = create({
   serviceProvider: {
     destination: 'http://127.0.0.1/saml2/acs',
-    metadata: 'http://127.0.0.1/saml2/metadata' //'http://127.0.0.1/saml2/metadata' //'http://127.0.0.1:8000/saml2/metadata/' per PEO
+    metadata: 'http://127.0.0.1/saml2/local/metadata'
   },  
   users: [
     {
