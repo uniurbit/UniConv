@@ -2,7 +2,6 @@ import { NgbModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { InjectionToken, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpModule } from '@angular/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyBootstrapModule } from '@ngx-formly/bootstrap';
@@ -166,9 +165,8 @@ export const customCurrencyMaskConfig = {
 @NgModule({
   imports: [
     CommonModule,
-    NgbModule.forRoot(),
-    NgbTooltipModule,
-    HttpModule,
+    NgbModule,
+    NgbTooltipModule,    
     FormsModule,
     ReactiveFormsModule,
     NgxDatatableModule,

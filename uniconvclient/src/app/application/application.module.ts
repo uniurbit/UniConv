@@ -101,7 +101,7 @@ registerLocaleData(localeIt);
     FormsModule,
     ReactiveFormsModule,    
     SharedModule,
-    NgbModule.forRoot(),
+    NgbModule,
     NgxDatatableModule,      
     RouterModule,
     LoadingModule,

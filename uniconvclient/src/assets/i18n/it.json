@@ -91,7 +91,15 @@
 
     "tariffa_bolli_allegati" : "Tariffa bolli allegato",
     "num_righe_bolli_allegati" : "Numero righe allegato",
-    "num_bolli_allegati" : "Numero bolli allegato"
+    "num_bolli_allegati" : "Numero bolli allegato",
 
+    "btn__0": "P1",
+    "btn__1": "P2",
+    "btn__2": "P3",
+    "btn__3": "P4",
+
+    "btn__0_title": "Informazioni descrittive",
+    "btn__1_title": "Allegati",
+    "btn__2_title": "Approvazione"
 }
   

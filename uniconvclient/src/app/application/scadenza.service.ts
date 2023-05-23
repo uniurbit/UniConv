@@ -75,4 +75,17 @@ export class ScadenzaService extends BaseService {
      this.basePath = 'scadenze';     
   }
 
+
+  deleteFile(id: number): Observable<any> {
+    const url = `${this._baseURL + '/convenzioni/uploadFile/'}${id}`;
+    let res = this.http.delete<any>(url, httpOptions)
+      .pipe(
+        tap(sub =>
+          this.messageService.info('Eliminazione documento effettuata con successo')
+        ),
+        catchError(this.handleError('deleteFile', null, true))
+      );
+    return res;
+  }
+  
 }

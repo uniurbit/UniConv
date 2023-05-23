@@ -77,7 +77,7 @@ const routes: Routes = [
     children:[
       {
         path: 'dashboard',
-        loadChildren: '../dashboards/dashboard.module#DashboardModule'
+        loadChildren: () => import('../dashboards/dashboard.module').then(m => m.DashboardModule)
       },
       { 
         path: 'convenzione',  component: ConvenzioneComponent,  canActivate:[AuthGuard],        

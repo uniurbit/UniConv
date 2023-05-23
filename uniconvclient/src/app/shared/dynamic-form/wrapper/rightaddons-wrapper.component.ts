@@ -23,7 +23,7 @@ import { ListItemComponent } from '../../view-list/list-item/list-item.component
 
 export class RightaddonsWrapperComponent extends FieldWrapper {
   public isCollapsed = false;
-  @ViewChild('fieldComponent', {read: ViewContainerRef}) fieldComponent: ViewContainerRef;
+  @ViewChild('fieldComponent', { read: ViewContainerRef, static: true }) fieldComponent: ViewContainerRef;
 
   addonRightClick($event: any,i) {
     if (this.to.addonRights[i].onClick) {

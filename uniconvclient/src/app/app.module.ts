@@ -84,7 +84,7 @@ export function appInitializerFactory(translate: TranslateService, injector: Inj
     TestTabComponent,        
 ],
   imports: [
-    SharedModule.forRoot(), NgxPermissionsModule.forRoot(), NgbModule.forRoot(),
+    SharedModule.forRoot(), NgxPermissionsModule.forRoot(), NgbModule,
     BrowserModule, FormsModule, HttpClientModule, ApplicationModule, ReactiveFormsModule, 
     AppRoutingModule, CoreModule, NgxDatatableModule,   PdfViewerModule, ToastrModule.forRoot(),     
     JwtModule.forRoot({

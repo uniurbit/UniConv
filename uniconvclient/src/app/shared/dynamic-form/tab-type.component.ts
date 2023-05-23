@@ -4,11 +4,18 @@ import { FormlyFormOptions, FormlyFieldConfig } from '@ngx-formly/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 import { evalExpression } from './utils';
+import ControlUtils from './control-utils';
 
 
 
 // ng g c shared/dynamic-form/tab-type -s true  --spec false --flat true
 
+//[disabled]="index>0 && !isValidChain(index-1)"
+// <button class="btn btn-circle mr-2">
+// <span *ngIf="isActive(index)" class="oi oi-pencil iconic" aria-hidden="true"></span>
+// <span *ngIf="!isActive(index)"><b>{{ index + 1 }}</b></span>
+// </button>
+// <span>{{ f.templateOptions.label }} </span>    
 @Component({
   selector: 'app-tab-type',
   template: `
@@ -16,46 +23,82 @@ import { evalExpression } from './utils';
   <div *ngFor="let f of field.fieldGroup; let index = index;">
     <ngb-tab id="tab-{{index}}"  *ngIf="!f.templateOptions.hidden">
         <ng-template ngbTabTitle>
-          <button class="btn btn-outline-secondary border-0 rounded-lg"  disabled="true">
-            <span *ngIf="isActive(index)" class="oi oi-pencil iconic" aria-hidden="true"></span>
-            <span *ngIf="!isActive(index)">{{ index + 1}} - </span>
-            <span> {{f.templateOptions.label}}</span>
-          </button>
+       <span></span>
         </ng-template>
         <ng-template ngbTabContent>            
-            <formly-field 
+            <formly-field              
                 [field]="f">
             </formly-field>              
         </ng-template>
     </ngb-tab>
 </div>
 </ngb-tabset>
-<div>
-<button *ngIf="selectedTab !== 'tab-0'" class="btn btn-primary mr-2" type="button" (click)="prevStep(activedStep)">Indietro</button>
-<button *ngIf="!last" class="btn btn-primary" type="button" [disabled]="!isValid(activedStep)" (click)="nextStep(activedStep)">Avanti</button>
-<button *ngIf="last && to.onSubmit" class="btn btn-primary" type="button" [disabled]="!form.valid || !form.dirty" (click)="to.onSubmit()">Salva</button>
+<div class="btn-toolbar justify-content-between mb-4" role="toolbar">
+<div class="btn-group" role="group">
+<button  [style.visibility]="selectedTab !== 'tab-0' ? 'visible' : 'hidden'"  [disabled]="selectedTab == 'tab-0' || (!isValid(activedStep) && !isBozza())" class="btn btn-outline-primary rounded mr-2" type="button" (click)="prevStep(activedStep)">Indietro</button>
+</div>
+<div class="btn-group" role="group">
+<ng-container *ngFor="let f of field.fieldGroup; let index = index;">
+<button type="button" *ngIf="!isHidden(index)"
+    [disabled]="buttonDisabled(activedStep,index)" 
+    [className]="selectedTab == 'tab-'+index ? 'btn btn-success rounded mr-1' : 'btn btn-outline-primary rounded mr-1'" 
+    title="{{ f.templateOptions.title ? f.templateOptions.title : ('btn_'+(field.key || '')+'_'+index+'_title' | translate) }}"
+    (click)="setStep(index)">{{ 'btn_'+(field.key || '')+'_'+index | translate }}</button>
+</ng-container>
+</div>
+<div class="btn-group" role="group">
+<button  [style.visibility]="!last ? 'visible' : 'hidden'"  class="btn btn-outline-primary rounded mr-1" type="button" [disabled]="!isValid(activedStep) || last" (click)="nextStep(activedStep)">Avanti</button>
+<button *ngIf="to.label_btn_next_step && isBozza()"  class="btn btn-outline-primary rounded" type="button" (click)="nextStepAction(activedStep)">{{to.label_btn_next_step }}</button>
+<button *ngIf="last && to.onSubmit" class="btn btn-outline-primary rounded" type="button" [disabled]="!form.valid || !form.dirty" (click)="to.onSubmit()">Salva</button>
+</div>
 </div>
   `,
-  styleUrls: ['./wrapper/navstepper-wrapper.component.css']
+styleUrls: ['./wrapper/navstepper-wrapper.component.css']
 })
+//[disabled]=!form.dirty
+//[disabled]="!isValid(activedStep)"
 
 export class TabTypeComponent extends FieldType implements OnInit {
 
   activedStep = 0;
 
-  @ViewChild('tabs') tabs: NgbTabset;
+  @ViewChild('tabs', { static: true }) tabs: NgbTabset;
 
   last = false;
   _selectedTab = 'tab-0';
 
-  ngOnInit() {          
-    if (this.field.fieldGroup.length==1){
-      this.last = true;
-    }
+  ngOnInit() {
+
+  }
+
+  isBozza(){
+    return this.options.formState.current_place && (this.options.formState.current_place == 'bozza' || this.options.formState.current_place == 'non_compilata');
+  }
+
+  isBozzaCompleta(){    
+    return this.options.formState.current_place && this.options.formState.current_place == 'bozza_completa';
   }
 
   isActive(index): boolean {
     return ('tab-' + index) === this.tabs.activeId;
+  }
+
+  isHidden(index){
+    let tab = this.field.fieldGroup[index];
+    return tab.templateOptions.hidden;
+  }
+
+  buttonDisabled(activeStep, index){
+    if (this.isBozza()){
+      //un bottone per essere attivo deve avere il precedente valido
+      //se primo
+      if (index == 0)
+        return !this.isValid(index);
+      else {
+        return this.buttonDisabled(activeStep,index-1);
+      }
+    }
+    return !this.isValid(activeStep);
   }
 
   isValidChain(index): boolean {
@@ -76,10 +119,21 @@ export class TabTypeComponent extends FieldType implements OnInit {
   }
 
   isValidFieldGroup(group: FormlyFieldConfig) {
+    if (!group || !group.fieldGroup){
+      return true;
+    }
+
     for (let subfield of group.fieldGroup) {
 
-      const fullName = this.field.key ? this.field.key + "." + subfield.key : subfield.key;
+      const fullName = this.field.key ? (this.field.key as string) + "." + (subfield.key as string): (subfield.key as string);
       const contrl = this.form.get(fullName);
+
+      //chiamata alla funzione di hideExpression
+      // const hideResult = !!evalExpression(
+      //   subfield.hideExpression,
+      //   { subfield },
+      //   [subfield.model, this.formState],
+      // );
 
       if (contrl) {
         if (contrl.status !== 'DISABLED') {
@@ -103,11 +157,62 @@ export class TabTypeComponent extends FieldType implements OnInit {
     this.selectActiveStep();
   }
 
+  /**
+   * Next step action - salva e continua
+   * to.nextStep: funzione definita dall'utente nel templateOptions che ritorna un observable
+   * 
+   * @param step step attivo
+   */
+  nextStepAction(step){   
+    //lanciare evento per il salvataggio o chiamare una funzione registrata
+    if (this.to.nextStep instanceof Function) {      
+      if (this.isValid(step)){
+        
+        this.to.nextStep(step).subscribe(
+          res => {
+            this.nextStep(step);
+          },
+          err => {
+            console.log(err);
+          }
+        );
+
+      }else{
+        console.log('Not valid');
+        let tab = this.field.fieldGroup[step];
+        ControlUtils.validate(tab);    
+        
+        this.to.nextStep(step).subscribe(
+          res => {},
+          err => {}
+        );
+      }
+            
+    } else {
+
+    }    
+  }
+
+  /**
+   * Next step
+   * 
+   * Imposta come attivo lo step successiovo se è l'ultimo allora ritorna true
+   * 
+   * @param step 
+   * @returns  
+   */
   nextStep(step) {
+    //se ultimo
     if (step === this.field.fieldGroup.length - 1) {
       return true;
     }
+   
     this.activedStep = step + 1;
+    this.selectActiveStep();
+  }
+
+  setStep(index){
+    this.activedStep = index;
     this.selectActiveStep();
   }
 
@@ -140,7 +245,7 @@ export class TabTypeComponent extends FieldType implements OnInit {
   }
 
   onTabChange($event) {
-    this.selectedTab = $event.nextId;    
+    this.selectedTab = $event.nextId;
     if (this.lastIndex === this.selectedTab) {
       this.last = true;
     } else {

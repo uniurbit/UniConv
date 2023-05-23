@@ -28,7 +28,7 @@ describe('AppComponent', () => {
         TestTabComponent,           
       ],
       imports: [
-        BrowserModule, FormsModule, HttpClientModule, ApplicationModule, ReactiveFormsModule, SharedModule, NgbModule.forRoot(), 
+        BrowserModule, FormsModule, HttpClientModule, ApplicationModule, ReactiveFormsModule, SharedModule, NgbModule, 
         AppRoutingModule, CoreModule, NgxDatatableModule,  NgxPermissionsModule.forRoot(), PdfViewerModule, ToastrModule.forRoot(),        
         JwtModule.forRoot({
           config: {

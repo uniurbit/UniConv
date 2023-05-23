@@ -25,7 +25,7 @@ import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
 
 export class ConvenzioniComponent extends BaseResearchComponent {
 
-  @ViewChild('detailRow') detailRow: TemplateRef<any>;
+  @ViewChild('detailRow', { static: false }) detailRow: TemplateRef<any>;
   
   researchMetadata: FormlyFieldConfig[];
 
@@ -214,7 +214,7 @@ export class ConvenzioniComponent extends BaseResearchComponent {
   translate: MyTranslatePipe;
   
   resultMetadata: FormlyFieldConfig[];
-  @ViewChild('tooltip') tooltipCellTemplate: TemplateRef<any>;
+  @ViewChild('tooltip', { static: true }) tooltipCellTemplate: TemplateRef<any>;
 
   constructor(protected service: ApplicationService, router: Router, route: ActivatedRoute, private translateService: TranslateService) {
     super(router, route);

@@ -14,6 +14,7 @@ import {Location} from '@angular/common';
 export class ConvenzionedetailsComponent implements OnInit {
 
   static keyValueState:{ [key: string]: number}={
+    'bozza': 0, 
     'start': 0, 
     'proposta': 1, 
     'inapprovazione': 2,

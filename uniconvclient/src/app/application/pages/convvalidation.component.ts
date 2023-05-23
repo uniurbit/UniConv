@@ -8,7 +8,7 @@ import ControlUtils from 'src/app/shared/dynamic-form/control-utils';
 import { FileDetector } from 'protractor';
 import {Location} from '@angular/common';
 import { MultistepSchematipoComponent } from './multistep-schematipo.component';
-import { template } from '@angular/core/src/render3';
+
 @Component({
   selector: 'app-convvalidation',
   template: `

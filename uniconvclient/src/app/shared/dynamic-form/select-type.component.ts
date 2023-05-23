@@ -32,7 +32,12 @@ export class SelectTypeComponent extends FieldType implements OnInit, OnDestroy 
     }
 
     field.type = 'select';     
-    field.wrappers = ['form-field'];           
+    field.wrappers = ['form-field'];        
+    
+    field.templateOptions.compareWith = (o1: any, o2: any) => {
+      return o1 === o2;      
+    };
+
     field.hooks = {
       onInit: (field) => {
         field.formControl.valueChanges.pipe(

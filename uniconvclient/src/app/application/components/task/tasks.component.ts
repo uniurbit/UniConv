@@ -22,7 +22,7 @@ export class TasksComponent extends BaseResearchComponent {
   translate: MyTranslatePipe = null;
   isLoading = false;
 
-  @ViewChild('stateattivita') stateattivita: TemplateRef<any>;
+  @ViewChild('stateattivita', { static: true }) stateattivita: TemplateRef<any>;
   
   fieldsRow: FormlyFieldConfig[] = [
           {

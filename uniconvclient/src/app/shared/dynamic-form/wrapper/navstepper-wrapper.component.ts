@@ -20,7 +20,7 @@ export interface StepType {
 
 export class NavstepperWrapperComponent implements OnInit {
   
-  @ViewChild('tabs') tabs:NgbTabset;
+  @ViewChild('tabs', { static: true }) tabs:NgbTabset;
 
   
   @Input()

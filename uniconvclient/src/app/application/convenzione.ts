@@ -57,7 +57,8 @@ export interface Convenzione extends BaseEntity {
     unitaorganizzativa_affidatario?: string,    
     convenzione_from: convenzioneFrom,
     rinnovo_type: rinnovoType,
-    deleted_at?: any
+    deleted_at?: any,
+    formstatus?: string
 }
 
 export interface ConvenzioneDipartimentale extends Convenzione{

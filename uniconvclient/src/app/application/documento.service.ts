@@ -43,8 +43,7 @@ export class DocumentoService extends BaseService implements IQueryMetadata{
             { value:'partenza', label:'Partenza'},
             { value:'interno', label:'Interno '},
             { value:'varie', label:'Varie'},
-          ],
-          column: { cellTemplate: 'valuecolumn'}
+          ],         
         }        
       },
       {

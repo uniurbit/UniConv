@@ -8,7 +8,6 @@ import { ServiceQuery } from '../query-builder/query-builder.interfaces';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LookupComponent } from '../lookup/lookup.component';
 import ControlUtils from './control-utils';
-import { initDomAdapter } from '@angular/platform-browser/src/browser';
 import { Router } from '@angular/router';
 
 @Component({
@@ -152,7 +151,7 @@ export class ExternalTypeComponent extends FieldType implements OnInit, OnDestro
   private initdesc = false;
   init(){   
     //verifico in caso di cache e non se il modello è inizializzato
-    if (!this.initdesc && this.field.key in this.model && this.model[this.field.key]){    
+    if (!this.initdesc && (this.field.key as string) in this.model && this.model[(this.field.key as string)]){    
       this.initdesc = true;
       
       if (this.field.templateOptions.initdescription in this.model){      

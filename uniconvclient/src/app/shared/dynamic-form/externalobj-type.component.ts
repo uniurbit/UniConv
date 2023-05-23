@@ -152,8 +152,8 @@ export class ExternalobjTypeComponent extends FieldType implements OnInit, OnDes
       return;
     }
     
-    if (field.key && field.model && !field.model[field.key] ){
-      field.model[field.key] = new Object();
+    if (field.key && field.model && !field.model[field.key as string] ){
+      field.model[field.key as string] = new Object();
     }
 
    

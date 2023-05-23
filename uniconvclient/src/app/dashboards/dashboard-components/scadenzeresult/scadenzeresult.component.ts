@@ -21,7 +21,7 @@ export class ScadenzeresultComponent implements OnInit {
   currency = new MycurrencyPipe();
   flatten = new MyFlattenPipe('');
   translate: MyTranslatePipe = null;
-  @ViewChild('statetemplate') statetemplate: TemplateRef<any>;
+  @ViewChild('statetemplate', { static: true }) statetemplate: TemplateRef<any>;
     
   @Input() 
   querymodel: any;

@@ -11,7 +11,6 @@ import { InfraMessageType } from 'src/app/shared/message/message';
 import { takeUntil, startWith, tap, filter, map, distinct, distinctUntilChanged } from 'rxjs/operators';
 import { Subject, Observable } from 'rxjs';
 import { PDFJSStatic } from 'pdfjs-dist';
-import { modelGroupProvider } from '@angular/forms/src/directives/ng_model_group';
 import { ChangeDetectorRef } from '@angular/core';
 import ControlUtils from 'src/app/shared/dynamic-form/control-utils';
 import { ConfirmationDialogService } from 'src/app/shared/confirmation-dialog/confirmation-dialog.service';
@@ -488,7 +487,7 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
 
   checkHistory(model){
     const entity = history.state ? history.state.entity : null;
-    if (entity){
+    if (entity && entity.id){
       if (model.aziende.length > 0)
       {
         model.aziende = model.aziende.filter(x=>x !== (undefined || null || '') && x.id);
@@ -673,7 +672,8 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.form.valid) {
-      this.isLoading = true;
+      this.isLoading = true;      
+      this.model.formstatus = this.form.status;
       var tosubmit: Convenzione = { ...this.model, ...this.form.value };
 
       var file = this.mapAttachment.get(MultistepSchematipoComponent.DELIBERA_CONSIGLIO_DIPARTIMENTO);

@@ -160,8 +160,8 @@ export class ExternalobjAsyncTypeComponent extends FieldType implements OnInit, 
       return;
     }
     
-    if (field.key && field.model && !field.model[field.key] ){
-      field.model[field.key] = new Object();
+    if (field.key && field.model && !field.model[field.key as string] ){
+      field.model[field.key as string] = new Object();
     }
 
    

@@ -17,7 +17,7 @@ export class ControlGenericListComponent implements OnInit {
   //la form contenitore
   @Input() form: FormGroup;
         
-  @ContentChild(TemplateRef) itemTemplate:  TemplateRef<any>;
+  @ContentChild(TemplateRef, /* TODO: add static flag */ {static: true}) itemTemplate:  TemplateRef<any>;
    
   metadata: ControlBase<any>[];
 

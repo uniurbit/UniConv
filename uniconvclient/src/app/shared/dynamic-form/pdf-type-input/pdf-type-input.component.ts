@@ -51,8 +51,8 @@ export class PdfTypeInputComponent  extends FieldType implements OnInit {
       return;
     }
 
-    if (!field.model[field.key]){
-      field.model[field.key] = {};
+    if (!field.model[field.key as string]){
+      field.model[field.key as string] = {};
     }
 
     field.fieldGroup = [

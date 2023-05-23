@@ -10,7 +10,6 @@ import { takeUntil, startWith, filter, tap, map, distinct } from 'rxjs/operators
 import { Observable, Subject } from 'rxjs';
 import {Location, getLocaleDateTimeFormat, DatePipe} from '@angular/common';
 import { ApplicationService } from '../../application.service';
-import { convertToR3QueryMetadata } from '@angular/core/src/render3/jit/directive';
 import { SottoscrizioneComponent } from '../../pages/sottoscrizione.component';
 import { FirmaControparteComponent } from '../../pages/firmacontroparte.component';
 import { FirmaDirettoreComponent } from '../../pages/firmadirettore.component';

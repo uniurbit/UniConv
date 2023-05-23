@@ -31,13 +31,13 @@ import { ScadenzaService } from '../../scadenza.service';
 
 export class ConvenzioneComponent implements OnInit, OnDestroy, AfterContentChecked {
 
-  @ViewChild('statetemplate') statetemplate: TemplateRef<any>;
-  @ViewChild('stateattivita') stateattivita: TemplateRef<any>;
+  @ViewChild('statetemplate', { static: true }) statetemplate: TemplateRef<any>;
+  @ViewChild('stateattivita', { static: true }) stateattivita: TemplateRef<any>;
   //bottoni
-  @ViewChild('apri') apri: TemplateRef<any>;
-  @ViewChild('comandi') comandi: TemplateRef<any>;
+  @ViewChild('apri', { static: true }) apri: TemplateRef<any>;
+  @ViewChild('comandi', { static: true }) comandi: TemplateRef<any>;
 
-  @ViewChild('tabs')
+  @ViewChild('tabs', { static: true })
   private tabs: NgbTabset;
 
   onDestroy$ = new Subject<void>();
@@ -636,6 +636,7 @@ export class ConvenzioneComponent implements OnInit, OnDestroy, AfterContentChec
     }, (reason) => {
     });
     modalRef.componentInstance.model_id = this.model.id;
+    modalRef.componentInstance.model_type = 'App\\Convenzione';
   }
 
   onRemoveFile(index: number, callback, context) {

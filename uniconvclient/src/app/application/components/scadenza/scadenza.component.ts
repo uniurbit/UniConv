@@ -9,12 +9,14 @@ import { ApplicationService } from '../../application.service';
 import { Location } from '@angular/common';
 import { encode, decode } from 'base64-arraybuffer';
 import { of, Observable, Subject } from 'rxjs';
-import { map, first } from 'rxjs/operators';
+import { map, first, tap, finalize } from 'rxjs/operators';
 import { NgxPermissionsService } from 'ngx-permissions';
 import { AuthService } from 'src/app/core';
 import { MyTranslatePipe } from 'src/app/shared/pipe/custom.translatepipe';
 import { MyFlattenPipe } from 'src/app/shared/pipe/custom.flattenpipe';
 import { TranslateService } from '@ngx-translate/core';
+import { UploadfileComponent } from '../convenzione/uploadfile.component';
+import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-scadenza',
   templateUrl: '../../../shared/base-component/base-entity.component.html',
@@ -24,7 +26,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 export class ScadenzaComponent extends BaseEntityComponent {
 
-  @ViewChild('stateattivita') stateattivita: TemplateRef<any>;
+  @ViewChild('stateattivita', { static: true }) stateattivita: TemplateRef<any>;
   
   translate: MyTranslatePipe = null;
   flatten = new MyFlattenPipe('nome_utente');
@@ -128,6 +130,7 @@ export class ScadenzaComponent extends BaseEntityComponent {
               (model.id && model.state != 'inpagamento');
           },
         },
+        
       ],         
     },
     {
@@ -365,13 +368,47 @@ export class ScadenzaComponent extends BaseEntityComponent {
       },
       fieldGroup: [
         {
+          type: 'button',
+          templateOptions: {
+            text: 'Nuovo',
+            btnType: 'btn btn-sm btn-outline-primary rounded-lg',
+            icon: 'oi oi-document',
+            onClick: ($event) => this.openUploadFile()
+          },
+          expressionProperties: {
+            'templateOptions.disabled': (model: any, formState: any) => {                        
+                return !!model.deleted_at
+            },
+          },
+          hideExpression: (model: any, formState: any) => {
+            if (!this.canActivate())
+              return true;
+          }    
+        },
+        {
           key: 'attachments',
           type: 'repeat',
           templateOptions: {
             btnHidden: true,
-            btnRemoveHidden: true,
+            btnRemoveHidden: false,
             label: '',
-          },
+            btnRemoveHiddenFunc: (raw) => {
+              if (!this.canActivate())
+                return true;
+              if (raw.attachmenttype_codice)
+                return  !UploadfileComponent.fileToBeUploaded.includes(raw.attachmenttype_codice);
+              return false;
+            },
+            onRemove: (id) => {
+              this.isLoading = true;
+              return this.service.deleteFile(id).pipe(
+                tap(() => {               
+                  this.isLoading = false;
+                }),
+                finalize(() =>  this.isLoading = false)
+              );
+            },          
+          },          
           hideExpression: (model: any, formState: any) => {
             return this.model.attachments == null || this.model.attachments.length == 0
           },
@@ -382,6 +419,14 @@ export class ScadenzaComponent extends BaseEntityComponent {
               {
                 fieldGroupClassName: 'row',
                 fieldGroup: [
+                  {
+                    type: 'input',
+                    key: 'id',
+                    templateOptions: {
+                      type:'hidden',
+                      disabled: true,
+                    },
+                  },
                   {
                     className: 'col-md-3',
                     type: 'input',
@@ -493,7 +538,10 @@ export class ScadenzaComponent extends BaseEntityComponent {
     return this.authService._roles.some((r) => ['ADMIN_AMM','ADMIN','SUPER-ADMIN'].includes(r));
   }
 
-  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected authService: AuthService, protected route: ActivatedRoute, protected router: Router, protected location: Location, private translateService: TranslateService) {
+  constructor(protected service: ScadenzaService, protected appService: ApplicationService, protected authService: AuthService, protected route: ActivatedRoute, protected router: Router, protected location: Location, private translateService: TranslateService,
+    private modalService: NgbModal, 
+    public activeModal: NgbActiveModal) {
+
     super(route, router, location);
     this.activeNew = true;
     this.isRemovable = true;
@@ -556,5 +604,23 @@ export class ScadenzaComponent extends BaseEntityComponent {
       e => { console.log(e); }
     );
 
+  }
+
+  openUploadFile() {
+    const modalRef = this.modalService.open(UploadfileComponent, {
+      size: 'lg'
+    });
+    modalRef.componentInstance.model_type = 'App\\Scadenza';
+    modalRef.result.then((result) => {
+      if (result) {
+        this.model = {
+          ...this.model,
+          attachments: this.model.attachments.concat(result),
+        }
+      }
+    }, (reason) => {
+    });
+    modalRef.componentInstance.model_id = this.model.id;
+    
   }
 }

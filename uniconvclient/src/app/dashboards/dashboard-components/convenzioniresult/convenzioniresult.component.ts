@@ -18,8 +18,8 @@ import { TranslateService } from '@ngx-translate/core';
 export class ConvenzioniresultComponent implements OnInit {
   isLoading: boolean = false;
 
-  @ViewChild('detailRow') detailRow: TemplateRef<any>;
-  @ViewChild('converter') converter: TemplateRef<any>;  
+  @ViewChild('detailRow', { static: true }) detailRow: TemplateRef<any>;
+  @ViewChild('converter', { static: true }) converter: TemplateRef<any>;  
 
   @Input() querymodel: any;
   @Input() columns: [] = null;
