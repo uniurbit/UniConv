@@ -2,9 +2,9 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class WorkflowScadenzaResource extends Resource
+class WorkflowScadenzaResource extends JsonResource
 {
     
     private $names = array(        

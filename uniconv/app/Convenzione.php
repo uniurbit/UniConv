@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Observers\UserActionsObserver;
-use Brexis\LaravelWorkflow\Traits\WorkflowTrait;
+use ZeroDaHero\LaravelWorkflow\Traits\WorkflowTrait;
 use Spatie\Permission\Traits\HasRoles;
 use Workflow;
 use Symfony\Component\Workflow\Transition;

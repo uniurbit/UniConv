@@ -13,6 +13,7 @@ use App\Tasks\EmissioneTask;
 use App\Tasks\RichiestaEmissioneTask;
 use App\Tasks\InvioRichiestaPagamentoTask;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 use Exception;
 use DB;
@@ -149,7 +150,7 @@ class ConvenzioneRepository extends BaseRepository {
             unset($data['tipopagamento']);            
 
             $conv = new Convenzione($data);            
-            $conv->withUser(array_get($data,'user'));                                   
+            $conv->withUser(Arr::get($data,'user'));                                   
             $conv->save();
 
             if (array_key_exists('aziende', $data))
@@ -172,7 +173,7 @@ class ConvenzioneRepository extends BaseRepository {
                 }     
             }
            
-            $conv->current_place = 'start';
+            $conv->current_place = 'bozza';
             $conv->save();
 
             $conv->workflow_apply('store_proposta', $conv->getWorkflowName());
@@ -413,24 +414,38 @@ class ConvenzioneRepository extends BaseRepository {
      * @return void
      */
     public function saveAttachments($data, $model, $emptyPermission = false){
-        foreach ($data as $valore){                    
+        $attachment = null;
+        foreach ($data as $valore){ 
+            $saved = false;
+
             $valore['model_type'] = get_class($model);        
-            $attachment = new Attachment($valore);        
+            $attachment = new Attachment($valore);   
+          
             $attachment->model()->associate($model);
-            if (array_key_exists('filevalue',$valore) && $attachment->loadStream($valore['filevalue']) != null ){                
+            if (array_key_exists('filevalue',$valore) && $attachment->loadStream($valore['filevalue']) != null ){     
+                $attachment->setDescription();           
                 $model->attachments()->save($attachment);
+                $saved = true;
             }else{                
-                if ($attachment->nrecord && $attachment->num_prot && $attachment->createLink($attachment->num_prot)){
+                if ($attachment->nrecord && $attachment->num_prot && $attachment->createLink($attachment->num_prot)){                    
                     $model->attachments()->save($attachment);
+                    $saved = true;
                 } else{
                     if ($emptyPermission && $attachment->createEmptyFile()){
                         $model->attachments()->save($attachment);
-                    }else{
-                        throw new Exception("Error file ".$valore['filename']." not saved", 1);                
+                        $saved = true;
                     }                    
                 }
-            }             
+            }
+
+            if (array_key_exists('id',$valore) && $saved){  
+                $attach = Attachment::find($valore['id']);
+                if ($attach)
+                    $attach->delete();
+            } 
+                        
         }
+        return $attachment;
     }
 
     public function updateRichiestaEmissione($data){

@@ -3,14 +3,14 @@
 namespace App\Http\Resources;
 
 use App\Convenzione;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class WorkflowConvenzione extends Resource
+class WorkflowConvenzione extends JsonResource
 {
         
   
-    private $names = array(
-        'start' => 'Inizio',
+    private $names = array(        
+        'bozza' => 'Inizio',
         'store_proposta' => 'Proposta',
         'store_to_inapprovazione' => "Da approvare",
         'store_validazione' => "Approvato",

@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
-use Collective\Html\FormFacade as Form;
+
 
 class RouteServiceProvider extends ServiceProvider
 {
@@ -25,12 +25,7 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         parent::boot();
-
-        Form::component('uniText', 'components.form.text', ['name', 'label'=> null, 'value' => null, 'classattributes'=>'', 'attributes' => []]);
-        Form::component('uniEmail', 'components.form.email', ['name', 'label'=> null, 'value' => null, 'classattributes'=>'', 'attributes' => []]);
-        Form::component('uniPassword', 'components.form.password', ['name', 'label'=> null, 'classattributes'=>'', 'attributes' => []]);
-        Form::component('uniDate', 'components.form.date', ['name', 'label'=> null, 'value' => null, 'classattributes'=>'', 'attributes' => []]);
-        Form::component('uniSelect', 'components.form.select', ['name', 'label'=> null, 'options'=>[] ,'value' => null, 'classattributes'=>'', 'attributes' => []]);
+     
     }
 
     /**

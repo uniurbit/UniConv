@@ -14,6 +14,7 @@ use Ramsey\Uuid\Uuid;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use App\Convenzione;
 use App\Observers\UserActionsObserver;
+use Illuminate\Support\Arr;
 
 class Attachment extends Model
 
@@ -80,6 +81,15 @@ class Attachment extends Model
         }
     }
     
+    public function setDescription(){
+        //se le descrizione è vuota aggiungo quella di defautl
+        if (!$this->description){
+            $type = ($this->attachmenttype()->first());
+            if ($type)
+                $this->description = $type->descrizione;
+        }        
+    }    
+
     /**
      * Shortcut method to bind an attachment to a model
      *
@@ -96,7 +106,7 @@ class Attachment extends Model
         if ( ! $attachment) {
             return null;
         }       
-        $options = array_only($options, $attributes);
+        $options = Arr::only($options, $attributes);
         $attachment->fill($options);
         return $attachment->model()->associate($model)->save() ? $attachment : null;
     }  
@@ -282,7 +292,7 @@ class Attachment extends Model
         if (is_null($key)) {
             return $this->metadata;
         }
-        return array_get($this->metadata, $key, $default);
+        return Arr::get($this->metadata, $key, $default);
     }
 
     /**

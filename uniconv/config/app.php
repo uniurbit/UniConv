@@ -165,11 +165,10 @@ return [
         /*
          * Package Service Providers...
          */
-        Collective\Html\HtmlServiceProvider::class,
-        Laravel\Socialite\SocialiteServiceProvider::class,
-        Yajra\Oci8\Oci8ServiceProvider::class,
-        Brexis\LaravelWorkflow\WorkflowServiceProvider::class,
+        Yajra\Oci8\Oci8ServiceProvider::class,      
         Artisaninweb\SoapWrapper\ServiceProvider::class,
+        ZeroDaHero\LaravelWorkflow\WorkflowServiceProvider::class,
+     
         /*
          * Application Service Providers...
          */
@@ -180,8 +179,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\RepositoryServiceProvider::class,
         App\Providers\ServiceServiceProvider::class,      
-        Aacotroneo\Saml2\Saml2ServiceProvider::class,
-        Mpociot\ApiDoc\ApiDocGeneratorServiceProvider::class,
+        Aacotroneo\Saml2\Saml2ServiceProvider::class,    
     ],
 
     /*

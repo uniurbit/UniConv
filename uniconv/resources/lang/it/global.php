@@ -63,6 +63,7 @@ return [
     "firmato"=>"Firmata",  
     "repertoriato"=>"Repertoriata",   
     "start"=>"Inizio",
+    "bozza"=>"Inizio",
 
     "dip"=>"Dipartimentale",
     "amm"=>"Amministrativa",

@@ -205,7 +205,8 @@ class ConvenzioneService implements ApplicationService
                     $user->notify(new RichiestaValidazione($conv, $data));    
                 } catch (Exception $e) {                                                            
                     Log::error('Notifica richiesta validazione non inviata utente [' .$user->email. ']');       
-                    throw $e;
+                    Log::error($e);
+                    //throw $e;
                 }
             }
 

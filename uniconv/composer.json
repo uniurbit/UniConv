@@ -4,41 +4,34 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "type": "project",
-    "repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/aacotroneo/laravel-saml2.git"
-    }],
     "require": {
         "php": "^7.2.5",
-        "aacotroneo/laravel-saml2": "dev-remove_mcrypt",
+        "aacotroneo/laravel-saml2": "^2.1",
         "artisaninweb/laravel-soap": "0.3.0.9",
-        "barryvdh/laravel-snappy": "^0.4.3",
-        "brexis/laravel-workflow": "^1.2",
+        "barryvdh/laravel-snappy": "^0.4.6",
+        "carlos-meneses/laravel-mpdf": "^2.1",
         "doctrine/dbal": "^2.9",
         "emadadly/laravel-uuid": "^1.2",
         "fideloper/proxy": "^4.0",
+        "guzzlehttp/guzzle": "^7.4",
         "h4cc/wkhtmltopdf-amd64": "0.12.x",
         "jenssegers/model": "^1.2",
         "joselfonseca/laravel-tactician": "^0.4.1",
-        "laravel/framework": "5.7.*",
-        "laravel/socialite": "^3.0",
-        "laravel/tinker": "^1.0",
-        "laravie/html": "~5.1",
+        "laravel/framework": "^7.0",
         "league/flysystem": "1.0.8",
-        "maatwebsite/excel": "^3.1",
-        "mpociot/laravel-apidoc-generator": "^2.1",
+        "maatwebsite/excel": "3.1.33",
         "spatie/array-to-xml": "^2.8",
-        "spatie/laravel-permission": "^2.12",
+        "spatie/laravel-permission": "^4.0.0",
         "tymon/jwt-auth": "^1.0.0",
-        "yajra/laravel-oci8": "5.7.*"
+        "yajra/laravel-oci8": "^7.0",
+        "zerodahero/laravel-workflow": "*"
     },
     "require-dev": {
         "filp/whoops": "^2.0",
         "fzaninotto/faker": "^1.4",
         "mockery/mockery": "^1.0",
-        "nunomaduro/collision": "^2.0",
-        "phpunit/phpunit": "^7.0"
+        "nunomaduro/collision": "^4.1",
+        "phpunit/phpunit": "^8.5"
     },
     "autoload": {
         "classmap": [

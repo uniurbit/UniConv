@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Expetions;
+namespace App\Exceptions;
 
 use Exception;
 

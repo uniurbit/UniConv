@@ -15,24 +15,14 @@ class Ruolo extends Model
 
     const DOCENTITYPE = array(9,1,11);
     const PTATYPE = array(3,13);
-
-     // Allow for camelCased attribute access
-     public function getAttribute($key)
-     {
-        return parent::getAttribute(snake_case($key));
-     }
- 
-     public function setAttribute($key, $value)
-     {
-        return parent::setAttribute(snake_case($key), $value);
-     }     
+    
 
      public function isDocente()
      {
-        return in_array($this->tipoRuolo, self::DOCENTITYPE);
+        return in_array($this->tipo_ruolo, self::DOCENTITYPE);
      }
      public function isPta()
      {
-        return in_array($this->tipoRuolo, self::PTATYPE);
+        return in_array($this->tipo_ruolo, self::PTATYPE);
      }
 }

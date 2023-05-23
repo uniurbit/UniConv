@@ -58,9 +58,12 @@ class AttachmentController extends Controller
             return $this->respondValidationError('Validazione fallita.', $validator->errors());
         }
 
-        //cancellazione
-        Convenzione::findOrFail($request->model_id);
-
+        
+        if ($request->model_type == 'App\\Convenzione'){
+            //cancellazione
+            Convenzione::findOrFail($request->model_id);
+        }
+        
         $attachment = $this->saveAttachment($request->all());       
         if ($attachment){
             //file caricato con successo

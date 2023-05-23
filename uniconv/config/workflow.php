@@ -13,13 +13,17 @@ return [
         ],
         'marking_store' => [
             'type' => 'single_state', //multiple_state single_state
-            'arguments' => ['current_place']
+            'property' => 'current_place'
         ],
         'supports'      => ['App\Convenzione'],
-        'places'        => ['start', 'proposta', 'approvato','inapprovazione','da_firmare_direttore','da_firmare_controparte2','firmato', 'repertoriato'],
-        'transitions'   => [                    
+        'places'        => ['bozza', 'proposta', 'approvato','inapprovazione','da_firmare_direttore','da_firmare_controparte2','firmato', 'repertoriato'],
+        'transitions'   => [    
+            'aggiorna_invalid' => [
+                'from' => 'bozza',
+                'to'   => 'bozza',
+            ],     
             'store_proposta' => [
-                'from' => 'start',
+                'from' => 'bozza',
                 'to'   => 'proposta',
             ],                       
             'store_to_approvato' => [
@@ -82,7 +86,7 @@ return [
         ],
         'marking_store' => [
             'type' => 'single_state', 
-            'arguments' => ['state']
+            'property' => 'state'
         ],
         'supports'      => ['App\UserTask'],
         'places'        => ['aperto', 'completato', 'annullato'],
@@ -106,7 +110,7 @@ return [
         ],
         'marking_store' => [
             'type' => 'single_state', 
-            'arguments' => ['state']
+            'property' => 'state'
         ],
         'supports'      => ['App\Scadenza'],
         'places'        => ['attivo', 'inemissione', 'emesso', 'inpagamento', 'pagato', 'cancellato'],

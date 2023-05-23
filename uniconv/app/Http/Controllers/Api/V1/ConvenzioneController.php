@@ -471,6 +471,7 @@ class ConvenzioneController extends Controller
         if (!Auth::user()->hasPermissionTo('search all convenzioni')){
             //aggiungere controllo per unitaorganizzativa_uo dell'utente che esegue la richiesta ...
             $uo = Auth::user()->unitaorganizzativa();
+            $id_ab = Auth::user()->v_ie_ru_personale_id_ab;
             if ($uo->isDipartimento()){    
                 //caso docenti che va ulteriormente filtrato ... 
                 //ad un afferente al dipartimento filtro per dipartimento       
@@ -483,12 +484,17 @@ class ConvenzioneController extends Controller
                     abort(403, trans('global.utente_non_autorizzato')); 
                 }  
             }else if (Auth::user()->hasRole('op_contabilita')){                                
-                if (!in_array($uo->uo, $conv->scadenzeusertasks()->pluck('unitaorganizzativa_uo')->toArray())){
+                if (!(in_array($uo->uo, $conv->scadenzeusertasks()->pluck('unitaorganizzativa_uo')->toArray()) || 
+                        in_array($id_ab, $conv->scadenzeusertasks()->pluck('respons_v_ie_ru_personale_id_ab')->toArray()))
+                    ){
                     abort(403, trans('global.utente_non_autorizzato')); 
                 } 
             }else if (Auth::user()->hasRole('op_approvazione')){
-                //op_approvazione                
-                if (!in_array($uo->uo, $conv->usertasks()->pluck('unitaorganizzativa_uo')->toArray())){
+                //op_approvazione                                
+                //o sei nell'ufficio o sei il responsabile
+                if (!(in_array($uo->uo, $conv->usertasks()->pluck('unitaorganizzativa_uo')->toArray()) || 
+                        in_array($id_ab, $conv->usertasks()->pluck('respons_v_ie_ru_personale_id_ab')->toArray()))
+                    ){
                     abort(403, trans('global.utente_non_autorizzato')); 
                 } 
             }else{

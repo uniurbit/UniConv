@@ -3,10 +3,10 @@
 namespace App\Http\Resources;
 
 use App\Convenzione;
-use Illuminate\Http\Resources\Json\Resource;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 
-class WorkflowConvenzioneSchemaTipoResource extends Resource
+class WorkflowConvenzioneSchemaTipoResource extends JsonResource
 {
         
     private $names = array(

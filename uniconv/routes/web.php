@@ -24,6 +24,11 @@
         'prefix' => config('saml2_settings.routesPrefix'),
         'middleware' => config('saml2_settings.routesMiddleware'),
     ], function () {
+        Route::get('metadata', function(Request $request){ 
+            $url = URL::route('saml2_metadata', env('IDP_ENV_ID', 'local'));
+            return redirect($url);
+        });
+     
         Route::post('/acs', array(
             'as' => 'saml_acs',
             'uses' => 'Saml2AuthController@acs',
