@@ -24,8 +24,7 @@ export class StruttureEsterneTitulus extends BaseResearchComponent {
             type: 'string',
             hideExpression: false,
             templateOptions: {
-              label: 'Codice ufficio',
-              disabled: true,
+              label: 'Codice ufficio',              
               column: { width: 10, cellTemplate: 'valuecolumn'}
             }
           },
@@ -69,7 +68,8 @@ export class StruttureEsterneTitulus extends BaseResearchComponent {
     
     this.resultMetadata[0].fieldArray.fieldGroup = service.getMetadata();        
 
-    this.routeAbsolutePath = 'home/struttureesterne'     
+    this.routeAbsolutePath = 'home/struttureesterne';
+    this.enableNew=false;         
     //this.title = 'Tipo pagamenti'
   }
  
