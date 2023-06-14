@@ -56,7 +56,7 @@ class UnitaOrganizzativaController extends Controller
             }
         }
         
-        $queryBuilder = new QueryBuilder(new UnitaOrganizzativa, $request, $findparam);
+        $queryBuilder = new QueryBuilderForceInsensitive(new UnitaOrganizzativa, $request, $findparam);
                 
         return $queryBuilder->build()->paginate();       
 

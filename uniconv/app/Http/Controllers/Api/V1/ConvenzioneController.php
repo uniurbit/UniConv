@@ -676,6 +676,10 @@ class ConvenzioneController extends Controller
                 //filtro per unitaorganizzativa dell'utente di inserimento (ufficio)
                 //se l'utente è responsabile di più uffici, filtro per unitaorganizzativa di ogni ufficio
                 $uos = Auth::user()->codiciUnitaorganizzative();
+                // if (Auth::user()->hasRole('op_approvazione_settore')){
+                //     $uos = array_merge($uos, Auth::user()->codiciResponsabileUnitaOrganizzative());
+                // }
+
                 array_push($parameters['rules'],[
                     "operator" => "In",
                     "field" => "unitaorganizzativa_uo",                
