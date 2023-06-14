@@ -102,8 +102,9 @@ export class MultistepSchematipoComponent implements OnInit, OnDestroy {
     };
 
     if (this.getStorageModel()){
-      let app = JSON.parse(this.getStorageModel());
+      let app = JSON.parse(this.getStorageModel());      
       this.checkHistory(app);                  
+      app.file_CD = "";
       this.model = app;       
       this.setStorageModel();
     }else{

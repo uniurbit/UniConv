@@ -1,7 +1,7 @@
-<form [formGroup]="form" (keydown.enter)="onFind()" >
+<form [formGroup]="form" (keydown.enter)="onFind()" *ngIf="fields" >
   <formly-form [model]="model" [fields]="fields" [form]="form" [options]="options">    
   </formly-form> 
-  <div class="mb-4 text-right" role="toolbar">
+  <div class="mb-4 text-right" role="toolbar" *ngIf="config.showButton">
     <button type="button" class="btn btn-outline-primary rounded-lg" (click)="onFind()"  [disabled]="disabled()">
       <span class="oi oi-magnifying-glass" title="reload" aria-hidden="true" ></span>
       <span class="ml-2">Avvia la ricerca</span>
