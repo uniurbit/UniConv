@@ -160,9 +160,15 @@ class AttachmentController extends Controller
 
             $resp = $sc->getDocumentURL($attach->num_prot);
             $parse = parse_url($resp);        
-            return [
-                'url'=> config('titulus.url').$parse['path'].'?'.$parse['query']
-            ];
+            if (isset($parse['query'])){
+                return [
+                    'url'=> config('titulus.url').$parse['path'].'?'.$parse['query']
+                ];
+            }else{
+                return [
+                    'url'=>$resp 
+                ];
+            }
         }        
 
         return response()->json(null);
