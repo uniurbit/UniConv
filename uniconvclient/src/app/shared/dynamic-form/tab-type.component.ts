@@ -68,7 +68,9 @@ export class TabTypeComponent extends FieldType implements OnInit {
   _selectedTab = 'tab-0';
 
   ngOnInit() {
-
+    if (this.field.fieldGroup.length == 1) {
+      this.last = true;
+    }
   }
 
   isBozza(){

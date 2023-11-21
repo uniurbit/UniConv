@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, Output, EventEmitter, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormlyFieldConfig, FormlyFormOptions, FormlyTemplateOptions } from '@ngx-formly/core';
 import { FormGroup, FormArray, FormControl, ValidationErrors } from '@angular/forms';
 import { Subject, Observable } from 'rxjs';
@@ -17,6 +17,7 @@ export interface IConfigQueryBuilder {
 @Component({
   selector: 'app-query-builder',
   templateUrl: './query-builder.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styles: []
 })
 
@@ -92,8 +93,7 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
       };
     }
   }
-  
-  
+    
 
   ngOnInit() {   
 
@@ -278,7 +278,6 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
       }
     ];
 
-
     if (this.rules)
       Object.assign(this.model.rules, this.rules);
 
@@ -300,6 +299,7 @@ export class QueryBuilderComponent implements OnInit, OnChanges {
         options.push({value: element.key, label: element.templateOptions.label});                  
     });
     field.templateOptions.options = options;  
+    
     //this.model.rules.push({field: options[0].value})
   }
 
