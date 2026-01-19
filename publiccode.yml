@@ -59,7 +59,7 @@ description:
     documentation: 'https://github.com/uniurbit/UniConv'
     genericName: applicazione web
     shortDescription: >-
-      Applicazione web per la gestione dei flussi documentali e la dematerializzazione dell'attività contrattuale attiva negli atenei (convenzioni conto terzi, convenzioni per contributi alla ricerca e accordi di collaborazione).
+      Applicazione web per convenzioni conto terzi, convenzioni per contributi alla ricerca e accordi di collaborazione.
     longDescription: >
       # **Funzionalità Applicative**
 
